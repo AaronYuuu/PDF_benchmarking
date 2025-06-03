@@ -1,0 +1,15 @@
+variant$hgvsp
+variant$variant
+variant$type
+variant$gene_symbol
+variant$hgvsc
+variant$zygosity
+variant$hgvsg
+variant$chromosome
+variant$start
+variant$exon
+variant$mafaf
+variant$mafac
+variant$mafan
+variant$interpretation
+variant$variant_id

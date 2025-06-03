@@ -71,20 +71,25 @@ def filterTemplate(templateJSON, templateTEX):
                         for nested_key in item.keys():
                             all_keys.add(nested_key)
 
-    print(f"Found {len(all_keys)} total keys in JSON")
-    print("Keys found:", sorted(all_keys))
+   # print(f"Found {len(all_keys)} total keys in JSON")
+    #print("Keys found:", sorted(all_keys))
 
     # Updated regex patterns to match different LaTeX command formats
     patterns = [r'\\data\{([a-zA-Z0-9_]+)\}']
     # Find all commands in the template using multiple patterns
-    matches = re.findall(patterns[0], template)
+    labels = re.findall(patterns[0], template)
     
-    print(f"Found {len(matches)} commands in template")
-    print("Commands found:", matches)
-
-    return matches, all_keys
+    # Filter labels that match blurb_hospital pattern
+    blurb_pattern = r'blurb_hospital[1-9a-zA-Z]+'
+    matches = [label for label in labels if re.match(blurb_pattern, label)]
+    filename = f'{matches[0]}.txt'
+    labels.remove(matches[0])
+    with open(filename,'r') as f:
+        labels.extend(f.read())
+    print(labels)
 
 # Execute the function
-labelsJSON(templateJSON)
-matches, allkeys = filterTemplate(templateJSON, templateTex)
-print(allkeys)
+#labelsJSON(templateJSON)
+#matches, allkeys = filterTemplate(templateJSON, templateTex)
+#print(allkeys)
+filterTemplate(templateJSON, templateTex)
