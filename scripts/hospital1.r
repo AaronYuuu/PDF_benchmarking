@@ -2,7 +2,7 @@ required_functions <- c("aaname", "summary_blurb", "cap", "num2text")
 missing_functions <- !sapply(required_functions, exists)
 
 if (any(missing_functions)) {
-  source("scripts/sharedFunctions.r")
+  source("sharedFunctions.r")
   cat("Loaded shared functions from sharedFunctions.r\n")
 }
 

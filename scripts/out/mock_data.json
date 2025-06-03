@@ -1,0 +1,88 @@
+{
+ "9bb11cc7-2bd4-4edb-b2d9-38218646db84": {
+ "date_collected": "2022-06-13 07:27:00",
+"date_received": "2022-06-14 09:10:52",
+"date_verified": "2022-06-15 18:14:55",
+"report_type": "Molecular Genetics",
+"testing_context": "Research",
+"ordering_clinic": "North York General Hospital (Toronto)",
+"testing_laboratory": "Kingston Health Sciences Centre (Kingston)",
+"sequencing_scope": "Targeted variant testing",
+"tested_genes": {
+ "PIK3R2": {
+ "gene_symbol": "PIK3R2",
+"refseq_mrna": "NM_005027.4" 
+},
+"RNF213": {
+ "gene_symbol": "RNF213",
+"refseq_mrna": "NM_001256071.3" 
+},
+"ELF4": {
+ "gene_symbol": "ELF4",
+"refseq_mrna": "NM_001421.4" 
+},
+"PRLR": {
+ "gene_symbol": "PRLR",
+"refseq_mrna": "NM_000949.7" 
+},
+"NRP1": {
+ "gene_symbol": "NRP1",
+"refseq_mrna": "NM_003873.7" 
+},
+"FN1": {
+ "gene_symbol": "FN1",
+"refseq_mrna": "NM_212482.4" 
+},
+"ACVR1B": {
+ "gene_symbol": "ACVR1B",
+"refseq_mrna": "NM_004302.5" 
+},
+"SYNGAP1": {
+ "gene_symbol": "SYNGAP1",
+"refseq_mrna": "NM_006772.3" 
+},
+"POT1": {
+ "gene_symbol": "POT1",
+"refseq_mrna": "NM_015450.3" 
+},
+"ATIC": {
+ "gene_symbol": "ATIC",
+"refseq_mrna": "NM_004044.7" 
+},
+"FLT1": {
+ "gene_symbol": "FLT1",
+"refseq_mrna": "NM_002019.4" 
+},
+"CDKN1B": {
+ "gene_symbol": "CDKN1B",
+"refseq_mrna": "NM_004064.5" 
+},
+"BCL11B": {
+ "gene_symbol": "BCL11B",
+"refseq_mrna": "NM_138576.4" 
+} 
+},
+"num_tested_genes": 13,
+"sample_type": "Total RNA",
+"analysis_type": "Fusion analysis",
+"variants": [
+ {
+ "gene_symbol": "FLT1",
+"variant_id": "VCV007792041",
+"chromosome": "chr13",
+"hgvsg": "g.28301812C>G",
+"hgvsc": "c.1467C>G",
+"hgvsp": "p.Ser489=",
+"transcript_id": "NM_002019.4",
+"exon": 30,
+"zygosity": "heterozygous",
+"interpretation": "Variant of uncertain clinical significance",
+"mafac":        6,
+"mafan":   561276,
+"mafaf": 1.068993e-05 
+} 
+],
+"num_variants": 1,
+"reference_genome": "GRCh38" 
+} 
+}

@@ -27,20 +27,24 @@ if (is.na(args$outprefix)) {
   args$outprefix <- sub("\\.tex$", "", basename(args$template_file))
 }
 
-
-
 # Read the template
 lines <- readLines(args$template_file)
 text <- paste(lines, collapse = "\n")
-blurb_data <- read_yaml("data/text_pieces.yml")
+
+# Fix path for text_pieces.yml - use relative path from scripts directory
+blurb_data <- read_yaml("../data/text_pieces.yml")
+
 # Read the json data
 mock_data <- fromJSON(args$json_file)
 
-source("scripts/sharedFunctions.r")
+# Source shared functions first
+source("sharedFunctions.r")
 
-plugin_files <- list.files(path = "scripts", pattern = "^hospital.*\\.r$",
-                           full.names = TRUE)
+# Initialize PLUGIN_FUNCTIONS list
 PLUGIN_FUNCTIONS <- list()
+
+# Load hospital plugins from current directory (scripts/)
+plugin_files <- list.files(path = ".", pattern = "^hospital.*\\.r$", full.names = TRUE)
 for (plugin_file in plugin_files) {
   source(plugin_file)
   cat("Loaded plugin:", basename(plugin_file), "\n")

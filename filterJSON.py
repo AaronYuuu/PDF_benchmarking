@@ -1,5 +1,5 @@
 templateJSON = "../lei_mockup_generator/mock_data.json"
-templateTex = "../lei_mockup_generator/templates/fakeHospital2.tex"
+templateTex = "templates/fakeHospital2.tex"
 
 def labelsJSON(templateJSON):
     import json
@@ -85,8 +85,13 @@ def filterTemplate(templateJSON, templateTEX):
     filename = f'{matches[0]}.txt'
     labels.remove(matches[0])
     with open(filename,'r') as f:
-        labels.extend(f.read())
-    print(labels)
+        lines = f.readlines()
+        for line in lines:
+            line = line.strip()
+            if line and not line.startswith('#'):
+                labels.append(line)
+    labels = set(labels) #final set of all latex labels for tex
+    return labels
 
 # Execute the function
 #labelsJSON(templateJSON)

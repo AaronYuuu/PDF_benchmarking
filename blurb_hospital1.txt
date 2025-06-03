@@ -1,0 +1,10 @@
+chromosome
+exon
+gene_symbol
+hgvsc
+hgvsp
+interpretation
+start
+type
+variant
+variant_id

@@ -22,9 +22,9 @@ num_reports <- args$amount
 out_file <- args$outfile
 
 #Load source data
-field_values <- yaml.load_file("data/field_values.yml")
-gene_info <- read.csv("data/gene_info.csv", row.names = 1)
-exons_df <- read.csv("data/exon_info.csv", stringsAsFactors = FALSE)
+field_values <- yaml.load_file("../data/field_values.yml")
+gene_info <- read.csv("../data/gene_info.csv", row.names = 1)
+exons_df <- read.csv("../data/exon_info.csv", stringsAsFactors = FALSE)
 
 # Helper function to sample from fields
 sample_field <- function(name, num = 1) sample(field_values[[name]], num)

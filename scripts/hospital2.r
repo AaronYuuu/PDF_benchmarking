@@ -1,3 +1,17 @@
+required_functions <- c("aaname", "summary_blurb", "cap", "num2text")
+missing_functions <- !sapply(required_functions, exists)
+
+if (any(missing_functions)) {
+  source("sharedFunctions.r")
+  cat("Loaded shared functions from sharedFunctions.r\n")
+}
+
+# Verify all functions are now available
+still_missing <- required_functions[!sapply(required_functions, exists)]
+if (length(still_missing) > 0) {
+  stop("Missing required functions: ", paste(still_missing, collapse = ", "))
+}
+
 long_blurb_hospital2 <- function(variants) {
   #if there are no variants, we're done
   if (length(variants) == 0) {
@@ -30,7 +44,7 @@ long_blurb_hospital2 <- function(variants) {
 
     location <- paste(
       "The", variant$hgvsg, "variant occurs in chromosome", variant$chromosome,
-      ", within the", variant$gene_symbol, "gene, and it causes", variant$hgvsg,
+      ", within the", variant$gene_symbol, "gene, and it causes", variant$hgvsc,
       "change at position", variant$start, "in exon", variant$exon, ", forming",
       variant$hgvsp, ". This mutation has been identified in",
       sample(30:50, 1), "families. It has a population frequency of",
