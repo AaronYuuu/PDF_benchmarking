@@ -27,27 +27,39 @@ if (is.na(args$outprefix)) {
   args$outprefix <- sub("\\.tex$", "", basename(args$template_file))
 }
 
+
+
 # Read the template
 lines <- readLines(args$template_file)
 text <- paste(lines, collapse = "\n")
-
-# Fix path for text_pieces.yml - use relative path from scripts directory
-blurb_data <- read_yaml("../data/text_pieces.yml")
-
+blurb_data <- read_yaml("data/text_pieces.yml")
 # Read the json data
 mock_data <- fromJSON(args$json_file)
 
-# Source shared functions first
-source("sharedFunctions.r")
+source("templates/sharedFunctions.r")
 
-# Initialize PLUGIN_FUNCTIONS list
-PLUGIN_FUNCTIONS <- list()
+# Determine which plugin to load based on template filename
+template_basename <- basename(args$template_file)
+template_name <- sub("\\.tex$", "", template_basename)
 
-# Load hospital plugins from current directory (scripts/)
-plugin_files <- list.files(path = ".", pattern = "^hospital.*\\.r$", full.names = TRUE)
-for (plugin_file in plugin_files) {
-  source(plugin_file)
-  cat("Loaded plugin:", basename(plugin_file), "\n")
+# Map template names to their corresponding plugin files
+template_to_plugin <- list(
+  "fakeHospital1" = "templates/hospital1.r",
+  "fakeHospital2" = "templates/hospital2.r"
+)
+
+
+# Load the specific plugin for this template if it exists
+if (template_name %in% names(template_to_plugin)) {
+  plugin_file <- template_to_plugin[[template_name]]
+  if (file.exists(plugin_file)) {
+    source(plugin_file)
+    cat("Loaded plugin for template:", template_name, "from", basename(plugin_file), "\n")
+  } else {
+    cat("Warning: Plugin file not found:", plugin_file, "\n")
+  }
+} else {
+  cat("No specific plugin found for template:", template_name, "- using default functions only\n")
 }
 
 #helper function to extract data labels from template
@@ -133,19 +145,16 @@ outputs <- lapply(names(mock_data), \(uuid) {
         label <- fields[j, "label"]
         marker <- paste0("\\data{", label, "}")
         if (label == "blurb") {
-          blurb_type <- "default"
-          blurb <- PLUGIN_FUNCTIONS[[blurb_type]](dataset$variants)
-          txt <- sub(marker, blurb, txt, fixed = "TRUE")
+          # Use the plugin's blurb function if available,
+          if (exists("long_blurb") && is.function(long_blurb)) {
+            blurb <- long_blurb(dataset$variants)
+          } else {
+            blurb <- paste("No explanation is available, please contact lab.",
+                           "This is a placeholder for the blurb.")
+          }
+          txt <- sub(marker, blurb, txt, fixed = TRUE)
         } else if (label == "summary_blurb") {
           blurb <- summary_blurb(dataset$variants)
-          txt <- sub(marker, blurb, txt, fixed = "TRUE")
-        } else if (grepl("^blurb_hospital", label)) {
-          blurb_type <- sub("^blurb_", "", label)
-          if (!is.null(PLUGIN_FUNCTIONS[[blurb_type]])) {
-            blurb <- PLUGIN_FUNCTIONS[[blurb_type]](dataset$variants)
-          } else {
-            blurb <- paste("No plugin function for", blurb_type, "found.")
-          }
           txt <- sub(marker, blurb, txt, fixed = "TRUE")
         } else if (!(label %in% names(dataset))) {
           cat("Skipping unsupported label: ", label, "\n")

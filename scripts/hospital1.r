@@ -2,7 +2,7 @@ required_functions <- c("aaname", "summary_blurb", "cap", "num2text")
 missing_functions <- !sapply(required_functions, exists)
 
 if (any(missing_functions)) {
-  source("sharedFunctions.r")
+  source("templates/sharedFunctions.r")
   cat("Loaded shared functions from sharedFunctions.r\n")
 }
 
@@ -23,7 +23,7 @@ long_blurb <- function(variants) {
     "The interpretation of these variants is as follows:",
     summary_blurb(variants, suffix = " "),
     if (length(variants) == 1) "was" else "were",
-    "detected in the sample."
+    "detected in the sample. \\newline"
   )
   var_blurbs <- lapply(seq_along(variants), \(i) {
     variant <- c(variants[[i]], var_data[i, ])
@@ -125,5 +125,4 @@ long_blurb <- function(variants) {
 if (!exists("PLUGIN_FUNCTIONS")) {
   PLUGIN_FUNCTIONS <- list()
 }
-PLUGIN_FUNCTIONS$default <- long_blurb
-PLUGIN_FUNCTIONS$hospital1 <- long_blurb
+PLUGIN_FUNCTIONS$long_blurb <- long_blurb

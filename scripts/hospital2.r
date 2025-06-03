@@ -1,18 +1,4 @@
-required_functions <- c("aaname", "summary_blurb", "cap", "num2text")
-missing_functions <- !sapply(required_functions, exists)
-
-if (any(missing_functions)) {
-  source("sharedFunctions.r")
-  cat("Loaded shared functions from sharedFunctions.r\n")
-}
-
-# Verify all functions are now available
-still_missing <- required_functions[!sapply(required_functions, exists)]
-if (length(still_missing) > 0) {
-  stop("Missing required functions: ", paste(still_missing, collapse = ", "))
-}
-
-long_blurb_hospital2 <- function(variants) {
+long_blurb <- function(variants) {
   #if there are no variants, we're done
   if (length(variants) == 0) {
     return("No variants were detected.")
@@ -45,8 +31,9 @@ long_blurb_hospital2 <- function(variants) {
     location <- paste(
       "The", variant$hgvsg, "variant occurs in chromosome", variant$chromosome,
       ", within the", variant$gene_symbol, "gene, and it causes", variant$hgvsc,
-      "change at position", variant$start, "in exon", variant$exon, ", forming",
-      variant$hgvsp, ". This mutation has been identified in",
+      "change at position", variant$start, "in exon", variant$exon, 
+      ", causing the mutation", variant$hgvsp, 
+      ". This mutation has been identified in",
       sample(30:50, 1), "families. It has a population frequency of",
       formatC(variant$mafaf, format = "e", digits = 2),
       paste0("(", variant$mafac, " alleles in ",
@@ -57,7 +44,7 @@ long_blurb_hospital2 <- function(variants) {
       else if (variant$mafaf < 0.01)
         "uncommon"
       else "relatively common",
-      "variant in the general population."
+      "variant in the general population. It "
     )
     effect <- switch(variant$type,
       synonymous = "causes no amino acid change.",
@@ -144,4 +131,4 @@ long_blurb_hospital2 <- function(variants) {
 if(!exists("PLUGIN_FUNCTIONS")) {
   PLUGIN_FUNCTIONS <- list()
 }
-PLUGIN_FUNCTIONS$hospital2 <- long_blurb_hospital2
+PLUGIN_FUNCTIONS$long_blurb <- long_blurb
