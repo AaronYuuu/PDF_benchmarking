@@ -1,0 +1,34 @@
+numbers:
+  - one
+  - two
+  - three
+  - four
+  - five
+  - six
+  - seven
+  - eight
+  - nine
+  - ten
+  - eleven 
+  - twelve
+residues:
+  ala: alanine
+  val: valine
+  leu: leucine
+  ile: isoleucine
+  met: methionine
+  his: histidine
+  phe: phenylalanine
+  tyr: tyrosine
+  trp: tryptophane
+  lys: lysine
+  arg: arginine
+  asp: aspartate
+  glu: glutamate
+  asn: asparagine
+  gln: glutamine
+  ser: serine
+  thr: threonine
+  cys: cysteine
+  gly: glycine
+  pro: proline

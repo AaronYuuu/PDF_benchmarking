@@ -7,7 +7,7 @@ This project generates mock genetic reports using lei_mockup_generator, extracts
 1. Access to the private `lei_mockup_generator` repository
 2. GitHub Personal Access Token or SSH key configured
 3. Python 3.8+ and R installed
-4. OpenAI API key or Anthropic API key
+4. An API key 
 
 ## Setup
 

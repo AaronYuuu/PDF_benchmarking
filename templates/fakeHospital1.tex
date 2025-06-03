@@ -1,0 +1,133 @@
+\documentclass[11pt]{extarticle}
+
+
+\usepackage{tgadventor}
+\renewcommand*\familydefault{\sfdefault} %% Only if the base font of the document is to be sans serif
+\usepackage[T1]{fontenc}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{array}
+%\usepackage{draftwatermark}
+%\SetWatermarkText{Mock specimen}
+%\SetWatermarkScale{.5}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{.5em}
+
+\usepackage{tabularx}
+
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} 
+
+\fancyhead[L]{\textbf{\LARGE OCH}}
+\fancyhead[R]{\textbf{\tiny Note this is a draft dataset}}
+\fancyhead[C]{\textbf{MRN:~~~~~~~~~~~~~~~~~~~~~~~ Date Collected: \data{date_collected}}}
+
+\fancyfoot[C]{\textbf{\tiny Note that this is a draft dataset}}
+\fancyfoot[L]{\textbf{\large Ontario Cancer Hospital}}
+\fancyfoot[R]{\textbf{Page \thepage\ }}
+
+\renewcommand{\footrulewidth}{0.25pt}
+
+\begin{document}
+\parbox[b]{0.65\textwidth}{%
+  \textbf{\LARGE Ontario Cancer Hospital} \\[0.5em]
+  \large 123 Main St. West, Toronto, ON, A4B5G9 \\[0.5em]
+  info@och.on.ca ~ | ~ fax: 416-456-7890 ~ | ~ phone: 437-416-6470
+}
+\hfill
+\parbox[b]{0.3\textwidth}{%
+  \raggedleft
+  \large Division of Tumor \\ 
+  Sequencing and \\ 
+  Diagnostics
+}
+\vspace{2em}
+\hrule
+
+
+\begin{center}
+{\Huge \bf CLINICAL LABORATORY RESULTS}
+\end{center}
+\noindent Report electronically signed by:
+\noindent\hrulefill
+\vspace{0.5em}
+\hrule
+\vspace{1.5em}
+
+
+
+\parbox[t]{9cm}{
+  \textbf{\Large Patient Info.} \\[0.5em]
+  First Name: Redacted \\
+  Last Name: \\
+  DOB: \\
+  Sex: \\
+  Health Card: \\
+  Medical Record \#: \\
+  Sample tested: \data{sample_type} \data{analysis_type}
+  Referral Reason: \\
+  Referring Physician:
+}
+
+\parbox[t]{6cm}{
+  \textbf{\Large Dates} \\[0.5em]
+  Collected – \data{date_collected} \\
+  Assessed – \data{date_received} \\
+  Reported – \data{date_verified} \\[1em]
+  \textbf{\Large Results:} \\[0.5em]
+  \data{summary_blurb}
+}
+
+
+\vspace{2em}
+\hrule
+
+{\bf \Huge Summary of Results:}
+
+\vspace{1em}
+\newcolumntype{W}{>{\hsize=0.85\hsize}X}
+\newcolumntype{Y}{>{\hsize=1.5\hsize}X} % Wider column
+\newcolumntype{Z}{>{\hsize=0.5\hsize}X} % Narrower column
+
+\begin{tabularx}{\textwidth}{X|Z|W|X|X|Y|}
+\hline
+{\bf \large Gene} & {\bf \large Exon} & {\bf \large Base} & {\bf \large Amino Acid} & {\bf \large Zygosity} & {\bf \large Interpretation} \\
+\hline
+\begin{dataiter}{variants}
+\data{gene_symbol} & \data{exon} & \data{hgvsc} & \data{hgvsp} & \data{zygosity} & \data{interpretation} \\ \hline
+\end{dataiter}
+%BRCA1 & 11 & c.123A>T & p.Lys41* & Heterozygous & Pathogenic \\ \hline %test compile
+
+\end{tabularx}
+
+\vspace{3em}
+
+{\bf \large Genes Analyzed: {\tiny \data{num_tested_genes} total}} \begin{dataiter}{tested_genes}\data{gene_symbol}, \end{dataiter}
+\newpage
+
+{\huge \bf \underline{Test Details:}} \newline
+\newline
+
+{\Large \bf Findings: }\newline
+\data{blurb} \newline
+\newline
+
+
+{\Large \bf Recommendations \newline}
+We recommend a precision oncology approach. These variants are associated with constitutive pathway activation and are well-established drivers of tumourigenesis. Targeted therapies should be evaluated based on these molecular findings. Specifically, pharmaceutical treatment is also recommended to correct hormone imbalances that may be caused by these mutations. However, the clinician's advice takes precedence. Additionally, PI3K inhibitors could be explored in clinical trials for the PIK3CA-mutated context. Further germline testing is not indicated at this time, as all three mutations are consistent with somatic oncogenic events. Multidisciplinary tumour board review is advised to integrate molecular findings into the patient's treatment plan. Further genetic testing may be required and completed at a physician's discretion. 
+\newline 
+\newline
+{\Large \bf Methodology} \newline
+Genomic DNA was extracted and analyzed using a custom-designed targeted sequencing panel encompassing all coding exons and at least 20 base pairs of flanking intronic regions for the specified genes. Target enrichment was performed using hybrid capture technology (Twist Bioscience), followed by paired-end sequencing on the Illumina NextSeq platform. Sequencing reads were aligned to the GRCh37/hg19 human genome reference using BWA-MEM, and variant calling was performed using GATK (Broad Institute). Annotation and interpretation of variants were conducted using VarSeq (Golden Helix), incorporating population frequency databases, in silico prediction tools, and ClinVar. Exon-level copy number variations were evaluated using CNVkit and confirmed by MLPA (MRC Holland) when applicable. Regions with known pseudogene interference, such as PMS2, were validated with long-range PCR and Sanger sequencing. The average read depth across all targeted regions exceeded 300x, with a minimum depth threshold of 50x. The analytical sensitivity for single nucleotide variants and small indels is >99\%, and for exon-level CNVs, >95\%. {\bf Only variants classified as pathogenic, likely pathogenic, or variants of uncertain significance (VUS) are reported}, according to ACMG/AMP guidelines (PMID: 25741868).
+
+
+{\large \bf Limitations \newline}
+This test was developed and validated by a certified clinical laboratory. Limitations include reduced sensitivity in regions with pseudogenes (e.g., PMS2, CHEK2), and inability to detect certain structural variants (e.g., MSH2 inversion), deep intronic changes, or low-level mosaicism. PMS2 exons 11–15 are not assessed due to pseudogene interference. Variant interpretation reflects current scientific knowledge and may evolve over time.
+\end{document}
