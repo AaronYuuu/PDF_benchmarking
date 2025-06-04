@@ -5,7 +5,7 @@ library(httr)
 library(RJSONIO)
 options(timeout=180)
 #get gene list from field values
-gene_table <- yaml.load_file("../data/field_values.yml")
+gene_table <- yaml.load_file("data/field_values.yml")
 
 #query biomart for genes
 
