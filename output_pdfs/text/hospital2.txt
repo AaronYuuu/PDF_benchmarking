@@ -1,0 +1,64 @@
+123 Main St, West , Toronto, ON, A4B5G9
+Toronto Cancer Hospital Division of Tumor Sequencing and Diagnostics
+info@och,on.ca fax: 416-456-7890 phone: 437-416-6470
+Draft PATHOLOGY LABORATORY RESULTS Patient Info: Patient Information: Name: Physician Name: DOB: Health Card: Sex: MRN #; Clinic: Sinai Health System (Toronto)
+Procedure Date 2023-03-20 16.30:00
+Accession Date 2023-03-21 19:03.41
+Report Date
+2023-03-23 10.38:10
+Report Details
+Genome Reference GRCh38 Sequencing Range Whole exome sequencing (WES) , Variant analysis
+Referral Reason Clinical
+Analysis Location London Health Sciences Centre (London) Table of findings: Gene Information Interpretation STIL T8 C 3946>C p GIu132Gln homozy- Variant Of uncertain gous clinical significance GATA3 8 c.13316>A p.ClyAA4Asp heterozy- Variant of uncertain gous clinical significance
+Summary: Two variants of uncertain clinical significance detected; The de tails regarding the specific mutations are included below:
+MRN:
+Date: 2023-03-20 16.30.00
+Page 1
+
+123 Main St, West , Toronto, ON, A4B5G9
+Toronto Cancer Hospital Division of Tumor info@och,on.ca Sequencing and fax: 416-456-7890 Diagnostics phone: 437-416-6470 Variant Interpretation: The interpretation of these variants is as follows: Two variants of uncertain clinical significance were detected in the sample:
+Variant 1 of 2
+Gene STIL
+Variant c.394G>C
+Amino Zygosity p.Glu132CIn homozygous Variant of uncertain clinical significance 6 The g.472505326>C variant occurs in chromosome chr] within the STIL gene , and it causes €,394G>C change at position 132 in exon 18 causing the mu- tation p.Glu132Gln This mutation has been identified in 33 families, It has a population frequency of 0.00e+00 (0 alleles in 527781 total alleles tested) , indi- cating it is a very rare variant in the general population It causes an amino acid substitution, which replaces glutamate with glutamine ClinVar and other ge- nomic databases report the STIL c.3946>C variant as clinically relevant based on aggregated evidence. The clinical implications of this variant are not yet fully understood: At present , available data is insufficient to confirm its role in disease_ The affected nucleotide lies within a region that is highly conserved across ver- tebrate species, which suggests functional importance and evolutionary con- straint, This variant is not currently strongly implicated in specific diseases according to ClinVar records (VCV accession: VCV003580448). Supporting studies and case reports can be found in the scientific literature. Rel- evant PubMed references include: 852145429, 926084914,206744673,803069417, 811657780
+MRN:
+Date: 2023-03-20 16.30.00
+Page 2
+
+123 Main St, West , Toronto, ON, A4B5G9
+Toronto Cancer Hospital Division of Tumor info@och,on.ca Sequencing and fax: 416-456-7890 Diagnostics phone: 437-416-6470 According to ClinVar; the evidence collected to date is insufficient to firmly es- tablish the clinical significance of this variant, therefore it is classified as a variant of uncertain clinical significance
+Variant 2 of 2
+Gene GATA3
+Variant c.1331G>A
+Amino
+Zygosity heterozygous
+p.GlyAA4Asp
+Variant of uncertain clinical significance
+The g.8046708G>A variant occurs in chromosome chrI0 within the GATA3 gene , andit causes c.1331G>Achange atposition 444in exon 8 , causing the mutation p.GlyA44Asp This mutation has been identified in 40 families. It has a popula- tion frequency of 1.13e-05 (6 alleles in 532228 total alleles tested) , indicating it is a very rare variant in the general population: It causes an amino acid sub- stitution, which replaces glycine with aspartate ClinVar and other genomic databases report the GATA3 c.1331G>A variant as clinically relevant based on aggregated evidence. The clinical implications of this variant are not yet fully understood: At present , available data is insufficient to confirm its role in disease. The affected nucleotide lies within a region that is highly conserved across ver- tebrate species, which suggests functional importance and evolutionary con- straint, This variant is not currently strongly implicated in specific diseases according to ClinVar records (VCV accession: VCV003655358) , Supporting studies and case reports can be found in the scientific literature. Rel- evant PubMed references include: 425553480,553524314,771277387,837905293 , 273401221
+MRN:
+Date: 2023-03-20 16.30.00
+Page 3
+
+123 Main St, West , Toronto, ON, A4B5G9
+Toronto Cancer Hospital Division of Tumor info@och,on.ca Sequencing and fax: 416-456-7890 Diagnostics phone: 437-416-6470 According to ClinVar; the evidence collected to date is insufficient to firmly es- tablish the clinical significance of this variant, therefore it is classified as a variant of uncertain clinical significance Test Details:
+Genes Analyzed: PML, total, SS]8, total, CDKNZC , total; HIST4HA, to- tal, RBM15, total, POLQ, total, ARNT, total:. STIL, total. GATA3 , total, ETV6, total, EPHB6, total, ETSI, total, FCRL4, total, BRCA2,total, 14 total genes tested; mRNA ref sequences tested NM_ NM_033238.3 NM_OO1007559.3 NM_078626.3 NM_175054,.2 NM_022768.5 NM_199420.4NM_001668.4NM_O01048166.1 NM_OO1002295.2 NM_001987,5 NM_004445.6 NM_O01 143820.2 NM_031282.3 NM_000059.4
+Recommendations A precision oncology approach is advised: These mutations are known onco- genic drivers, linked to constitutive pathway activation. Targeted therapies, including hormone-correcting agents, may be considered, guided by clinical judgment; PI3K inhibitors could be explored in trials for PIK3CA-mutated cases. Germline testing is not indicated, as all mutations are consistent with somatic events, A multidisciplinary tumour board review is recommended to integrate findings into care: Additional testing may be pursued at the physician's discre- tion;
+Methodology Total RNA was sequenced with Whole exome sequencing (WES) and was ana- lyzed using Variant analysis covering all coding exons and adjacent intronic re- gions. Target enrichment was performed with hybrid capture (Twist Bioscience) ; followed by Illumina NextSeq sequencing: Reads were aligned to GRCh37 US - ing BWA-MEM, and variants called with GATK, Annotation waS performed in VarSeq using population databases, predictive algorithms, and ClinVar: CNVs were assessed with CNVkit and confirmed by MLPA when applicable; Regions with pseudogene interference , such as PMS2 , were validated using long-range PCR and Sanger sequencing; Mean read depth exceeded 30Ox , with a mini- mum threshold of 5Ox. Analytical sensitivity is > 99% for SNVs/indels and >95* for exon-level CNVs. Only variants classified as pathogenic, likely pathogenic, or variants of uncertain significance (VUS) are reported, per ACMGIAMP guide- lines (PMID: 25741868). Limitations This test was developed and validated in a certified clinical laboratory: Limi- tations include reduced sensitivity in pseudogene regions (e.g., PMS2 , CHEK2), and inability to detect certain structuralvariants (e.g., MSH2 inversions) , deep in- tronic changes, or Iow-level mosaicism, PMS2 exons 1-15 are not analyzed: In- terpretations reflect current knowledge and may be updated as new evidence
+MRN:
+Date: 2023-03-20 16.30:00
+Page 4
+
+123 Main St, West , Toronto, ON, A4B5G9
+Toronto Cancer Hospital Division of Tumor Sequencing and Diagnostics
+info@och,on.ca fax: 416-456-7890 phone: 437-416-6470
+emerges:
+MRN:
+Date: 2023-03-20 16.30.00
+Page 5
+1 Mock
+
+123 Main St, West , Toronto, ON, A4B5G9
+Toronto Cancer Hospital Sequencing and Division of Tumor fax: 416-456-7890 info@och,on.ca Report Electronically Verified and Signed Diagnostics phone: 437-416-6470 by: 1 Mock
+MRN:
+Date: 2023-03-20 16.30.00
+Page 6

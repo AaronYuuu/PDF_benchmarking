@@ -32,11 +32,11 @@ if (is.na(args$outprefix)) {
 # Read the template
 lines <- readLines(args$template_file)
 text <- paste(lines, collapse = "\n")
-blurb_data <- read_yaml("data/text_pieces.yml")
+blurb_data <- read_yaml("../data/text_pieces.yml")
 # Read the json data
 mock_data <- fromJSON(args$json_file)
 
-source("scripts/sharedFunctions.r")
+source("sharedFunctions.r")
 
 # Determine which plugin to load based on template filename
 template_basename <- basename(args$template_file)
@@ -44,8 +44,8 @@ template_name <- sub("\\.tex$", "", template_basename)
 
 # Map template names to their corresponding plugin files
 template_to_plugin <- list(
-  "fakeHospital1" = "scripts/hospital1.r",
-  "fakeHospital2" = "scripts/hospital2.r"
+  "fakeHospital1" = "hospital1.r",
+  "fakeHospital2" = "hospital2.r"
 )
 
 

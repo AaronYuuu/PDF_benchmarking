@@ -1,3 +1,9 @@
+# Load required libraries and data
+library(yaml)
+
+# Load blurb_data from text_pieces.yml
+blurb_data <- yaml.load_file("../data/text_pieces.yml")
+
 #capitalize a word ("hello" -> "Hello")
 cap <- function(txt) {
   substr(txt, 1, 1) <- toupper(substr(txt, 1, 1))

@@ -68,7 +68,7 @@ while (( "$#" )); do
   esac
 done
 #reset command arguments as only positional parameters
-TEMPLATE="${1:-templates/fakeHospital2.tex}"
+TEMPLATE="${1:-../templates/fakeHospital2.tex}"
 
 eval set -- "$PARAMS"
 
@@ -77,11 +77,11 @@ DATA="$OUTDIR/mock_data.json"
 
 # Generate mock data using the AMOUNT variable
 echo "Generating mock data files..."
-Rscript scripts/generate_mock_data.R --amount "$AMOUNT" --outfile "$DATA"
+Rscript generate_mock_data.R --amount "$AMOUNT" --outfile "$DATA"
 
 # For each JSON file, run interpolate on each template
 echo "Interpolating JSON files with templates..."
-Rscript scripts/interpolate.R "$TEMPLATE" "$DATA" --outprefix "$OUTDIR/report_"
+Rscript interpolate.R "$TEMPLATE" "$DATA" --outprefix "$OUTDIR/report_"
 cd "$OUTDIR"
 # Compile all generated .tex files into PDFs and clean up
 echo "Compiling LaTeX files into PDFs..."

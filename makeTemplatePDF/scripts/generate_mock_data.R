@@ -22,9 +22,9 @@ num_reports <- args$amount
 out_file <- args$outfile
 
 #Load source data
-field_values <- yaml.load_file("data/field_values.yml")
-gene_info <- read.csv("data/gene_info.csv", row.names = 1)
-exons_df <- read.csv("data/exon_info.csv", stringsAsFactors = FALSE)
+field_values <- yaml.load_file("../data/field_values.yml")
+gene_info <- read.csv("../data/gene_info.csv", row.names = 1)
+exons_df <- read.csv("../data/exon_info.csv", stringsAsFactors = FALSE)
 
 # Helper function to sample from fields
 sample_field <- function(name, num = 1) sample(field_values[[name]], num)
@@ -125,7 +125,7 @@ gen_hgvs <- function(var_data, gene) {
       b$substitution(pos, from, to)
     })
   })
-  b <- new.hgvs.builder.g()
+  # Use the same builder for genomic coordinates
   hgvsg <- sapply(seq_len(nrow(var_data)), \(i) {
     with(var_data[i, ], {
       b$substitution(gene_info[gene, "start_position"] + pos - 1, from, to)
@@ -198,6 +198,9 @@ sample_variants <- function(genes) {
       data$gene_symbol,
       exons_df
     )
+    if (is.null(data$exon) || is.na(data$exon) || data$exon < 1) {
+      data$exon <- sample(1:20, 1)  # fallback to a random exon number
+    }
 
     #make function to query biomart for exon derived from variant position
     data$zygosity <- sample(

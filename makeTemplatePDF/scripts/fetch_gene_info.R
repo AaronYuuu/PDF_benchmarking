@@ -1,11 +1,10 @@
-
 library(yaml)
 library(biomaRt)
 library(httr)
 library(RJSONIO)
 options(timeout=180)
 #get gene list from field values
-gene_table <- yaml.load_file("data/field_values.yml")
+gene_table <- yaml.load_file("../data/field_values.yml")
 
 #query biomart for genes
 
@@ -124,8 +123,8 @@ results_final$chromosome_name <-
   gsub("^HSCHR|_.+$", "", results_filtered$chromosome_name)
 results_final$refseq_mrna <- do.call(c, refseq_accessions)
 # write result to file
-write.csv(results_final, "data/gene_info.csv", row.names = FALSE)
-write.csv(exons_filtered, "data/exon_info.csv", row.names = FALSE)
+write.csv(results_final, "../data/gene_info.csv", row.names = FALSE)
+write.csv(exons_filtered, "../data/exon_info.csv", row.names = FALSE)
 paste("Gene info, exon info, saved to 
 data/gene_info.csv, data/exon_info.csv",
       sep = "\n") |> cat()

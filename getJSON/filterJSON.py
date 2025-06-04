@@ -1,5 +1,5 @@
-templateJSON = "../lei_mockup_generator/mock_data.json"
-templateTex = "templates/fakeHospital2.tex"
+templateJSON = "makeTemplatePDF/scripts/out/mock_data.json"
+templateTex = "makeTemplatePDF/templates/fakeHospital2.tex"
 
 def labelsJSON(templateJSON):
     import json

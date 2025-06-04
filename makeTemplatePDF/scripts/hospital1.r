@@ -1,8 +1,16 @@
+# Declare functions that will be sourced to avoid R CMD check warnings
+if (FALSE) {
+  summary_blurb <- function(...) NULL
+  aaname <- function(...) NULL
+  cap <- function(...) NULL
+  num2text <- function(...) NULL
+}
+
 required_functions <- c("aaname", "summary_blurb", "cap", "num2text")
 missing_functions <- !sapply(required_functions, exists)
 
 if (any(missing_functions)) {
-  source("templates/sharedFunctions.r")
+  source("sharedFunctions.r")
   cat("Loaded shared functions from sharedFunctions.r\n")
 }
 

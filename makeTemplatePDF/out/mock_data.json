@@ -1,0 +1,107 @@
+{
+ "7cef8a91-8d49-4415-8eec-b22f9f4dd205": {
+ "date_collected": "2023-03-20 16:30:00",
+"date_received": "2023-03-21 19:03:41",
+"date_verified": "2023-03-23 10:38:10",
+"report_type": "Pathology",
+"testing_context": "Clinical",
+"ordering_clinic": "Sinai Health System (Toronto)",
+"testing_laboratory": "London Health Sciences Centre (London)",
+"sequencing_scope": "Whole exome sequencing (WES)",
+"tested_genes": {
+ "PML": {
+ "gene_symbol": "PML",
+"refseq_mrna": "NM_033238.3" 
+},
+"SS18": {
+ "gene_symbol": "SS18",
+"refseq_mrna": "NM_001007559.3" 
+},
+"CDKN2C": {
+ "gene_symbol": "CDKN2C",
+"refseq_mrna": "NM_078626.3" 
+},
+"HIST4H4": {
+ "gene_symbol": "HIST4H4",
+"refseq_mrna": "NM_175054.2" 
+},
+"RBM15": {
+ "gene_symbol": "RBM15",
+"refseq_mrna": "NM_022768.5" 
+},
+"POLQ": {
+ "gene_symbol": "POLQ",
+"refseq_mrna": "NM_199420.4" 
+},
+"ARNT": {
+ "gene_symbol": "ARNT",
+"refseq_mrna": "NM_001668.4" 
+},
+"STIL": {
+ "gene_symbol": "STIL",
+"refseq_mrna": "NM_001048166.1" 
+},
+"GATA3": {
+ "gene_symbol": "GATA3",
+"refseq_mrna": "NM_001002295.2" 
+},
+"ETV6": {
+ "gene_symbol": "ETV6",
+"refseq_mrna": "NM_001987.5" 
+},
+"EPHB6": {
+ "gene_symbol": "EPHB6",
+"refseq_mrna": "NM_004445.6" 
+},
+"ETS1": {
+ "gene_symbol": "ETS1",
+"refseq_mrna": "NM_001143820.2" 
+},
+"FCRL4": {
+ "gene_symbol": "FCRL4",
+"refseq_mrna": "NM_031282.3" 
+},
+"BRCA2": {
+ "gene_symbol": "BRCA2",
+"refseq_mrna": "NM_000059.4" 
+} 
+},
+"num_tested_genes": 14,
+"sample_type": "Total RNA",
+"analysis_type": "Variant analysis",
+"variants": [
+ {
+ "gene_symbol": "STIL",
+"variant_id": "VCV003580448",
+"chromosome": "chr1",
+"hgvsg": "g.47250532G>C",
+"hgvsc": "c.394G>C",
+"hgvsp": "p.Glu132Gln",
+"transcript_id": "NM_001048166.1",
+"exon": 18,
+"zygosity": "homozygous",
+"interpretation": "Variant of uncertain clinical significance",
+"mafac":        0,
+"mafan":   527781,
+"mafaf":        0 
+},
+{
+ "gene_symbol": "GATA3",
+"variant_id": "VCV003655358",
+"chromosome": "chr10",
+"hgvsg": "g.8046708G>A",
+"hgvsc": "c.1331G>A",
+"hgvsp": "p.Gly444Asp",
+"transcript_id": "NM_001002295.2",
+"exon": 8,
+"zygosity": "heterozygous",
+"interpretation": "Variant of uncertain clinical significance",
+"mafac":        6,
+"mafan":   532228,
+"mafaf": 1.127336e-05 
+} 
+],
+"num_variants": 2,
+"reference_genome": "GRCh38" 
+} 
+}

@@ -1,3 +1,24 @@
+# Declare functions that will be sourced to avoid R CMD check warnings
+if (FALSE) {
+  summary_blurb <- function(...) NULL
+  aaname <- function(...) NULL
+  cap <- function(...) NULL
+  num2text <- function(...) NULL
+}
+
+required_functions <- c("aaname", "summary_blurb", "cap", "num2text")
+missing_functions <- !sapply(required_functions, exists)
+
+if (any(missing_functions)) {
+  source("sharedFunctions.r")
+  cat("Loaded shared functions from sharedFunctions.r\n")
+}
+
+# Verify all functions are now available
+still_missing <- required_functions[!sapply(required_functions, exists)]
+if (length(still_missing) > 0) {
+  stop("Missing required functions: ", paste(still_missing, collapse = ", "))
+}
 long_blurb <- function(variants) {
   #if there are no variants, we're done
   if (length(variants) == 0) {
