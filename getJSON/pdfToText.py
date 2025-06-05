@@ -238,12 +238,12 @@ def main():
 
 def main2():
     """Main function for testing purposes."""
-    input_dir = "out/"  # Replace with your input directory
+    input_dir = "makeTemplatePDF/out/"  # Replace with your input directory
     # Ensure output directory exists
     if not os.path.exists("output_pdfs"):
         os.makedirs("output_pdfs")
     output_dir = "output_pdfs"  # Replace with your output directory
-    process_pdf_batch(input_dir, output_dir, save_text=True, save_images=True, 
+    process_pdf_batch(input_dir, output_dir, save_text=True, save_images=False, 
                      language_list=["en"], dpi=300)
     
 main2()
