@@ -6,9 +6,14 @@ You must extract the following categories:
 
 ### A. Clinical Testing Information
 1. **Sequencing Scope** — Molecular testing methods used. Choose one or more from:
-   - Gene panel, Targeted variant testing, Whole exome sequencing (WES), Whole genome sequencing (WGS), Whole transcriptome sequencing (WTS)
+  - Gene panel
+  - Targeted variant testing
+  - Whole exome sequencing (WES)
+  - Whole genome sequencing (WGS)
+  - Whole transcriptome sequencing (WTS)
 2. **Tested Genes** — List of genes tested.
-3. **Tested refseq_mrna** — List of RefSeq mRNA IDs for the tested genes. They are in the same order. Format example is `NM_000123.3`
+3. **Tested refseq_mrna** — List of RefSeq mRNA IDs for the tested genes. They are in the same order in the genes section and refseq_mrna sequences.
+  - Format example is `NM_000123.3`
 4. **Sample Type** — Sample type used for sequencing. Choose one from:
    - Amplified DNA, ctDNA, Other DNA enrichments, Other RNA fractions, polyA+ RNA, Ribo-Zero RNA, Total DNA, Total RNA
 4. **Analysis Type** — Type(s) of analysis done. Choose from:
@@ -19,22 +24,22 @@ You must extract the following categories:
 2. **Report Type** — Choose one from:
    - Pathology, Molecular Genetics
 3. **Testing Context** — Clinical or Research
-4. **Ordering Clinic** — Clinic that ordered the test. Choose from provided list of Ontario hospitals.
-5. **Testing Laboratory** — Where the test was conducted. Choose from approved lab list.
+4. **Ordering Clinic** — Clinic that ordered the test. Include the city name i.e. hamilton health sciences (hamilton)
+5. **Testing Laboratory** — Where the test was conducted. Include the city in brackets if applicable i.e. Sinai Health System (Toronto)
 
 ### C. Variant Details
 1. **Variant Identifiers** — Any from: OMIM, Clinvar, dbSNP, dbVar, COSMIC, UniProt, ClinGen
-   - Must match regex: `OMIM:\d+`, `Clinvar:VCV\d+`, `dbSNP:rs\d+`, `dbVar:\w+`, `COSMIC:COSM\d+`, `uniprot:VAR_\d+`, `clingene:CA\d+`
+      - Must match regex '\d+' or '\w+'
 2. **Gene Symbol** — Official HGNC gene symbols
 3. **Transcript ID** — Reference transcripts (e.g., NM_000123.3)
 4. **Genomic HGVS (gDNA)** — Format `g.` strings
 5. **Coding HGVS (cDNA)** — Format `c.` strings
 6. **Protein HGVS (AA change)** — Format `p.` strings
-7. **Chromosome** — Format: Chr1–Chr22, ChrX, ChrY
+7. **Chromosome** — Format: chr1–chr22, chrX, chrY
 8. **Exon** — Exon number(s)
-9. **Reference Genome** — One of: GRCh37, GRCh38, NCBI build 34, NCBI build 38, hg19, hg38
+9. **Reference Genome** — One of: GRCh37, GRCh38, NCBI build 34, hg19, hg38
 10. **Allele Zygosity** — Homozygous, Heterozygous, Hemizygous, Compound heterozygous
-11. **Interpretation** — One of: Pathogenic, Likely pathogenic, Uncertain significance, Likely benign, Benign
+11. **Interpretation** — Must match format Variant of [clinical significance, uncertain clinical significance, no clinical significance]
 12. **MAF Allele Frequencies** — For each variant, provide:
     - MAFAC: minnor allele frequency count
     - MAFAN: allele frequency overall in tested population
@@ -82,10 +87,11 @@ Do not include any comments such as:
         "mafan": "",
         "mafaf": ""
       }
-      // (repeated for each variant)
+      // (repeated for each variant) and it should be a list of dictionaries
     ],
     "num_variants": "",
     "reference_genome": ""
   }
 }
+```
 ##### End PROMPT #####

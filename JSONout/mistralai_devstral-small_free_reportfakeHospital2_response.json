@@ -1,0 +1,70 @@
+{
+  "model": "mistralai/devstral-small:free",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "2022-10-11",
+      "date_received": "2022-10-12",
+      "date_verified": "",
+      "report_type": "Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Hamilton Health Sciences (Hamilton)",
+      "testing_laboratory": "Sinai Health System (Toronto)",
+      "sequencing_scope": "Targeted variant testing",
+      "tested_genes": {
+        "gene_id": {
+          "gene_symbol": "TPM3",
+          "refseq_mrna": "NM_152263.4"
+        },
+        "gene_id2": {
+          "gene_symbol": "RAD51C",
+          "refseq_mrna": "NM_001243196.2"
+        },
+        "gene_id3": {
+          "gene_symbol": "TCEA1",
+          "refseq_mrna": "NM_058216.3"
+        },
+        "gene_id4": {
+          "gene_symbol": "MLLT1",
+          "refseq_mrna": "NM_006756.4"
+        },
+        "gene_id5": {
+          "gene_symbol": "TPM3",
+          "refseq_mrna": "NM_152263.4"
+        },
+        "gene_id6": {
+          "gene_symbol": "ELF4",
+          "refseq_mrna": "NM_005936.4"
+        },
+        "gene_id7": {
+          "gene_symbol": "HNRNPA2B1",
+          "refseq_mrna": "NM_001421.4"
+        }
+      },
+      "num_tested_genes": "6",
+      "sample_type": "polyA+ RNA",
+      "analysis_type": "Variant analysis",
+      "variants": [
+        {
+          "gene_symbol": "TPM3",
+          "variant_id": "ClinVar:VCV002155324",
+          "chromosome": "Chr15",
+          "hgvsg": "g.4154155716A>T",
+          "hgvsc": "c.409A>T",
+          "hgvsp": "p.Lys137Ter",
+          "transcript_id": "NM_152263.4",
+          "exon": "15",
+          "zygosity": "Homozygous",
+          "interpretation": "Uncertain significance",
+          "mafac": "915",
+          "mafan": "558972",
+          "mafaf": "0.00164"
+        }
+      ],
+      "num_variants": "1",
+      "reference_genome": "NCBI Build 34"
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital2__ab5c2ad8-906f-4bda-ad56-208429da34a2.txt"
+}

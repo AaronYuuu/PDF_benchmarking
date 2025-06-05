@@ -1,0 +1,66 @@
+{
+  "model": "meta-llama/llama-4-scout:free",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "2022-10-11",
+      "date_received": "2022-10-12",
+      "date_verified": "2022-10-14",
+      "report_type": "Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Hamilton Health Sciences",
+      "testing_laboratory": "Sinai Health System (Toronto)",
+      "sequencing_scope": "Targeted variant testing",
+      "tested_genes": {
+        "RADS1C": {
+          "gene_symbol": "RADS1C",
+          "refseq_mrna": "NM_"
+        },
+        "TCEA1": {
+          "gene_symbol": "TCEA1",
+          "refseq_mrna": "NM_058216.3"
+        },
+        "MLLT1": {
+          "gene_symbol": "MLLT1",
+          "refseq_mrna": "NM_006756.4"
+        },
+        "TPM3": {
+          "gene_symbol": "TPM3",
+          "refseq_mrna": "NM_005934.4"
+        },
+        "ELF4": {
+          "gene_symbol": "ELF4",
+          "refseq_mrna": "NM_152263.4"
+        },
+        "HNRNPA2B1": {
+          "gene_symbol": "HNRNPA2B1",
+          "refseq_mrna": "NM_001421.4"
+        }
+      },
+      "num_tested_genes": "6",
+      "sample_type": "polyA+ RNA",
+      "analysis_type": "Variant analysis",
+      "variants": [
+        {
+          "gene_symbol": "TPM3",
+          "variant_id": "ClinVar:VCV002155324",
+          "chromosome": "Chr1",
+          "hgvsg": "",
+          "hgvsc": "c.409A>T",
+          "hgvsp": "p.Lys137Ter",
+          "transcript_id": "NM_005934.4",
+          "exon": "15",
+          "zygosity": "homozygous",
+          "interpretation": "Uncertain significance",
+          "mafac": "",
+          "mafan": "1.64e-03",
+          "mafaf": ""
+        }
+      ],
+      "num_variants": "1",
+      "reference_genome": "GRCh37"
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital2__ab5c2ad8-906f-4bda-ad56-208429da34a2.txt"
+}

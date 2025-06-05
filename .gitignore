@@ -8,3 +8,4 @@ out/mock_data.json
 /getJSON/JSONout
 /output_pdfs
 /makeTemplate/out
+/getJSON/__pycache__

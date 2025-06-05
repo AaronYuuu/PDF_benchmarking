@@ -95,15 +95,16 @@ gen_maf <- function(amount = 1, max_pop = 5e5) {
 # Generate a set of threee dates (collected, received, verified)
 gen_dates <- function() {
   d1 <- paste0(
-    "20", sample(20:25, 1), "-", sample(12, 1), "-",
-    sample(29, 1), " ", sample(23, 1), ":", sample(59, 1)
-  ) |> as.POSIXct()
-  d2 <- d1 + round(rnorm(1, mean = 60 * 60 * 24, sd = 60 * 60 * 12))
-  d3 <- d2 + round(rnorm(1, mean = 60 * 60 * 24, sd = 60 * 60 * 12))
+    "20", sample(20:25, 1), "-", sprintf("%02d", sample(12, 1)), "-", sprintf("%02d", sample(28, 1))
+  ) |> as.Date()  # Use as.Date instead of as.POSIXct
+
+  d2 <- d1 + round(rnorm(1, mean = 1, sd = 0.5))  # Adds days
+  d3 <- d2 + round(rnorm(1, mean = 1, sd = 0.5))
+
   list(
-    date_collected = as.character(d1),
-    date_received = as.character(d2),
-    date_verified = as.character(d3)
+    date_collected = format(d1, "%Y-%m-%d"),
+    date_received = format(d2, "%Y-%m-%d"),
+    date_verified = format(d3, "%Y-%m-%d")
   )
 }
 
@@ -119,16 +120,18 @@ gen_var <- function(gene, amount = 1) {
 
 # Generate HGVS identifiers for variants
 gen_hgvs <- function(var_data, gene) {
-  b <- new.hgvs.builder.c()
+  b_c <- new.hgvs.builder.c()  # coding builder for hgvsc
+  b_g <- new.hgvs.builder.g()  # genomic builder for hgvsg
+  
   hgvsc <- sapply(seq_len(nrow(var_data)), \(i) {
     with(var_data[i, ], {
-      b$substitution(pos, from, to)
+      b_c$substitution(pos, from, to)
     })
   })
-  # Use the same builder for genomic coordinates
+  # Use genomic builder for genomic coordinates with g. prefix
   hgvsg <- sapply(seq_len(nrow(var_data)), \(i) {
     with(var_data[i, ], {
-      b$substitution(gene_info[gene, "start_position"] + pos - 1, from, to)
+      b_g$substitution(gene_info[gene, "start_position"] + pos - 1, from, to)
     })
   })
   cds_seq <- gene_info[gene, "coding"]
@@ -244,7 +247,7 @@ gen_genes <- function() {
 #   "chromosome": chrX
 #   hgvsc
 #   hgvsg
-#   hgvsp
+#   hgvp
 #   gene_symbol
 #   transcript_id":  "NM_000179.2"
 #   "exon"

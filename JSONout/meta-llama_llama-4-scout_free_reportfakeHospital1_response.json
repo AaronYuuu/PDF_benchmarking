@@ -1,0 +1,66 @@
+{
+  "model": "meta-llama/llama-4-scout:free",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "2022-10-11",
+      "date_received": null,
+      "date_verified": null,
+      "report_type": "Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Ontario Cancer Hospital",
+      "testing_laboratory": "Ontario Cancer Hospital",
+      "sequencing_scope": "Gene panel",
+      "tested_genes": {
+        "RADSIC": {
+          "gene_symbol": "RADSIC",
+          "refseq_mrna": null
+        },
+        "TCEAI": {
+          "gene_symbol": "TCEAI",
+          "refseq_mrna": null
+        },
+        "MLLTI": {
+          "gene_symbol": "MLLTI",
+          "refseq_mrna": null
+        },
+        "TPM3": {
+          "gene_symbol": "TPM3",
+          "refseq_mrna": null
+        },
+        "ELF4": {
+          "gene_symbol": "ELF4",
+          "refseq_mrna": null
+        },
+        "HNRNPA2BI": {
+          "gene_symbol": "HNRNPA2BI",
+          "refseq_mrna": null
+        }
+      },
+      "num_tested_genes": "6",
+      "sample_type": "polyA+ RNA",
+      "analysis_type": "Variant analysis",
+      "variants": [
+        {
+          "gene_symbol": "TPM3",
+          "variant_id": "Clinvar:VCV002155324",
+          "chromosome": "Chr1",
+          "hgvsg": null,
+          "hgvsc": "c.409A>T",
+          "hgvsp": "p.Lys137Ter",
+          "transcript_id": null,
+          "exon": "15",
+          "zygosity": "homozygous",
+          "interpretation": "Uncertain significance",
+          "mafac": null,
+          "mafan": null,
+          "mafaf": null
+        }
+      ],
+      "num_variants": "1",
+      "reference_genome": "GRCh37"
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital1__ab5c2ad8-906f-4bda-ad56-208429da34a2.txt"
+}

@@ -3,3 +3,13 @@
 openai
 numpy
 pdf2image
+
+# Local LLM support
+transformers
+torch
+accelerate
+sentencepiece
+#for biogpt
+sacremoses
+protobuf
+deepdiff
