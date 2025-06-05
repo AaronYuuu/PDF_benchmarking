@@ -68,7 +68,7 @@ def main():
                 modelname = json_file.split('__')[0]
                 diff = findexact(template, data)
                 numWrong = len(diff["values_changed"])
-                pprint.pprint(diff)
+                ##pprint.pprint(diff)
                 print(f"Number of differences found in {modelname}'s JSON: {numWrong} out of {len(template)} keys.")
         else:
             print(f"{json_file} has an error status: {dtemp['status']}. Skipping comparison.")

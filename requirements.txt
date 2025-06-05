@@ -13,3 +13,6 @@ sentencepiece
 sacremoses
 protobuf
 deepdiff
+
+#ollama
+ollama
