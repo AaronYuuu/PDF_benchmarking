@@ -55,6 +55,7 @@ def main():
 
     json_files = [f for f in os.listdir("JSONout") if f.endswith('.json') and f.__contains__('reportfakeHospital2')]
     print(f"Found {len(json_files)} JSON files to compare.")
+    
     for json_file in json_files:
         with open(os.path.join("JSONout", json_file), "r") as f:
             dtemp = json.load(f)
@@ -64,10 +65,12 @@ def main():
                 print(f"{json_file} is equal to the template.")
             else:
                 print(f"{json_file} is not equal to the template.")
+                modelname = json_file.split('__')[0]
                 diff = findexact(template, data)
+                numWrong = len(diff["values_changed"])
                 pprint.pprint(diff)
+                print(f"Number of differences found in {modelname}'s JSON: {numWrong} out of {len(template)} keys.")
         else:
             print(f"{json_file} has an error status: {dtemp['status']}. Skipping comparison.")
-    
     
 main()

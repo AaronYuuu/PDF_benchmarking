@@ -9,7 +9,7 @@ from jsonLLM import (
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
-  api_key="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",
+  api_key="",
 )
 
 def textToLLM(prompt, text, model, max_retries=3):
