@@ -1,5 +1,6 @@
 .DS_Store
 .DS_store
 
-/scripts/.DS_store
+/makeTemplate/scripts/.DS_store
 out/mock_data.json
+/templates
