@@ -1,6 +1,10 @@
 .DS_Store
 .DS_store
+.DS_Store
 
 /makeTemplate/scripts/.DS_store
 out/mock_data.json
 /templates
+/getJSON/JSONout
+/output_pdfs
+/makeTemplate/out
