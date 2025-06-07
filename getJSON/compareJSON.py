@@ -65,7 +65,7 @@ def main():
                 print(f"{json_file} is equal to the template.")
             else:
                 print(f"{json_file} is not equal to the template.")
-                modelname = json_file.split('__')[0]
+                modelname = json_file.split('_')[0]
                 diff = findexact(template, data)
                 numWrong = len(diff["values_changed"])
                 ##pprint.pprint(diff)

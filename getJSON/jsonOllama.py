@@ -37,7 +37,7 @@ def ensure_model_exists(model):
 
 def main(): #if I ran this on an Ollama server would that 
     models = [
-        "mistral:7b",     # Fast and capable
+        #"mistral:7b",     # Fast and capable
         "phi3:mini",      # Very efficient
         "gemma:2b"        # Tiny and quick
     ]
