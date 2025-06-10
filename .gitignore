@@ -4,9 +4,12 @@
 api_keys.txt
 
 /makeTemplate/scripts/.DS_store
-out/mock_data.json
+/makeTemplate/out/mock_data.json
 /templates
 /getJSON/JSONout
 /output_pdfs
 /makeTemplate/out
 /getJSON/__pycache__
+
+test.ipynb
+/makeTemplate/out/
