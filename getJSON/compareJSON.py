@@ -291,6 +291,7 @@ def main():
                 # Use the new key-focused comparison with key counting
                 is_equal, num_differences, differences, key_counts = compare_with_template_keys_only(template, data)
                 
+                #TODO fix this and make it work properly with the correct ranking system
                 print(f"\n--- {json_file} ---")
                 print(f"Template: {key_counts['template_total_keys']} total keys, {key_counts['template_string_keys']} string keys")
                 print(f"Data:     {key_counts['data_total_keys']} total keys, {key_counts['data_string_keys']} string keys")
