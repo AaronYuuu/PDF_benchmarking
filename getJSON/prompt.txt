@@ -64,7 +64,7 @@ Once the json is made, doublecheck the formatting for trailing commas, non-JSON 
     "testing_laboratory": "",
     "sequencing_scope": "",
     "tested_genes": {
-      "gene_id": {
+      "gene_symbol": {
         "gene_symbol": "",
         "refseq_mrna": ""
       }

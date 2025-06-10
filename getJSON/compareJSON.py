@@ -53,24 +53,28 @@ def main():
     print(template)
     print(type(template['variants']))
 
-    json_files = [f for f in os.listdir("JSONout") if f.endswith('.json') and f.__contains__('reportfakeHospital2')]
-    print(f"Found {len(json_files)} JSON files to compare.")
-    
-    for json_file in json_files:
-        with open(os.path.join("JSONout", json_file), "r") as f:
-            dtemp = json.load(f)
-        if dtemp["status"] == "success":
-            data = dtemp["data"]["report_id"]
-            if compare(template, data):
-                print(f"{json_file} is equal to the template.")
+    #json_direcs = ["JSONout", "OllamaOut", "OpenAIOut", "localOut"]
+    json_direcs = ["OpenAIOut"]
+    for direc in json_direcs:
+        json_files = [f for f in os.listdir(direc) if f.endswith('.json') and f.__contains__('fakeHospital2')]
+        print(f"Found {len(json_files)} JSON files to compare.")
+        
+        for json_file in json_files:
+            with open(os.path.join(direc, json_file), "r") as f:
+                dtemp = json.load(f)
+            if dtemp["status"] == "success":
+                data = dtemp["data"]["report_id"]
+                if compare(template, data):
+                    print(f"{json_file} is equal to the template.")
+                else:
+                    print(f"{json_file} is not equal to the template.")
+                    modelname = json_file.split('_')[0]
+                    diff = findexact(template, data)
+                    numWrong = len(diff["values_changed"])
+                    ##pprint.pprint(diff)
+                    pprint.pprint(diff["values_changed"])
+                    print(f"Number of differences found in {modelname}'s JSON: {numWrong} out of {len(template)} keys.")
             else:
-                print(f"{json_file} is not equal to the template.")
-                modelname = json_file.split('_')[0]
-                diff = findexact(template, data)
-                numWrong = len(diff["values_changed"])
-                ##pprint.pprint(diff)
-                print(f"Number of differences found in {modelname}'s JSON: {numWrong} out of {len(template)} keys.")
-        else:
-            print(f"{json_file} has an error status: {dtemp['status']}. Skipping comparison.")
+                print(f"{json_file} has an error status: {dtemp['status']}. Skipping comparison.")
     
 main()

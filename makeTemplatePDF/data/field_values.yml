@@ -67,7 +67,6 @@ reference_genomes:
   - NCBI Build 36.1
   - NCBI Build 35
   - NCBI Build 34
-  - T2T-CHM13
 genes:
   - ABCB1
   - ABCB11

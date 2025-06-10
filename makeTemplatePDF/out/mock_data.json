@@ -1,107 +1,138 @@
 {
- "7cef8a91-8d49-4415-8eec-b22f9f4dd205": {
- "date_collected": "2023-03-20 16:30:00",
-"date_received": "2023-03-21 19:03:41",
-"date_verified": "2023-03-23 10:38:10",
+ "ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5": {
+ "date_collected": "2020-12-07",
+"date_received": "2020-12-09",
+"date_verified": "2020-12-09",
 "report_type": "Pathology",
-"testing_context": "Clinical",
-"ordering_clinic": "Sinai Health System (Toronto)",
-"testing_laboratory": "London Health Sciences Centre (London)",
-"sequencing_scope": "Whole exome sequencing (WES)",
+"testing_context": "Research",
+"ordering_clinic": "Orillia Soldiers Memorial Hospital (Orillia, Simcoe/Muskoka)",
+"testing_laboratory": "North York General Hospital (Toronto)",
+"sequencing_scope": "Gene panel",
 "tested_genes": {
- "PML": {
- "gene_symbol": "PML",
-"refseq_mrna": "NM_033238.3" 
+ "LRP2": {
+ "gene_symbol": "LRP2",
+"refseq_mrna": "NM_004525.3" 
 },
-"SS18": {
- "gene_symbol": "SS18",
-"refseq_mrna": "NM_001007559.3" 
+"CCND3": {
+ "gene_symbol": "CCND3",
+"refseq_mrna": "NM_001760.5" 
 },
-"CDKN2C": {
- "gene_symbol": "CDKN2C",
-"refseq_mrna": "NM_078626.3" 
+"RHOH": {
+ "gene_symbol": "RHOH",
+"refseq_mrna": "NM_004310.5" 
 },
-"HIST4H4": {
- "gene_symbol": "HIST4H4",
-"refseq_mrna": "NM_175054.2" 
+"FANCD2": {
+ "gene_symbol": "FANCD2",
+"refseq_mrna": "NM_001018115.3" 
 },
-"RBM15": {
- "gene_symbol": "RBM15",
-"refseq_mrna": "NM_022768.5" 
+"ING4": {
+ "gene_symbol": "ING4",
+"refseq_mrna": "NM_016162.4" 
 },
-"POLQ": {
- "gene_symbol": "POLQ",
-"refseq_mrna": "NM_199420.4" 
+"ACKR3": {
+ "gene_symbol": "ACKR3",
+"refseq_mrna": "NM_020311.3" 
 },
-"ARNT": {
- "gene_symbol": "ARNT",
-"refseq_mrna": "NM_001668.4" 
+"GNAS": {
+ "gene_symbol": "GNAS",
+"refseq_mrna": "NM_000516.7" 
 },
-"STIL": {
- "gene_symbol": "STIL",
-"refseq_mrna": "NM_001048166.1" 
+"MPO": {
+ "gene_symbol": "MPO",
+"refseq_mrna": "NM_000250.2" 
 },
-"GATA3": {
- "gene_symbol": "GATA3",
-"refseq_mrna": "NM_001002295.2" 
+"HMGA1": {
+ "gene_symbol": "HMGA1",
+"refseq_mrna": "NM_145899.3" 
 },
-"ETV6": {
- "gene_symbol": "ETV6",
-"refseq_mrna": "NM_001987.5" 
+"KDM6A": {
+ "gene_symbol": "KDM6A",
+"refseq_mrna": "NM_001291415.2" 
 },
-"EPHB6": {
- "gene_symbol": "EPHB6",
-"refseq_mrna": "NM_004445.6" 
+"ZHX2": {
+ "gene_symbol": "ZHX2",
+"refseq_mrna": "NM_014943.5" 
 },
-"ETS1": {
- "gene_symbol": "ETS1",
-"refseq_mrna": "NM_001143820.2" 
+"CHD4": {
+ "gene_symbol": "CHD4",
+"refseq_mrna": "NM_001273.5" 
 },
-"FCRL4": {
- "gene_symbol": "FCRL4",
-"refseq_mrna": "NM_031282.3" 
+"PSIP1": {
+ "gene_symbol": "PSIP1",
+"refseq_mrna": "NM_033222.5" 
 },
-"BRCA2": {
- "gene_symbol": "BRCA2",
-"refseq_mrna": "NM_000059.4" 
+"FOXA2": {
+ "gene_symbol": "FOXA2",
+"refseq_mrna": "NM_021784.5" 
+},
+"PRRC2A": {
+ "gene_symbol": "PRRC2A",
+"refseq_mrna": "NM_004638.4" 
+},
+"TPM3": {
+ "gene_symbol": "TPM3",
+"refseq_mrna": "NM_152263.4" 
+},
+"BCL7A": {
+ "gene_symbol": "BCL7A",
+"refseq_mrna": "NM_001024808.3" 
+},
+"ATM": {
+ "gene_symbol": "ATM",
+"refseq_mrna": "NM_000051.4" 
 } 
 },
-"num_tested_genes": 14,
-"sample_type": "Total RNA",
-"analysis_type": "Variant analysis",
+"num_tested_genes": 18,
+"sample_type": "Other RNA fractions",
+"analysis_type": "Karyotyping",
 "variants": [
  {
- "gene_symbol": "STIL",
-"variant_id": "VCV003580448",
-"chromosome": "chr1",
-"hgvsg": "g.47250532G>C",
-"hgvsc": "c.394G>C",
-"hgvsp": "p.Glu132Gln",
-"transcript_id": "NM_001048166.1",
-"exon": 18,
-"zygosity": "homozygous",
-"interpretation": "Variant of uncertain clinical significance",
-"mafac":        0,
-"mafan":   527781,
-"mafaf":        0 
-},
-{
- "gene_symbol": "GATA3",
-"variant_id": "VCV003655358",
-"chromosome": "chr10",
-"hgvsg": "g.8046708G>A",
-"hgvsc": "c.1331G>A",
-"hgvsp": "p.Gly444Asp",
-"transcript_id": "NM_001002295.2",
-"exon": 8,
+ "gene_symbol": "ATM",
+"variant_id": "VCV006516823",
+"chromosome": "chr11",
+"hgvsg": "g.108228317T>A",
+"hgvsc": "c.5514T>A",
+"hgvsp": "p.Cys1838Ter",
+"transcript_id": "NM_000051.4",
+"exon": 19,
 "zygosity": "heterozygous",
 "interpretation": "Variant of uncertain clinical significance",
-"mafac":        6,
-"mafan":   532228,
-"mafaf": 1.127336e-05 
+"mafac":      148,
+"mafan":   569224,
+"mafaf": "2.60e-04" 
+},
+{
+ "gene_symbol": "ACKR3",
+"variant_id": "VCV006460873",
+"chromosome": "chr2",
+"hgvsg": "g.236568008C>A",
+"hgvsc": "c.222C>A",
+"hgvsp": "p.Thr74=",
+"transcript_id": "NM_020311.3",
+"exon": 10,
+"zygosity": "heterozygous",
+"interpretation": "Variant of uncertain clinical significance",
+"mafac":      266,
+"mafan":   587186,
+"mafaf": "4.53e-04" 
+},
+{
+ "gene_symbol": "KDM6A",
+"variant_id": "VCV002228307",
+"chromosome": "chrX",
+"hgvsg": "g.44876814A>T",
+"hgvsc": "c.3627A>T",
+"hgvsp": "p.Ile1209=",
+"transcript_id": "NM_001291415.2",
+"exon": 3,
+"zygosity": "heterozygous",
+"interpretation": "Variant of uncertain clinical significance",
+"mafac":     1632,
+"mafan":   559603,
+"mafaf": "2.92e-03" 
 } 
 ],
-"num_variants": 2,
+"num_variants": 3,
 "reference_genome": "GRCh38" 
 } 
 }

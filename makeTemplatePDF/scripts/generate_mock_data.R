@@ -217,7 +217,7 @@ sample_variants <- function(genes) {
     maf <- gen_maf(1)[1, , drop = TRUE]
     data$mafac <- maf$ac
     data$mafan <- maf$an
-    data$mafaf <- maf$af
+    data$mafaf <- formatC(maf$af, format = "e", digits = 2)
     data
   }, simplify = FALSE)
 }

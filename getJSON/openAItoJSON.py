@@ -7,8 +7,8 @@ from jsonLLM import (
 from openai import OpenAI
 import os
 import time
-
-client = OpenAI(api_key="da")
+API = os.environ["OPENAI_API_KEY"]
+client = OpenAI(api_key=API)
 
 def textToLLM(prompt, text, model):
     """

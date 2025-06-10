@@ -24,3 +24,15 @@ cd ..
 
 echo ""
 echo "Pipeline complete! Check the scripts/out/ directory for generated PDFs."
+
+cd ..
+echo "=============================================="
+echo "All tasks completed successfully!"
+echo "You can now review the generated reports in the 'out' directory."
+echo "=============================================="
+echo "Generating text files for each PDF..."
+# Generate text files for each PDF in the out directory
+cd getJSON
+python3 pdfToText.py
+echo "Text files generated successfully!"
+echo "=============================================="
