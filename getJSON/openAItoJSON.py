@@ -8,7 +8,7 @@ from openai import OpenAI
 import os
 import time
 
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="da")
 
 def textToLLM(prompt, text, model):
     """
