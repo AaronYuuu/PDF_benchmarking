@@ -1,15 +1,16 @@
 # PDF Benchmarking for LLM Genetic Report Extraction
 
-A benchmarking framework that evaluates Large Language Model (LLM) performance on extracting structured data from genetic laboratory reports. The system generates synthetic genetic reports as PDFs and tests various LLMs' ability to extract accurate structured information.
+A comprehensive benchmarking framework that evaluates Large Language Model (LLM) performance on extracting structured data from genetic laboratory reports. The system generates synthetic genetic reports as PDFs and tests various LLMs' ability to extract accurate structured information through multiple API providers.
 
 ## 🎯 Purpose
 
 This project addresses the critical need to evaluate how well different LLMs can process complex genetic laboratory reports and extract structured clinical data. It provides:
 
 - **Realistic Test Data**: Generates synthetic genetic reports with authentic formatting
-- **Multi-Model Evaluation**: Tests multiple LLMs simultaneously 
-- **Standardized Benchmarking**: Consistent evaluation framework across different models
-- **Performance Metrics**: Quantifiable results for model comparison
+- **Multi-Provider Evaluation**: Tests models via OpenRouter, OpenAI, and local Ollama instances
+- **Standardized Benchmarking**: Consistent evaluation framework across different models and providers
+- **Advanced Performance Metrics**: Comprehensive scoring system with key-level accuracy analysis
+- **Automated Pipeline**: End-to-end automation from report generation to performance analysis
 
 ## 🏗️ Architecture
 
@@ -37,7 +38,10 @@ This project addresses the critical need to evaluate how well different LLMs can
 - R 4.0+ (with biomaRt, yaml, httr, RJSONIO packages)
 - Python 3.8+ 
 - LaTeX distribution
-- OpenRouter API key
+- API keys for desired providers:
+  - OpenRouter API key
+  - OpenAI API key (optional)
+  - Local Ollama installation (optional)
 ```
 
 ### Installation
@@ -45,16 +49,23 @@ This project addresses the critical need to evaluate how well different LLMs can
 # Install Python dependencies
 pip install -r requirements.txt
 
-# Set OpenRouter API key in openRouterLLMs.py or as environment variable
-export OPENROUTER_API_KEY="your-key-here"
+# Set API keys in api_keys.txt or as environment variables
+echo "OPENROUTER_API_KEY=your-key-here" >> api_keys.txt
+echo "OPENAI_API_KEY=your-openai-key" >> api_keys.txt
 ```
 
 ### Run Complete Pipeline
 ```bash
-# Generate reports and extract data
-./generate_reports.sh
-python getJSON/pdfToText.py
-python getJSON/openRouterLLMs.py
+# Generate reports, extract data from all providers, and analyze results
+./run_all_llms.sh
+
+# Or run individual components:
+./generate_reports.sh                    # Generate PDFs
+python getJSON/pdfToText.py             # Convert to text
+python getJSON/openRouterLLMs.py        # OpenRouter models
+python getJSON/openAItoJSON.py          # OpenAI models  
+python getJSON/jsonOllama.py            # Local Ollama models
+python getJSON/compareJSON.py           # Performance analysis
 ```
 
 ## 📁 Project Structure
@@ -63,26 +74,61 @@ python getJSON/openRouterLLMs.py
 PDF_benchmarking/
 ├── 📋 makeTemplatePDF/           # Report generation
 │   ├── data/                     # Gene data & configuration
+│   │   ├── exon_info.csv
+│   │   ├── field_values.yml
+│   │   ├── gene_info.csv
+│   │   └── text_pieces.yml
 │   ├── scripts/                  # R generation scripts
+│   │   ├── fetch_gene_info.R
+│   │   ├── generate_mock_data.R
+│   │   ├── hospital1.r
+│   │   ├── hospital2.r
+│   │   └── run.sh
 │   └── templates/                # LaTeX report templates
-├── 🤖 getJSON/                   # LLM extraction
-│   ├── openRouterLLMs.py         # Multi-model extraction
+│       ├── fakeHospital1.tex
+│       └── fakeHospital2.tex
+├── 🤖 getJSON/                   # LLM extraction engines
+│   ├── openRouterLLMs.py         # OpenRouter API models
+│   ├── openAItoJSON.py           # OpenAI API models
+│   ├── jsonOllama.py             # Local Ollama models
+│   ├── localLLM.py               # Local model utilities
 │   ├── pdfToText.py              # PDF conversion
-│   └── prompt.txt                # Extraction prompt
-├── 📄 output_pdfs/               # Generated PDFs
-├── 📊 JSONout/                   # Extraction results
-└── 🔧 generate_reports.sh        # Main pipeline
+│   ├── compareJSON.py            # Performance evaluation
+│   ├── prompt.txt                # Extraction prompt
+│   ├── blurb_hospital1.txt       # Template text samples
+│   ├── blurb_hospital2.txt
+│   └── outJSON/                  # Results by provider
+│       ├── JSONout/              # OpenRouter results
+│       ├── OllamaOut/            # Ollama results
+│       └── OpenAIOut/            # OpenAI results
+├── 📄 output_pdfs/               # Generated PDFs and text
+│   └── text/                     # Extracted text files
+├── 🔧 api_keys.txt               # API configuration
+├── 🔧 requirements.txt           # Python dependencies
+├── 🔧 generate_reports.sh        # Report generation pipeline
+└── 🔧 run_all_llms.sh           # Complete benchmarking pipeline
 ```
 
-## 🤖 Supported LLM Models
+## 🤖 Supported LLM Models - in use currently
 
-The system currently benchmarks these free-tier models via OpenRouter:
-
+### OpenRouter Models (Free Tier)
 - **Google Gemini 2.0 Flash** (`google/gemini-2.0-flash-exp:free`)
 - **Meta Llama 4 Scout** (`meta-llama/llama-4-scout:free`) 
 - **Mistral Devstral Small** (`mistralai/devstral-small:free`)
 - **Qwen 2.5-VL 72B** (`qwen/qwen2.5-vl-72b-instruct:free`)
 - **Reka Flash 3** (`rekaai/reka-flash-3:free`)
+
+### OpenAI Models
+- **GPT 4o mini** (`gpt-4o mini`)
+
+### Local Ollama Models
+They are all pulled automatically from Ollama provided it is up and running. 
+- **Llama 3.2 1B** (`llama3.2:1b`)
+- **Phi 3 Mini** (`phi3:mini`)
+- **Gemma 3 variants** (`gemma3:1b`, `gemma3:4b`)
+- **Granite 3.3 2B** (`granite3.3:2b`)
+- **SmolLM2 135M** (`smollm2:135m`)
+- **Qwen 2.5-VL 3B** (`qwen2.5vl:3b`)
 
 ## 📊 Data Extraction Schema
 
@@ -106,207 +152,155 @@ The system extracts structured genetic information including:
 - Sequencing quality indicators
 - Analysis confidence levels
 
-## ⚙️ Configuration
+## 📊 Advanced Performance Evaluation System
 
-### Adding New Models
-Edit the `MODELS` list in `getJSON/openRouterLLMs.py`:
-```python
-MODELS = [
-    "your-new-model:free",
-    # ... existing models
-]
-```
+### Comprehensive Scoring with compareJSON.py
 
-### Customizing Gene Panels
-Modify `makeTemplatePDF/data/field_values.yml` to specify:
-- Target gene lists
-- Clinical indications
-- Report parameters
+The project includes a sophisticated evaluation system that provides detailed accuracy analysis across multiple dimensions:
 
-### Creating New Report Templates
-1. Add LaTeX template to `makeTemplatePDF/templates/`
-2. Create corresponding R script in `makeTemplatePDF/scripts/`
-3. Update configuration files
+#### Key Features
 
-## 🔧 Advanced Usage
+**Multi-Level Comparison**:
+- **Exact Matching**: Perfect field-by-field comparison
+- **Key Structure Analysis**: Focuses on presence of required fields
+- **Value-Level Accuracy**: Compares actual extracted values
+- **Case-Insensitive Matching**: Handles string case variations
+- **Type-Flexible Comparison**: Automatically handles numeric vs string differences
 
-### Generate Custom Reports
-```bash
-# Modify gene panel in field_values.yml, then:
-cd makeTemplatePDF/scripts
-./run.sh
-```
+**Advanced Metrics**:
+- **Total Key Count**: All keys at all nesting levels
+- **String Value Keys**: Only keys with extractable string values
+- **Missing Field Detection**: Identifies gaps in extraction
+- **Error Classification**: Categorizes types of extraction failures
 
-### Test Single Model
-```python
-# In openRouterLLMs.py, modify MODELS list:
-MODELS = ["google/gemini-2.0-flash-exp:free"]
-```
-
-### Extract from Existing PDFs
-```bash
-# Place PDFs in output_pdfs/, then:
-python getJSON/pdfToText.py
-python getJSON/openRouterLLMs.py
-```
-
-## 📊 Scoring & Performance Evaluation
-
-### Automated Scoring with compareJSON.py
-
-The project includes a comprehensive scoring system that compares LLM extractions against ground truth data to evaluate accuracy.
-
-#### How It Works
-
-The `compareJSON.py` script provides detailed performance analysis by:
-
-1. **Loading Ground Truth**: Reads the original mock data from `makeTemplatePDF/out/mock_data.json`
-2. **Comparing Extractions**: Uses deep comparison to evaluate each LLM's JSON output
-3. **Calculating Accuracy**: Counts exact matches and identifies specific field errors
-4. **Generating Reports**: Provides detailed statistics per model
-
-#### Running the Evaluation
+#### Running Performance Analysis
 
 ```bash
-# After generating reports and running LLM extractions
+# After running LLM extractions
 cd getJSON
 python compareJSON.py
 ```
 
-#### What Gets Measured
-
-**Field-Level Accuracy**:
-- **Exact Matches**: Fields that perfectly match ground truth
-- **Value Differences**: Fields with incorrect values
-- **Missing Fields**: Required fields not extracted
-- **Type Mismatches**: Incorrect data types (automatically handled)
-
-**Model Comparison Metrics**:
-- **Success Rate**: Percentage of successful JSON extractions vs failures
-- **Accuracy Score**: Number of correct fields / Total fields
-- **Error Distribution**: Types and frequency of extraction errors
-- **Consistency**: Reliability across different report formats
-
-#### Sample Output
+#### Sample Output Analysis Still a Work in Progress
 
 ```
 Template loaded successfully.
-Found 10 JSON files to compare.
+Template has 45 total keys and 28 string value keys
 
-google_gemini-2.0-flash-exp_free_reportfakeHospital1_response.json is not equal to the template.
-Number of differences found in google_gemini-2.0-flash-exp's JSON: 3 out of 25 keys.
+--- fakeHospital2_google_gemini-2.0-flash-exp_free__response.json ---
+Template: 45 total keys, 28 string keys
+Data:     42 total keys, 25 string keys
+✗ Found 3 differences out of 28 comparable string values
+Accuracy: 89.3%
 
-meta-llama_llama-4-scout_free_reportfakeHospital1_response.json is not equal to the template.
-Number of differences found in meta-llama_llama-4-scout's JSON: 7 out of 25 keys.
-
-mistralai_devstral-small_free_reportfakeHospital1_response.json is not equal to the template.
-Number of differences found in mistralai_devstral-small's JSON: 5 out of 25 keys.
+--- fakeHospital2_meta-llama_llama-4-scout_free__response.json ---
+Template: 45 total keys, 28 string keys  
+Data:     38 total keys, 22 string keys
+✗ Found 8 differences out of 28 comparable string values
+Accuracy: 71.4%
 ```
 
-#### Advanced Scoring Features
+#### Performance Interpretation
 
-**Intelligent Comparison**:
-- **Case-Insensitive**: Ignores string case differences
-- **Order-Agnostic**: Array order doesn't affect scoring  
-- **Type-Flexible**: Automatically handles string vs numeric differences
-- **Null-Tolerant**: Handles missing vs empty field variations
+**Accuracy Ranges**:
+- **90-100%**: Excellent extraction, production-ready
+- **80-89%**: Good extraction, minor formatting issues
+- **70-79%**: Acceptable extraction, some field gaps
+- **60-69%**: Poor extraction, significant issues
+- **<60%**: Inadequate extraction, major problems
 
-**Detailed Error Analysis**:
+### Provider-Specific Analysis
+
+The system is capable of analyzing specific provider types and ranking based on accuracy. 
+
+### Error Pattern Analysis
+## TODO
+**Common Extraction Challenges**:
+- **Date Formatting**: Inconsistent date representation across models
+- **HGVS Nomenclature**: Complex genetic notation extraction errors
+- **Nested JSON Structure**: Difficulty with deeply nested genetic variant arrays
+- **Numeric Precision**: Allele frequency precision variations
+- **Missing Optional Fields**: Selective field extraction by different models
+
+## ⚙️ Configuration & Customization
+
+### API Configuration
+
+### Create an environment variable to store your api keys
+However, you can also create a txt file and more them over
+Create `api_keys.txt` with your credentials:
+```
+OPENROUTER_API_KEY=your-openrouter-key
+OPENAI_API_KEY=your-openai-key
+```
+
+
+### Model Selection
+
+**OpenRouter Models** (`openRouterLLMs.py`):
 ```python
-# View specific differences for debugging
-diff = findexact(template, extracted_data)
-pprint.pprint(diff)  # Shows exact field differences
+MODELS = [
+    "google/gemini-2.0-flash-exp:free",
+    "meta-llama/llama-4-scout:free",
+    # Add new models here
+]
 ```
 
-### Performance Benchmarking
-
-#### Typical Performance Ranges
-
-Based on the current model evaluation:
-
-**High Performers** (85-95% accuracy):
-- Google Gemini 2.0 Flash
-- Meta Llama 4 Scout
-
-**Medium Performers** (70-85% accuracy):
-- Qwen 2.5-VL 72B  
-- Reka Flash 3
-
-**Lower Performers** (50-70% accuracy):
-- Mistral Devstral Small
-
-#### Common Error Patterns
-
-**Date Format Issues**:
-- LLMs often struggle with date parsing and formatting
-- Solution: Standardize date formats in prompt
-
-**Numeric vs String Confusion**:
-- Allele frequencies extracted as strings vs numbers
-- Handled automatically by the scoring system
-
-**Complex Variant Notation**:
-- HGVS nomenclature extraction challenges
-- Most errors occur in protein notation (p.) formatting
-
-**Missing Fields**:
-- Some models skip optional fields
-- Critical for completeness scoring
-
-### Custom Evaluation Scripts
-
-#### Evaluate Specific Models
+**Ollama Models** (`jsonOllama.py`):
 ```python
-# In compareJSON.py, modify to focus on specific models:
-json_files = [f for f in os.listdir("JSONout") 
-              if f.endswith('.json') and 'gemini' in f]
+MODELS = [
+    "llama3.2:1b",
+    "phi3:mini", 
+    # Add locally installed models
+]
 ```
 
-#### Hospital Format Comparison
+### Report Templates
+
+**Hospital Format Selection**:
+Modify the comparison script to focus on specific hospital formats:
 ```python
-# Compare performance between hospital templates:
-hospital1_files = [f for f in json_files if 'Hospital1' in f]
-hospital2_files = [f for f in json_files if 'Hospital2' in f]
+# In compareJSON.py main() function
+json_files = [f for f in os.listdir(direc) 
+              if f.endswith('.json') and f.__contains__('fakeHospital1')]
 ```
 
-#### Field-Specific Analysis
+**Custom Gene Panels**:
+Edit `makeTemplatePDF/data/field_values.yml` to customize:
+- Target gene lists for different genetic conditions
+- Clinical indication categories
+- Report complexity levels
+
+## 🔧 Advanced Usage Patterns
+
+### Batch Processing Multiple Models
+```bash
+# Run all providers simultaneously
+./run_all_llms.sh
+
+# Or run specific providers
+python getJSON/openRouterLLMs.py    # Cloud models
+python getJSON/jsonOllama.py        # Local models (will automatically pull)
+python getJSON/openAItoJSON.py      # OpenAI models
+```
+
+### Custom Evaluation Scenarios
 ```python
-# Focus on specific extraction challenges:
-variant_accuracy = analyze_variants_only(template, extracted_data)
-clinical_accuracy = analyze_clinical_fields(template, extracted_data)
+# Focus on specific model comparison
+# Modify compareJSON.py to filter by model type:
+json_files = [f for f in json_files if 'gemini' in f or 'llama' in f]
+
+# Analyze specific extraction challenges
+template_filtered = filter_complex_variants_only(template)
+accuracy = compare_with_template_keys_only(template_filtered, extracted_data)
 ```
 
-## 📈 Output Analysis
-
-### Results Location
-- **Extracted Data**: `JSONout/` (timestamped folders)
-- **Performance Logs**: Console output during extraction  
-- **Ground Truth**: `makeTemplatePDF/out/mock_data.json`
-- **Scoring Results**: Console output from `compareJSON.py`
-
-### Key Metrics
-- **Extraction Success Rate**: Percentage of successful JSON extractions
-- **Field Accuracy**: Accuracy per extracted field type
-- **Model Reliability**: Consistency across multiple runs
-- **Error Distribution**: Common failure patterns per model
-
-### Interpreting Results
-
-**Perfect Score (100%)**:
-- All fields extracted correctly
-- Rare due to complexity of genetic reports
-
-**High Score (85-95%)**:
-- Minor formatting differences
-- Usually production-ready for most use cases
-
-**Medium Score (70-85%)**:
-- Some field extraction issues
-- May require prompt refinement
-
-**Low Score (<70%)**:
-- Significant extraction problems
-- Model may not be suitable for this task
+### Error Analysis & Debugging
+```python
+# In compareJSON.py, enable detailed difference reporting:
+for i, difference in enumerate(differences):
+    print(f"  {i+1}. {difference}")
+```
 
 ## 🛠️ Troubleshooting
 
@@ -320,41 +314,31 @@ clinical_accuracy = analyze_clinical_fields(template, extracted_data)
 
 ## 🤝 Contributing
 
-### Adding New LLMs
-1. Add model to `MODELS` list in `openRouterLLMs.py`
-2. Ensure model supports required context length
-3. Test with sample reports
+### Adding New Providers
+1. Create new extraction script following the pattern of existing providers
+2. Ensure output format matches the standard JSON structure
+3. Add provider-specific output directory to `outJSON/`
+4. Update `compareJSON.py` to include new provider in analysis
 
-### Improving Templates
-1. Create new LaTeX template
-2. Add corresponding R generation script
-3. Update field mappings in configuration
+### Enhancing Evaluation Metrics
+1. Extend `compareJSON.py` with new scoring algorithms
+2. Add provider-specific performance characteristics
+3. Implement field-importance weighting for clinical relevance
 
-### Enhancing Extraction
-1. Modify prompt in `getJSON/prompt.txt`
-2. Update JSON schema validation
-3. Add new extraction fields
+### Improving Model Coverage
+1. Add new models to provider-specific scripts
+2. Test context length requirements for genetic reports
+3. Validate JSON schema compliance across models
 
-## 📋 Requirements
+## 📈 Research Applications
 
-**Python Packages** (see `requirements.txt`):
-- `openai` - OpenRouter API client
-- `pdf2image` - PDF to image conversion
-- `numpy` - Data processing
-
-**R Packages**:
-- `biomaRt` - Gene data retrieval
-- `yaml` - Configuration parsing
-- `httr` - HTTP requests
-- `RJSONIO` - JSON processing
-
-## 📄 License
-
-This project is designed for research and educational purposes. Please ensure compliance with:
-- OpenRouter API terms of service
-- Individual LLM provider policies
-- Institutional data handling requirements
+This framework is designed for:
+- **Clinical AI Research**: Evaluating LLMs for healthcare applications
+- **Model Comparison Studies**: Systematic evaluation across providers
+- **Prompt Engineering**: Optimizing extraction accuracy through prompt refinement
+- **Deployment Planning**: Comparing cloud vs local model performance
+- **Cost-Benefit Analysis**: Evaluating accuracy vs computational cost trade-offs
 
 ---
 
-**Note**: This framework generates synthetic data only. No real patient information is used or processed.
+**Note**: This framework generates synthetic data only. No real patient information is used or processed. Ensure compliance with relevant data handling policies and API terms of service.
