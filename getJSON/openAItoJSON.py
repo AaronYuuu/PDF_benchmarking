@@ -48,8 +48,8 @@ def main():
     process_text_files_with_models(
         models=OPENAI_MODELS,
         output_dir="OpenAIOut/", 
-        text_directory="output_pdfs/text/", 
-        prompt_path="getJSON/prompt.txt", 
+        text_directory="../output_pdfs/text/", 
+        prompt_path="prompt.txt", 
         llm_function=textToLLM
     )
 

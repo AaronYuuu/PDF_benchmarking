@@ -1,7 +1,6 @@
 from openai import OpenAI
 import time
-from jsonLLM import (
-    cleanFilename, 
+from jsonLLM import ( 
     extract_json_from_response, 
     save_model_response, 
     process_text_files_with_models

@@ -176,7 +176,7 @@ def get_text_files_from_directory(directory="output_pdfs/text/"):
         print(f"Error reading directory {directory}: {e}")
         return []
 
-def process_text_files_with_models(models, output_dir,text_directory="output_pdfs/text/", prompt_path="getJSON/prompt.txt", llm_function=None ):
+def process_text_files_with_models(models, output_dir,text_directory="../output_pdfs/text/", prompt_path="prompt.txt", llm_function=None ):
     """
     Process all text files with the given models using the provided LLM function.
     
@@ -191,7 +191,9 @@ def process_text_files_with_models(models, output_dir,text_directory="output_pdf
     
     # Read the prompt file content
     prompt = read_prompt_file(prompt_path)
-    
+    os.makedirs("outJSON", exist_ok=True)
+
+    output_dir = "outJSON/"+output_dir
     # Find all text files in the directory
     text_files = get_text_files_from_directory(text_directory)
     

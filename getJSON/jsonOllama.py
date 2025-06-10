@@ -36,22 +36,22 @@ def ensure_model_exists(model):
 
 def main(): #if I ran this on an Ollama server would that 
     models = [
-        "mistral:7b",     # Fast and capable
+        #"mistral:7b",     # Fast and capable
         "phi3:mini",      # Very efficient
         "gemma3:1b",
         "gemma3:1b-it-qat",
         "gemma3:4b",    # can also do images
         "llama3.2:1b", 
+        "qwen2.5vl:3b", #vision language
         "smollm2:135m", #very small model
+        "granite3.3:2b", #good for reasoning
     ]
     for model in models:
         ensure_model_exists(model)   
     print(f"Found {len(models)} models to process.")
     process_text_files_with_models(
             models=models, 
-            output_dir="OllamaOut", 
-            text_directory="output_pdfs/text/", 
-            prompt_path="getJSON/prompt.txt", 
+            output_dir="OllamaOut",
             llm_function=textToLLM
     )
 

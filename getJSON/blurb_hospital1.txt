@@ -1,10 +1,17 @@
-chromosome
-exon
+date_collected
+date_received
+date_verified
+testing_context
 gene_symbol
-hgvsc
-hgvsp
-interpretation
-start
-type
-variant
-variant_id
+num_tested_genes
+sample_type
+analysis_type
+gene_symbol":
+variant_id": "",
+chromosome": "",
+"hgvsc": "",
+"hgvsp": "",
+"transcript_id": "",
+"exon": "",
+"zygosity": "",
+"interpretation": "",

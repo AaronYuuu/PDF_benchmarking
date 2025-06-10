@@ -25,7 +25,7 @@ You must extract the following categories:
    - Pathology, Molecular Genetics
 3. **Testing Context** — Clinical or Research
 4. **Ordering Clinic** — Clinic that ordered the test. Include the city name i.e. hamilton health sciences (hamilton)
-5. **Testing Laboratory** — Where the test was conducted. Include the city in brackets if applicable i.e. Sinai Health System (Toronto)
+5. **Testing Laboratory** — Where the test was conducted. Include the city in brackets if applicable i.e. Ontario Cancer Hospital (Toronto), Mount Sinai Hospital (Toronto)
 
 ### C. Variant Details
 1. **Variant Identifiers** — Any from: OMIM, Clinvar, dbSNP, dbVar, COSMIC, UniProt, ClinGen
@@ -67,6 +67,11 @@ Once the json is made, doublecheck the formatting for trailing commas, non-JSON 
       "gene_symbol": {
         "gene_symbol": "",
         "refseq_mrna": ""
+      }
+      //Example below
+      "ATM": {
+       "gene_symbol": "ATM",
+      "refseq_mrna": "NM_000051.4" 
       }
       // (repeated for each gene)
     },

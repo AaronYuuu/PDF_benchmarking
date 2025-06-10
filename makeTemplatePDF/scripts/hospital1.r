@@ -64,12 +64,12 @@ long_blurb <- function(variants) {
         "According to ClinVar, the evidence collected to date is",
         "insufficient to firmly establish the clinical significance of this",
         "variant, therefore it is classified as a",
-        tolower(variant$interpretation), "."
+        tolower(variant$interpretation), ". \\newline"
       )
     } else {
       paste(
         "In accordance with existing evidence, this variant is therefore",
-        "classified as a", tolower(variant$interpretation), "variant."
+        "classified as a", tolower(variant$interpretation), "variant. \\newline"
       )
     }
     interp <- tolower(variant$interpretation)
