@@ -1,7 +1,6 @@
 import ollama 
 
 from jsonLLM import(
-    cleanFilename, 
     extract_json_from_response, 
     save_model_response, 
     process_text_files_with_models
@@ -37,9 +36,13 @@ def ensure_model_exists(model):
 
 def main(): #if I ran this on an Ollama server would that 
     models = [
-        #"mistral:7b",     # Fast and capable
+        "mistral:7b",     # Fast and capable
         "phi3:mini",      # Very efficient
-        "gemma:2b"        # Tiny and quick
+        "gemma3:1b",
+        "gemma3:1b-it-qat",
+        "gemma3:4b",    # can also do images
+        "llama3.2:1b", 
+        "smollm2:135m", #very small model
     ]
     for model in models:
         ensure_model_exists(model)   

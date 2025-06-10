@@ -50,6 +50,8 @@ Your output must use this JSON structure and follow it strictly. Do not include 
 or empty strings. Use the exact field names and types as specified below.
 Do not include any comments such as: 
 "Based on the provided text, I will extract the relevant information and present it in the required JSON format"
+Do not use // in your response and do not leave any comments within any field
+Once the json is made, doublecheck the formatting for trailing commas, non-JSON comments, multiline string syntax, misformatted fields and incomplete closing braces
 ```json
 {
   "report_id": {

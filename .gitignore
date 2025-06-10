@@ -1,6 +1,7 @@
 .DS_Store
 .DS_store
 .DS_Store
+api_keys.txt
 
 /makeTemplate/scripts/.DS_store
 out/mock_data.json

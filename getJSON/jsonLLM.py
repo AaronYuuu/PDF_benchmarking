@@ -21,23 +21,7 @@ def read_prompt_file(prompt_path="getJSON/prompt.txt"):
     """
     with open(prompt_path, "r", encoding="utf-8") as f:
         return f.read()
-    
 
-def cleanFilename(filename):
-    """
-    Clean filename to extract just the template name part.
-    Examples:
-    - report_fakeHospital1__ab5c2ad8-906f-4bda-ad56-208429da34a5b02f80c240696a9adc7998ba14ec0301.txt
-      becomes: reportfakeHospital1
-    - report_fakeHospital2__some-uuid.txt 
-      becomes: reportfakeHospital2
-    """
-    # Remove file extension
-    base_name = os.path.splitext(filename)[0]
-    
-    # Split by underscore and take the first two parts (report_fakeHospitalX)
-    parts = base_name.split('_')
-    return parts[0] + parts[1]  # e.g., "report" + "fakeHospital1" = "reportfakeHospital1"
 
 def fix_json_structure(json_str):
     """
@@ -94,20 +78,17 @@ def extract_json_from_response(response):
     except json.JSONDecodeError:
         pass
     
+    comment_pattern = r'^\s*//.*$'
+    json_nocomment = re.sub(comment_pattern, '', cleaned, flags=re.MULTILINE)
+    try:
+        return json.loads(json_nocomment)
+    except json.JSONDecodeError:
+        pass
     # If that fails, try to find JSON within the text
     # Look for content between ```json and ``` or just between { and }
         
     # Try to find JSON block with just ``` markers
-    json_pattern = r'```\s*(\{.*?\})\s*```'
-    match = re.search(json_pattern, response, re.DOTALL)
     
-    if match:
-        try:
-            json_content = match.group(1)
-            fixed_json = fix_json_structure(json_content)
-            return json.loads(fixed_json)
-        except json.JSONDecodeError:
-            pass
 
     return None
 
@@ -119,7 +100,8 @@ def save_model_response(model, response, source_file, output_dir):
     os.makedirs(output_dir, exist_ok=True)
     
     # Clean the source filename to get template name
-    clean_name = cleanFilename(source_file)
+    clean_name = source_file.split("_")[1]
+    print(clean_name)
     
     # Create a clean filename from model name
     model_name = model.replace("/", "_").replace(":", "_")
