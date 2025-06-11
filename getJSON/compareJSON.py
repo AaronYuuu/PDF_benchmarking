@@ -216,7 +216,7 @@ def main():
     # Show template value count
     
 
-    json_direcs = ["JSONout", "OllamaOut", "OpenAIOut"]
+    json_direcs = ["JSONout", "OllamaOut", "OpenAIOut", "OpenRouter"]
     hospitals = ["fakeHospital1", "fakeHospital2"] ##update according to latex templates generated
     #json_direcs = ["OpenAIOut"]
     for direc in json_direcs:
@@ -234,18 +234,23 @@ def main():
             for json_file in json_files:
                 with open(os.path.join(direc, json_file), "r") as f:
                     dtemp = json.load(f)
-                print(f"\n--- {json_file} ---")
-                print(f"Model: {dtemp['model']}")
-                print(f"Status: {dtemp['status']}")
+                #print(f"\n--- {json_file} ---")
                 
-                if dtemp["status"] == "success":
+                
+                if dtemp["status"] != "success":
+                    #print(f"Error status: {dtemp['status']}. Skipping comparison.")
+                    continue
+                else: 
+                    if ":" in dtemp["model"]:
+                        dtemp["model"] = dtemp["model"].split(":")[0]
+                    print(f"\nModel: {dtemp['model']}")
                     try:
                         data = dtemp["data"]["report_id"]
                     except KeyError:
                         try:
                             data = dtemp["data"]["report"]
                         except KeyError:
-                            print(f"Error: No valid report data found in {json_file}. Skipping comparison.")
+                            #print(f"Error: No valid report data found in {json_file}. Skipping comparison.")
                             continue
                     
                     # Compare values with template using strict dictionary matching
@@ -257,11 +262,10 @@ def main():
                         matching_values = total_values - num_differences
                         accuracy = (matching_values / total_values) * 100
                         print(f"✗ {matching_values}/{total_values} values match")
-                        print(f"Accuracy: {accuracy:.1f}%")
+                        print(f"Accuracy: {accuracy:.1f}% \n")
                         
-                            
-                else:
-                    print(f"Error status: {dtemp['status']}. Skipping comparison.")
+                    
+                    continue
 
 if __name__ == "__main__":
     main()

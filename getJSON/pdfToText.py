@@ -123,7 +123,7 @@ def convert_pdf_to_text(pdf_path: str, language_list=["en"], dpi=300) -> str:
 
 
 def process_pdf_batch(input_dir: str, output_dir: str, save_text: bool = True, 
-                     save_images: bool = False, language_list=["en"], dpi=300):
+                     save_images: bool = True, language_list=["en"], dpi=300):
     """Process a batch of PDF files.
     
     Args:
@@ -238,12 +238,13 @@ def main():
 
 def main2():
     """Main function for testing purposes."""
+    os.chdir("/Users/ayu/PDF_benchmarking")
     input_dir = "makeTemplatePDF/out/"  # Replace with your input directory
     # Ensure output directory exists
     if not os.path.exists("output_pdfs"):
         os.makedirs("output_pdfs")
     output_dir = "output_pdfs"  # Replace with your output directory
-    process_pdf_batch(input_dir, output_dir, save_text=True, save_images=False, 
+    process_pdf_batch(input_dir, output_dir, save_text=True, save_images=True, 
                      language_list=["en"], dpi=300)
-    
+
 main2()

@@ -1,6 +1,8 @@
 import json
 import os
 import re
+import base64
+from collections import defaultdict
 
 def read_text_file(file_path):
     """
@@ -22,6 +24,56 @@ def read_prompt_file(prompt_path="getJSON/prompt.txt"):
     with open(prompt_path, "r", encoding="utf-8") as f:
         return f.read()
 
+def encode_image_to_base64(image_path):
+    """
+    Encode a single image to base64.
+    Returns the base64 encoded string.
+    """
+    try:
+        with open(image_path, "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+            return encoded_string
+    except Exception as e:
+        print(f"Error encoding image {image_path}: {e}")
+        return None
+
+def group_images_by_source(directory="output_pdfs/images/"):
+    """
+    Group images by their source document (hospital report).
+    Returns a dictionary where keys are source names and values are lists of image paths.
+    """
+    try:
+        image_files = [f for f in os.listdir(directory) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+        grouped_images = defaultdict(list)
+        
+        for image_file in image_files:
+            # Extract source name from filename (e.g., "fakeHospital1" from "report_fakeHospital1__...")
+            if image_file.startswith("report_"):
+                parts = image_file.split("_")
+                if len(parts) >= 2:
+                    source_name = parts[1]  # e.g., "fakeHospital1"
+                    grouped_images[source_name].append(os.path.join(directory, image_file))
+        
+        # Sort images within each group by page number
+        for source_name in grouped_images:
+            grouped_images[source_name].sort(key=lambda x: int(x.split("_page_")[1].split(".")[0]) if "_page_" in x else 0)
+        
+        return dict(grouped_images)
+    except Exception as e:
+        print(f"Error grouping images from directory {directory}: {e}")
+        return {}
+
+def encode_image_group_to_base64(image_paths):
+    """
+    Encode multiple images to base64.
+    Returns a list of base64 encoded strings.
+    """
+    encoded_images = []
+    for image_path in image_paths:
+        encoded = encode_image_to_base64(image_path)
+        if encoded:
+            encoded_images.append(encoded)
+    return encoded_images
 
 def fix_json_structure(json_str):
     """
@@ -175,6 +227,17 @@ def get_text_files_from_directory(directory="output_pdfs/text/"):
     except Exception as e:
         print(f"Error reading directory {directory}: {e}")
         return []
+    
+def get_images_from_directory(directory="output_pdfs/images/"):
+    """
+    Get all image files from the specified directory.
+    Returns a list of image file names.
+    """
+    try:
+        return [f for f in os.listdir(directory) if f.lower().endswith(('.png'))]
+    except Exception as e:
+        print(f"Error reading directory {directory}: {e}")
+        return []
 
 def process_text_files_with_models(models, output_dir,text_directory="../output_pdfs/text/", prompt_path="prompt.txt", llm_function=None ):
     """
@@ -222,3 +285,41 @@ def process_text_files_with_models(models, output_dir,text_directory="../output_
     print(f"\n{'='*60}")
     print(f"All files and models completed. Check {output_dir} folder for results.")
     print(f"{'='*60}")
+
+def process_image_with_models(models, outputdir, image_path = "../output_pdfs/images", prompt_path = "prompt.txt", llm_function=None):
+    """
+    Process a single image with the given models using the provided LLM function.
+    
+    Args:
+        models: List of model names/identifiers
+        image_path: Path to the image file
+        prompt_path: Path to the prompt file
+        llm_function: Function to call LLM (should accept prompt, text, model as parameters)
+    """
+    if llm_function is None:
+        raise ValueError("llm_function must be provided")
+    
+    # Read the prompt file content
+    prompt = read_prompt_file(prompt_path)
+    
+    # Create output directory if it doesn't exist
+    os.makedirs(outputdir, exist_ok=True)
+    
+    print(f"Processing image: {image_path}")
+    
+    # Read the image file content
+    try:
+        with open(image_path, "rb") as f:
+            image_content = f.read()
+    except Exception as e:
+        print(f"Error reading image {image_path}: {e}")
+        return
+    
+    # Try each model for this image
+    for model in models:
+        print(f"\nProcessing image with model: {model}")
+        
+        response = llm_function(prompt, image_content, model)
+        save_model_response(model, response, os.path.basename(image_path), outputdir)
+    
+    print(f"\nAll models completed. Check {outputdir} folder for results.")
