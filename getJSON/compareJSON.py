@@ -2,6 +2,7 @@ from deepdiff import DeepDiff
 import json
 import os
 import pprint
+import copy as c
 
 def compare(json1, json2):
     """
@@ -16,18 +17,45 @@ def findexact(json1, json2):
 
 
 #TODO make this work
-def filter_template(template, reportNum):
+def filter_template(template, reportName):
     """
-    Filter the template JSON to only include keys that are present in the corresponding reports. 
+    Return a copy of `template` with only those entries whose key
+    appears in reportName.txt (nested dicts/lists pruned similarly).
     """
-    if reportNum == 1:
-        with open("blurb_hospital1.txt", "r") as f:
-            blurb = f.read()
-    elif reportNum == 2:
-        return
-    elif reportNum == 3:
-        with open("blurb_hospital3.txt", "r") as f:
-            blurb = f.read()
+    reportName = reportName.lower()
+    if reportName == "fakehospital2":
+        return template
+
+    # read the report text once
+    report_file = f"{reportName}.txt"
+    with open(report_file, "r", encoding="utf-8") as f:
+        report_data = f.read()
+
+    filtered = c.deepcopy(template)
+
+    def recurse(obj):
+        if isinstance(obj, dict):
+            for k in list(obj):
+                v = obj[k]
+                if isinstance(v, (dict, list)):
+                    recurse(v)
+                    if not v:
+                        del obj[k]
+                else:
+                    # drop any leaf whose key is not in the report text
+                    if k not in report_data:
+                        del obj[k]
+
+        elif isinstance(obj, list):
+            for item in list(obj):
+                if isinstance(item, (dict, list)):
+                    recurse(item)
+                    if not item:
+                        obj.remove(item)
+                # leave primitive list items untouched
+
+    recurse(filtered)
+    return filtered
 
 def key_num(d):
     return sum(len(d) for d in d.values() if isinstance(d, dict))
@@ -184,49 +212,56 @@ def main():
     template = temp[k]
     print("Template loaded successfully.")
     template = template_to_string(template)  
-    
+
     # Show template value count
-    total_template_values = count_string_values(template)
-    print(f"Template has {total_template_values} string values to compare")
+    
 
     json_direcs = ["JSONout", "OllamaOut", "OpenAIOut"]
+    hospitals = ["fakeHospital1", "fakeHospital2"] ##update according to latex templates generated
     #json_direcs = ["OpenAIOut"]
     for direc in json_direcs:
         direc = "outJSON/" + direc
-        json_files = [f for f in os.listdir(direc) if f.endswith('.json') and f.__contains__('fakeHospital2')]
-        print(f"Found {len(json_files)} JSON files to compare.")
-        
-        for json_file in json_files:
-            with open(os.path.join(direc, json_file), "r") as f:
-                dtemp = json.load(f)
-            print(f"\n--- {json_file} ---")
-            print(f"Model: {dtemp['model']}")
-            print(f"Status: {dtemp['status']}")
+        for hospital in hospitals: 
+            json_files = [f for f in os.listdir(direc) if f.endswith('.json') and f.__contains__(hospital)]
+            copy = filter_template(template, hospital)
+            copy = template_to_string(copy)  
+            # Ensure all values are strings for comparison
+            #copy = c.deepcopy(template)
+            total_template_values = count_string_values(copy)
+            print(f"Template has {total_template_values} string values to compare.")
+            print(f"Found {len(json_files)} JSON files to compare.")
             
-            if dtemp["status"] == "success":
-                try:
-                    data = dtemp["data"]["report_id"]
-                except KeyError:
+            for json_file in json_files:
+                with open(os.path.join(direc, json_file), "r") as f:
+                    dtemp = json.load(f)
+                print(f"\n--- {json_file} ---")
+                print(f"Model: {dtemp['model']}")
+                print(f"Status: {dtemp['status']}")
+                
+                if dtemp["status"] == "success":
                     try:
-                        data = dtemp["data"]["report"]
+                        data = dtemp["data"]["report_id"]
                     except KeyError:
-                        print(f"Error: No valid report data found in {json_file}. Skipping comparison.")
-                        continue
-                
-                # Compare values with template using strict dictionary matching
-                is_equal, num_differences, total_values, differences = compare_values_with_template(template, data)
-                
-                if is_equal:
-                    print(f"✓ Perfect match - all {total_values} values match!")
-                else:
-                    matching_values = total_values - num_differences
-                    accuracy = (matching_values / total_values) * 100
-                    print(f"✗ {matching_values}/{total_values} values match")
-                    print(f"Accuracy: {accuracy:.1f}%")
+                        try:
+                            data = dtemp["data"]["report"]
+                        except KeyError:
+                            print(f"Error: No valid report data found in {json_file}. Skipping comparison.")
+                            continue
                     
+                    # Compare values with template using strict dictionary matching
+                    is_equal, num_differences, total_values, differences = compare_values_with_template(copy, data)
+                    
+                    if is_equal:
+                        print(f"✓ Perfect match - all {total_values} values match!")
+                    else:
+                        matching_values = total_values - num_differences
+                        accuracy = (matching_values / total_values) * 100
+                        print(f"✗ {matching_values}/{total_values} values match")
+                        print(f"Accuracy: {accuracy:.1f}%")
                         
-            else:
-                print(f"Error status: {dtemp['status']}. Skipping comparison.")
+                            
+                else:
+                    print(f"Error status: {dtemp['status']}. Skipping comparison.")
 
 if __name__ == "__main__":
     main()
