@@ -85,7 +85,7 @@ def main():
     #ensure text files are cleaned
     
     # Use the shared processing function
-    process_text_files_with_models(MODELS,output_dir="JSONout/", llm_function=textToLLM)
+    process_text_files_with_models(MODELS,output_dir="OpenRouter/", llm_function=textToLLM)
 
 if __name__ == "__main__":
     main()
