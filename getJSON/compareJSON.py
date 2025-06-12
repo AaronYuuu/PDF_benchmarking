@@ -63,12 +63,12 @@ def key_num(d):
 def template_to_string(template):
     for a,v in template.items():
         if isinstance(v, int):
-            template[a] = str(v)
+            template[a] = str(v).lower()
         if isinstance(v, list):
             for variantsdic in v:
                 for key, value in variantsdic.items():
                     if isinstance(value, int) or isinstance(value, float):
-                        variantsdic[key] = str(value)
+                        variantsdic[key] = str(value).lower()
     #print("Template values converted to strings where applicable.")
     return template
 
@@ -280,10 +280,12 @@ def main():
     print("Template loaded successfully.")
     template = template_to_string(template)  
 
-    # Show template value count
+    fakehospital1results = {}
+    fakehospital2results = {}
     
 
-    json_direcs = ["JSONout", "OllamaOut", "OpenAIOut", "OpenRouter"]
+    json_direcs = ["OllamaOut", "OpenAIOut", "OpenRouter", "OpenRouterVisionOut", "OllamaVisionOut"]
+    hosts = {"OllamaOut": "ollama","OpenAIOut" : "openai", "OpenRouter": "openrouter", "OpenRouterVisionOut": "", "OllamaVisionOut": ""}
     hospitals = ["fakeHospital1", "fakeHospital2"] ##update according to latex templates generated
     #json_direcs = ["OpenAIOut"]
     for direc in json_direcs:
@@ -304,8 +306,11 @@ def main():
                     continue
                 else: 
                     if ":" in dtemp["model"]:
-                        dtemp["model"] = dtemp["model"].split(":")[0]
-                    print(f"Extraction with {dtemp['model']} for {hospital} report")
+                        t = dtemp["model"].split(":")
+                        dtemp["model"] = t[0] + t[1]
+                    if "Vision" in direc:
+                        dtemp["model"] = dtemp["model"] + "_vision"
+                    print(f"Extraction with {dtemp['model']} from {hosts[direc.split('/')[1]]}for {hospital} report")
                     try:
                         data = dtemp["data"]["report_id"]
                     except KeyError:
@@ -347,7 +352,29 @@ def main():
                         print(f"Precision: {precision:.1f}%, Recall: {recall:.1f}%")
                         f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
                         print(f"F1 Score: {f1score:.1f}\n")
+                    
+                    if hospital == "fakeHospital1":
+                        fakehospital1results[dtemp["model"]] = {
+                            "precision": precision,
+                            "recall": recall,
+                            "f1score": f1score
+                        }
+                    elif hospital == "fakeHospital2":
+                        fakehospital2results[dtemp["model"]] = {
+                            "precision": precision,
+                            "recall": recall,
+                            "f1score": f1score
+                        }
                     continue
+
+    # Save as pandas dataframe and export to csv
+    import pandas as pd
+    h1 = pd.DataFrame.from_dict(fakehospital1results, orient='index')
+    h2 = pd.DataFrame.from_dict(fakehospital2results, orient='index')
+    h1 = h1.rename(columns={"Unnamed: 0": "LLM Model", 'precision': 'Precision', 'recall': 'Recall', 'f1-score': 'F1-Score'})
+    h2 = h2.rename(columns={"Unnamed: 0": "LLM Model", 'precision': 'Precision', 'recall': 'Recall', 'f1-score': 'F1-Score'})
+    h1.to_csv("fakeHospital1_results.csv")
+    h2.to_csv("fakeHospital2_results.csv")
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,6 @@
 # PDF Benchmarking Requirements
+pandas
+
 # LLM APIs
 openai
 numpy
@@ -12,6 +14,8 @@ sentencepiece
 #for biogpt
 sacremoses
 protobuf
+
+
 deepdiff
 
 #ollama
