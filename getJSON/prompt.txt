@@ -46,12 +46,12 @@ You must extract the following categories:
     - MAFAF: minor allele frequency as a decimal
 
 ## JSON Schema
-Your output must use this JSON structure and follow it strictly. Do not include any additional fields or explanations.Do not include any comments or explanations in the JSON output. Ensure all fields are present, even if empty, return empty fields as Null
-or empty strings. Use the exact field names and types as specified below.
+Your output MUST use this JSON structure and follow it STRICTLY. Do not include any additional fields or explanations.Do not include any comments or explanations in the JSON output. Ensure all fields are present, even if empty, return empty fields as empty strings. Use the exact field names and types as specified below.
 Do not include any comments such as: 
-"Based on the provided text, I will extract the relevant information and present it in the required JSON format"
+"Based on the provided text, I will extract the relevant information and present it in the required JSON format" or "Summary"
 Do not use // in your response and do not leave any comments within any field
-Once the json is made, doublecheck the formatting for trailing commas, non-JSON comments, multiline string syntax, misformatted fields and incomplete closing braces
+DO NOT add any additional fields.
+Once the json is made, doublecheck the formatting for trailing commas, non-JSON comments, multiline string syntax, misformatted fields, missing commas, missing quotation marks, and incomplete closing braces
 ```json
 {
   "report_id": {
@@ -67,12 +67,16 @@ Once the json is made, doublecheck the formatting for trailing commas, non-JSON 
       "gene_symbol": {
         "gene_symbol": "",
         "refseq_mrna": ""
-      }
+      },
       //Example below
       "ATM": {
        "gene_symbol": "ATM",
       "refseq_mrna": "NM_000051.4" 
-      }
+      },
+      "BCL7A": {
+       "gene_symbol": "BCL7A",
+      "refseq_mrna": "" 
+      },
       // (repeated for each gene)
     },
     "num_tested_genes": "",

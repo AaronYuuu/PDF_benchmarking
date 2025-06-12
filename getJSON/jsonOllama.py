@@ -32,26 +32,6 @@ def textToLLM(prompt, text, model):
         print(f"✗ Error with model {model}: {error_str}")
         return None
 
-def imageToLLM(prompt, image_path, model):
-    """
-    Function to send an image to a specific LLM model using Ollama and get response.
-    Returns the response text or None if failed.
-    """
-    try:
-        print(f"Trying model: {model} with image {image_path}")
-        
-        # Send request to Ollama
-        response = ollama.chat(model=model, messages=[
-            {"role": "user", "content": f"{prompt}\n\nImage to analyze:\n{image_path}"}
-        ])
-        
-        print(f"✓ Success with model: {model}")
-        return response['message']['content']
-        
-    except Exception as e:
-        error_str = str(e)
-        print(f"✗ Error with model {model}: {error_str}")
-        return None
 def ensure_model_exists(model):
     try:
         ollama.show(model)
@@ -94,7 +74,7 @@ def imageGroupToLLM(prompt, image_group, model):
         print(f"✗ Error with model {model}: {error_str}")
         return None
 
-def process_grouped_images_with_models(models, output_dir, image_directory="output_pdfs/images/", prompt_path="prompt.txt"):
+def process_grouped_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="prompt.txt"):
     """
     Process grouped images (by source document) with vision-capable models.
     
@@ -137,26 +117,28 @@ def process_grouped_images_with_models(models, output_dir, image_directory="outp
     print(f"{'='*60}")
 
 def main(): #if I ran this on an Ollama server would that 
+    '''
     models = [
         #"mistral:7b",     # Fast and capable
-        "phi3:mini",      # Very efficient
-        "gemma3:1b",
+        #"phi3:mini",      # Very efficient
+        #"gemma3:1b",
         "gemma3:1b-it-qat",
-        "gemma3:4b",    # can also do images
+        #"gemma3:4b",    # can also do images
         "llama3.2:1b", 
         "qwen2.5vl:3b", #vision language
-        "smollm2:135m", #very small model
+        #"smollm2:135m", #very small model
         "granite3.3:2b", #good for reasoning
     ]
     for model in models:
         ensure_model_exists(model)   
     print(f"Found {len(models)} models to process.")
     process_text_files_with_models(
+            prompt_path="ollamaPrompt.txt",
             models=models, 
             output_dir="OllamaOut",
             llm_function=textToLLM
     )
-
+    '''
     os.makedirs("OllamaVisionOut", exist_ok=True)
     vision_models = [
         "qwen2.5vl:3b",    # Vision language model

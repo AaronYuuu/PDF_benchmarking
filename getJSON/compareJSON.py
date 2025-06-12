@@ -69,8 +69,26 @@ def template_to_string(template):
                 for key, value in variantsdic.items():
                     if isinstance(value, int) or isinstance(value, float):
                         variantsdic[key] = str(value)
-    print("Template values converted to strings where applicable.")
+    #print("Template values converted to strings where applicable.")
     return template
+
+def dict_to_lowercase(obj):
+    """
+    Recursively convert all string values in a dictionary/list structure to lowercase.
+    """
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if isinstance(value, str):
+                obj[key] = value.lower()
+            elif isinstance(value, (dict, list)):
+                dict_to_lowercase(value)
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            if isinstance(item, str):
+                obj[i] = item.lower()
+            elif isinstance(item, (dict, list)):
+                dict_to_lowercase(item)
+    return obj
 
 def count_string_values(obj):
     """
@@ -104,8 +122,6 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
     - If types don't match: count as error
     """
     differences = []
-    fp = 0
-    fn = 0
     if not (isinstance(dict1, dict) and isinstance(dict2, dict)):
         differences.append(f"Type mismatch at {path}: expected dictionaries")
         return differences
@@ -118,10 +134,10 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
         
         # Check if key exists in both dictionaries
         if key not in dict1:
-            differences.append(f"Key missing in dict1 at {current_path}")
+            differences.append(f"Key missing in template at {current_path}")
             continue
         elif key not in dict2:
-            differences.append(f"Key missing in dict2 at {current_path}")
+            differences.append(f"Key missing in extracted values at {current_path}")
             continue
         
         val1 = dict1[key]
@@ -129,24 +145,21 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
         
         # Both values are strings - exact comparison
         if isinstance(val1, str) and isinstance(val2, str):
-            temp = compare_string(val1, val2, current_path)
-            differences.extend(temp[0])
-            fp += temp[1]
-            fn += temp[2]
+            differences.extend(compare_string(val1, val2, current_path))
         
         # Both values are dictionaries - recursive comparison
         elif isinstance(val1, dict) and isinstance(val2, dict):
-            differences.extend(compare_dict_keys_and_values(val1, val2, current_path)[0])
+            differences.extend(compare_dict_keys_and_values(val1, val2, current_path))
         
         # Both values are lists - handle list comparison
         elif isinstance(val1, list) and isinstance(val2, list):
-            differences.extend(compare_list_values(val1, val2, current_path)[0])
+            differences.extend(compare_list_values(val1, val2, current_path))
         
         # Type mismatch - count as error
         else:
             differences.append(f"Type mismatch at {current_path}: {type(val1).__name__} vs {type(val2).__name__}")
     
-    return [differences, fp, fn]
+    return differences
 
 def normalizeNames(x):
     import re
@@ -185,23 +198,37 @@ def normalizeNames(x):
 def compare_string(str1, str2, path=""):
     """
     Compare two strings for equality, ignoring case and scientific notation.
+    Returns differences list with FP/FN information.
     """
-    if str1.lower() == str2.lower():
-        return [[],0,0]
-    fn = 0 
-    fp = 0
-    # Handle scientific notation
-    if 'e-' in str1.lower() or 'e-' in str2.lower():
+    differences = []
+    
+    # Normalize strings for comparison
+    norm_str1 = normalizeNames(str1.strip()) if str1 else ""
+    norm_str2 = normalizeNames(str2.strip()) if str2 else ""
+    
+    # Perfect match
+    if norm_str1 == norm_str2:
+        return differences
+    
+    # Handle scientific notation comparison
+    if ('e-' in str1.lower() or 'e-' in str2.lower()):
         try:
             num1 = float(str1)
             num2 = float(str2)
-            if num1 == num2:
-                return []
+            if abs(num1 - num2) < 1e-10:  # Handle floating point precision
+                return differences
         except ValueError:
-            pass  # If conversion fails, treat as mismatch
-    if str1 == "" and str2 !="":
-        fp += 1
-    return [[f"Extra value at {path}: expected '{str1}' but got {str2}"], fp, fn]
+            pass  # If conversion fails, continue with string comparison
+    
+    # Add difference based on comparison with FP/FN labels
+    if not str1 and str2:  # Template empty, but prediction has value
+        differences.append(f"FALSE POSITIVE at {path}: template empty but got '{str2}'")
+    elif str1 and not str2:  # Template has value, but prediction empty
+        differences.append(f"FALSE NEGATIVE at {path}: expected '{str1}' but got empty")
+    else:  # Both have values but don't match
+        differences.append(f"Value mismatch at {path}: expected '{str1}' but got '{str2}'")
+    
+    return differences
     
 def compare_list_values(list1, list2, path=""):
     """
@@ -211,8 +238,7 @@ def compare_list_values(list1, list2, path=""):
     
     if len(list1) != len(list2):
         differences.append(f"List length mismatch at {path}: {len(list1)} vs {len(list2)}")
-    fp = 0
-    fn = 0
+    
     # Compare corresponding elements
     min_len = min(len(list1), len(list2))
     for i in range(min_len):
@@ -221,25 +247,22 @@ def compare_list_values(list1, list2, path=""):
         val2 = list2[i]
         
         if isinstance(val1, str) and isinstance(val2, str):
-            temp = compare_string(val1, val2, current_path)
-            differences.extend(temp[0])
-            fp += temp[1]
-            fn += temp[2]
+            differences.extend(compare_string(val1, val2, current_path))
         elif isinstance(val1, dict) and isinstance(val2, dict):
-            differences.extend(compare_dict_keys_and_values(val1, val2, current_path)[0])
+            differences.extend(compare_dict_keys_and_values(val1, val2, current_path))
         elif isinstance(val1, list) and isinstance(val2, list):
-            differences.extend(compare_list_values(val1, val2, current_path)[0])
+            differences.extend(compare_list_values(val1, val2, current_path))
         else:
             differences.append(f"Type mismatch at {current_path}: {type(val1).__name__} vs {type(val2).__name__}")
     
-    return differences, fp, fn
+    return differences
 
 def compare_values_with_template(template, data):
     """
     Compare data with template using strict dictionary key matching.
     Returns count of matching vs mismatching values with type mismatch detection.
     """
-    differences = compare_dict_keys_and_values(template, data)[0]
+    differences = compare_dict_keys_and_values(template, data)
     
     # Count total string values in template for comparison base
     total_values = count_string_values(template)
@@ -267,16 +290,14 @@ def main():
         direc = "outJSON/" + direc
         for hospital in hospitals: 
             json_files = [f for f in os.listdir(direc) if f.endswith('.json') and f.__contains__(hospital)]
-            copy = template_to_string(filter_template(template, hospital)) 
-            total_template_values = count_string_values(copy)
-            print(f"Template has {total_template_values} string values to compare.")
-            print(f"Found {len(json_files)} JSON files to compare.")
+            copy = template_to_string(filter_template(template, hospital))
+            # Convert template to lowercase
+            copy = dict_to_lowercase(copy)
             
             for json_file in json_files:
                 with open(os.path.join(direc, json_file), "r") as f:
                     dtemp = json.load(f)
                 #print(f"\n--- {json_file} ---")
-                
                 
                 if dtemp["status"] != "success":
                     #print(f"Error status: {dtemp['status']}. Skipping comparison.")
@@ -284,7 +305,7 @@ def main():
                 else: 
                     if ":" in dtemp["model"]:
                         dtemp["model"] = dtemp["model"].split(":")[0]
-                    print(f"\nModel: {dtemp['model']}")
+                    print(f"Extraction with {dtemp['model']} for {hospital} report")
                     try:
                         data = dtemp["data"]["report_id"]
                     except KeyError:
@@ -294,6 +315,9 @@ def main():
                             #print(f"Error: No valid report data found in {json_file}. Skipping comparison.")
                             continue
                     
+                    # Convert data to lowercase before comparison
+                    data = dict_to_lowercase(data)
+                    
                     # Compare values with template using strict dictionary matching
                     is_equal, num_differences, total_values, differences = compare_values_with_template(copy, data)
                     
@@ -302,10 +326,27 @@ def main():
                     else:
                         matching_values = total_values - num_differences
                         accuracy = (matching_values / total_values) * 100
-                        print(f"✗ {matching_values}/{total_values} values match")
-                        print(f"Accuracy: {accuracy:.1f}% \n")
-                        print(f"Differences found: [{differences}]")
-                    
+                        #print(f"✗ {matching_values}/{total_values} values match")
+                        print(f"Accuracy: {accuracy:.1f}%")
+                        fn = 0 
+                        fp = 0
+                        ic = 0
+                        for diff in differences:
+                            if "FALSE POSITIVE" in diff or "Key missing in template" in diff:
+                                fp += 1
+                            elif "FALSE NEGATIVE" in diff or "Key missing in extracted values" in diff:
+                                fn += 1
+                            elif "Type mismatch" in diff or "Value mismatch" in diff:
+                                ic += 1
+                                
+                        #print(f"False Positives: {fp}, False Negatives: {fn}, Incorrect Extraction: {ic}")
+                        fp += ic
+                        fn += ic
+                        precision = (matching_values / (matching_values + fp)) * 100 if (matching_values + fp) > 0 else 0
+                        recall = (matching_values / (matching_values + fn)) * 100 if (matching_values + fn) > 0 else 0
+                        print(f"Precision: {precision:.1f}%, Recall: {recall:.1f}%")
+                        f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+                        print(f"F1 Score: {f1score:.1f}\n")
                     continue
 
 if __name__ == "__main__":
