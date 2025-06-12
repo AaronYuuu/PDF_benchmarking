@@ -40,19 +40,19 @@ def filter_template(template, reportName):
                 if isinstance(v, (dict, list)):
                     recurse(v)
                     if not v:
-                        del obj[k]
+                        obj[k] = "" #make the not listend keys an empty string
                 else:
                     # drop any leaf whose key is not in the report text
                     if k not in report_data:
-                        del obj[k]
+                        obj[k] = ""
 
         elif isinstance(obj, list):
             for item in list(obj):
                 if isinstance(item, (dict, list)):
                     recurse(item)
                     if not item:
-                        obj.remove(item)
-                # leave primitive list items untouched
+                        index = obj.index(item)
+                        obj[index] = ""  # make the not listed items an empty string
 
     recurse(filtered)
     return filtered
@@ -104,7 +104,8 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
     - If types don't match: count as error
     """
     differences = []
-    
+    fp = 0
+    fn = 0
     if not (isinstance(dict1, dict) and isinstance(dict2, dict)):
         differences.append(f"Type mismatch at {path}: expected dictionaries")
         return differences
@@ -128,29 +129,67 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
         
         # Both values are strings - exact comparison
         if isinstance(val1, str) and isinstance(val2, str):
-            differences.extend(compare_string(val1, val2, current_path))
+            temp = compare_string(val1, val2, current_path)
+            differences.extend(temp[0])
+            fp += temp[1]
+            fn += temp[2]
         
         # Both values are dictionaries - recursive comparison
         elif isinstance(val1, dict) and isinstance(val2, dict):
-            differences.extend(compare_dict_keys_and_values(val1, val2, current_path))
+            differences.extend(compare_dict_keys_and_values(val1, val2, current_path)[0])
         
         # Both values are lists - handle list comparison
         elif isinstance(val1, list) and isinstance(val2, list):
-            differences.extend(compare_list_values(val1, val2, current_path))
+            differences.extend(compare_list_values(val1, val2, current_path)[0])
         
         # Type mismatch - count as error
         else:
             differences.append(f"Type mismatch at {current_path}: {type(val1).__name__} vs {type(val2).__name__}")
     
-    return differences
+    return [differences, fp, fn]
+
+def normalizeNames(x):
+    import re
+    '''
+    Normalize names by removing special characters and converting to lowercase. 
+    bAsed off of ohcrn_lei eval compare_json.py same function
+    '''
+    # normalize hgvs by removing prefixes and brackets
+    x = re.sub(r"Chr.+:g\.", "", x)
+    x = re.sub(r"^g\.|^c\.|^p\.", "", x)
+    x = re.sub(r"^\(|\)$", "", x)
+    if re.match(r"^\d+-\d+$", x):
+      x = re.sub(r"-\d+$", "", x)
+    # normalize omim, clinvar, dbsnp
+    x = re.sub(r"^OMIM\D+", "", x)
+    x = re.sub(r"^Clinvar[^V]*", "", x, flags=re.IGNORECASE)
+    x = re.sub(r"^dbSNP[^r]*", "", x, flags=re.IGNORECASE)
+    # normalize chromosomes
+    if re.match(r"^ChrX$|^ChrY$|^Chr\d$", x, flags=re.IGNORECASE):
+      x = re.sub(r"Chr", "", x, flags=re.IGNORECASE)
+    # remove location tags
+    x = re.sub(
+      r" ?\(Toronto$| ?\(Kingston$| ?\(Ottawa| ?\(London| ?\(Orillia.*| ?\(Mississauga",
+      "",
+      x,
+      flags=re.IGNORECASE,
+    )
+    # convert everything to uppercase for case insensitive matching
+    x = x.lower()
+    # remove extra spaces
+    x = re.sub(r"\s+", " ", x).strip()
+        
+    return x
+
 
 def compare_string(str1, str2, path=""):
     """
     Compare two strings for equality, ignoring case and scientific notation.
     """
     if str1.lower() == str2.lower():
-        return []
-    
+        return [[],0,0]
+    fn = 0 
+    fp = 0
     # Handle scientific notation
     if 'e-' in str1.lower() or 'e-' in str2.lower():
         try:
@@ -160,9 +199,10 @@ def compare_string(str1, str2, path=""):
                 return []
         except ValueError:
             pass  # If conversion fails, treat as mismatch
+    if str1 == "" and str2 !="":
+        fp += 1
+    return [[f"Extra value at {path}: expected '{str1}' but got {str2}"], fp, fn]
     
-    return [f"Value mismatch at {path}: '{str1}' vs '{str2}'"]
-
 def compare_list_values(list1, list2, path=""):
     """
     Compare two lists by comparing values at corresponding positions.
@@ -171,7 +211,8 @@ def compare_list_values(list1, list2, path=""):
     
     if len(list1) != len(list2):
         differences.append(f"List length mismatch at {path}: {len(list1)} vs {len(list2)}")
-    
+    fp = 0
+    fn = 0
     # Compare corresponding elements
     min_len = min(len(list1), len(list2))
     for i in range(min_len):
@@ -180,22 +221,25 @@ def compare_list_values(list1, list2, path=""):
         val2 = list2[i]
         
         if isinstance(val1, str) and isinstance(val2, str):
-            differences.extend(compare_string(val1, val2, current_path))
+            temp = compare_string(val1, val2, current_path)
+            differences.extend(temp[0])
+            fp += temp[1]
+            fn += temp[2]
         elif isinstance(val1, dict) and isinstance(val2, dict):
-            differences.extend(compare_dict_keys_and_values(val1, val2, current_path))
+            differences.extend(compare_dict_keys_and_values(val1, val2, current_path)[0])
         elif isinstance(val1, list) and isinstance(val2, list):
-            differences.extend(compare_list_values(val1, val2, current_path))
+            differences.extend(compare_list_values(val1, val2, current_path)[0])
         else:
             differences.append(f"Type mismatch at {current_path}: {type(val1).__name__} vs {type(val2).__name__}")
     
-    return differences
+    return differences, fp, fn
 
 def compare_values_with_template(template, data):
     """
     Compare data with template using strict dictionary key matching.
     Returns count of matching vs mismatching values with type mismatch detection.
     """
-    differences = compare_dict_keys_and_values(template, data)
+    differences = compare_dict_keys_and_values(template, data)[0]
     
     # Count total string values in template for comparison base
     total_values = count_string_values(template)
@@ -223,10 +267,7 @@ def main():
         direc = "outJSON/" + direc
         for hospital in hospitals: 
             json_files = [f for f in os.listdir(direc) if f.endswith('.json') and f.__contains__(hospital)]
-            copy = filter_template(template, hospital)
-            copy = template_to_string(copy)  
-            # Ensure all values are strings for comparison
-            #copy = c.deepcopy(template)
+            copy = template_to_string(filter_template(template, hospital)) 
             total_template_values = count_string_values(copy)
             print(f"Template has {total_template_values} string values to compare.")
             print(f"Found {len(json_files)} JSON files to compare.")
@@ -263,7 +304,7 @@ def main():
                         accuracy = (matching_values / total_values) * 100
                         print(f"✗ {matching_values}/{total_values} values match")
                         print(f"Accuracy: {accuracy:.1f}% \n")
-                        
+                        print(f"Differences found: [{differences}]")
                     
                     continue
 
