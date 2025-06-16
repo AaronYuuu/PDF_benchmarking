@@ -272,6 +272,37 @@ def compare_values_with_template(template, data):
     else:
         return False, len(differences), total_values, differences
 
+def visualize(df1, df2):
+    """
+    Visualize the results of two dataframes side by side.
+    """
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    
+    # Set up the figure
+    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6))
+    
+    # Plot for fakeHospital1
+    sns.barplot(x=df1.index, y='Precision', data=df1, ax=axes[0], color='blue', label='Precision')
+    sns.barplot(x=df1.index, y='Recall', data=df1, ax=axes[0], color='orange', label='Recall')
+    sns.barplot(x=df1.index, y='F1-Score', data=df1, ax=axes[0], color='green', label='F1-Score')
+    axes[0].set_title('Fake Hospital 1 Results')
+    axes[0].set_ylabel('Scores')
+    axes[0].set_xlabel('LLM Model')
+    axes[0].legend()
+    
+    # Plot for fakeHospital2
+    sns.barplot(x=df2.index, y='Precision', data=df2, ax=axes[1], color='blue', label='Precision')
+    sns.barplot(x=df2.index, y='Recall', data=df2, ax=axes[1], color='orange', label='Recall')
+    sns.barplot(x=df2.index, y='F1-Score', data=df2, ax=axes[1], color='green', label='F1-Score')
+    axes[1].set_title('Fake Hospital 2 Results')
+    axes[1].set_ylabel('Scores')
+    axes[1].set_xlabel('LLM Model')
+    axes[1].legend()
+    
+    plt.tight_layout()
+    plt.show()
+
 def main():
     with open("../makeTemplatePDF/out/mock_data.json", "r") as f:
         temp = json.load(f)
@@ -355,12 +386,22 @@ def main():
                     
                     if hospital == "fakeHospital1":
                         fakehospital1results[dtemp["model"]] = {
+                            "False Positives": fp,
+                            "False Negatives": fn,
+                            "Incorrect Extractions": ic,
+                            "Correct Matches": matching_values,
+                            "Total Values": total_values,
                             "precision": precision,
                             "recall": recall,
                             "f1score": f1score
                         }
                     elif hospital == "fakeHospital2":
                         fakehospital2results[dtemp["model"]] = {
+                            "False Positives": fp,
+                            "False Negatives": fn,
+                            "Incorrect Extractions": ic,
+                            "Correct Matches": matching_values,
+                            "Total Values": total_values,
                             "precision": precision,
                             "recall": recall,
                             "f1score": f1score
@@ -371,8 +412,24 @@ def main():
     import pandas as pd
     h1 = pd.DataFrame.from_dict(fakehospital1results, orient='index')
     h2 = pd.DataFrame.from_dict(fakehospital2results, orient='index')
-    h1 = h1.rename(columns={"Unnamed: 0": "LLM Model", 'precision': 'Precision', 'recall': 'Recall', 'f1-score': 'F1-Score'})
-    h2 = h2.rename(columns={"Unnamed: 0": "LLM Model", 'precision': 'Precision', 'recall': 'Recall', 'f1-score': 'F1-Score'})
+    h1 = h1.rename(columns={"Unnamed: 0": "LLM Model",
+                            "False Positives": "False Positives", 
+                            "False Negatives": "False Negatives", 
+                            "Incorrect Extractions": "Incorrect Extractions", 
+                            "Correct Matches": "Correct Matches", 
+                            "Total Values": "Total Values", 
+                            "precision": "Precision", 
+                            "recall": "Recall", 
+                            "f1score": "F1-Score"})
+    h2 = h2.rename(columns={"Unnamed: 0": "LLM Model",
+                            "False Positives": "False Positives", 
+                            "False Negatives": "False Negatives", 
+                            "Incorrect Extractions": "Incorrect Extractions", 
+                            "Correct Matches": "Correct Matches", 
+                            "Total Values": "Total Values", 
+                            "precision": "Precision", 
+                            "recall": "Recall", 
+                            "f1score": "F1-Score"})
     h1.to_csv("fakeHospital1_results.csv")
     h2.to_csv("fakeHospital2_results.csv")
 
