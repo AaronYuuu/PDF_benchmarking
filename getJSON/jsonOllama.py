@@ -74,7 +74,7 @@ def imageGroupToLLM(prompt, image_group, model):
         print(f"✗ Error with model {model}: {error_str}")
         return None
 
-def process_grouped_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="prompt.txt"):
+def process_grouped_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="ollamaPrompt.txt"):
     """
     Process grouped images (by source document) with vision-capable models.
     

@@ -177,18 +177,19 @@ def process_grouped_images_with_openrouter_models(models, output_dir, image_dire
     
     # Process each group of images
     for source_name, image_paths in grouped_images.items():
-        print(f"\n{'='*60}")
-        print(f"Processing source: {source_name} ({len(image_paths)} pages)")
-        print(f"Image files: {[os.path.basename(p) for p in image_paths]}")
-        print(f"{'='*60}")
-        
-        # Try each vision model for this image group
-        for model in models:
-            print(f"\nProcessing {source_name} with model: {model}")
+        if source_name == "fakeHospital2":
+            print(f"\n{'='*60}")
+            print(f"Processing source: {source_name} ({len(image_paths)} pages)")
+            print(f"Image files: {[os.path.basename(p) for p in image_paths]}")
+            print(f"{'='*60}")
             
-            response = give_image_group_to_llm(prompt, image_paths, model)
-            # Use source name as the "file" identifier for consistent naming
-            save_model_response(model, response, f"report_{source_name}", full_output_dir)
+            # Try each vision model for this image group
+            for model in models:
+                print(f"\nProcessing {source_name} with model: {model}")
+                
+                response = give_image_group_to_llm(prompt, image_paths, model)
+                # Use source name as the "file" identifier for consistent naming
+                save_model_response(model, response, f"report_{source_name}", full_output_dir)
     
     print(f"\n{'='*60}")
     print(f"All image groups and models completed. Check {full_output_dir} folder for results.")
@@ -200,8 +201,8 @@ def main_vision():
     """
     # Vision-capable models from OpenRouter
     vision_models = [
-        "google/gemini-2.0-flash-exp:free",
-        "qwen/qwen2.5-vl-72b-instruct:free",
+        #"google/gemini-2.0-flash-exp:free",
+        #"qwen/qwen2.5-vl-72b-instruct:free",
         "meta-llama/llama-4-scout:free",
     ]
     
@@ -214,11 +215,10 @@ def main_vision():
 def main():
     # List of models to try
     MODELS = [
-        "google/gemini-2.0-flash-exp:free",
+        #"google/gemini-2.0-flash-exp:free",
         "qwen/qwen2.5-vl-72b-instruct:free",
-        "meta-llama/llama-4-scout:free",
-        "mistralai/devstral-small:free", 
-        "rekaai/reka-flash-3:free"
+       # "meta-llama/llama-4-scout:free",
+        #"mistralai/devstral-small:free", 
     ]
     #ensure text files are cleaned
     

@@ -302,6 +302,7 @@ def visualize(df1, df2):
     
     plt.tight_layout()
     plt.show()
+    
 
 def main():
     with open("../makeTemplatePDF/out/mock_data.json", "r") as f:
@@ -315,11 +316,13 @@ def main():
     fakehospital2results = {}
     
 
-    json_direcs = ["OllamaOut", "OpenAIOut", "OpenRouter", "OpenRouterVisionOut", "OllamaVisionOut"]
-    hosts = {"OllamaOut": "ollama","OpenAIOut" : "openai", "OpenRouter": "openrouter", "OpenRouterVisionOut": "", "OllamaVisionOut": ""}
+    json_direcs = ["OllamaOut", "OpenAIOut", "OpenRouter", "OpenRouterVisionOut", "OllamaVisionOut", "OpenAiVisionOut"]
     hospitals = ["fakeHospital1", "fakeHospital2"] ##update according to latex templates generated
+    sources = {"OllamaOut": "Ollama", "OpenAIOut": "OpenAI", "OpenRouter": "OpenRouter",
+               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAiVisionOut": "OpenAi"}
     #json_direcs = ["OpenAIOut"]
     for direc in json_direcs:
+        source = sources[direc]
         direc = "outJSON/" + direc
         for hospital in hospitals: 
             json_files = [f for f in os.listdir(direc) if f.endswith('.json') and f.__contains__(hospital)]
@@ -331,17 +334,51 @@ def main():
                 with open(os.path.join(direc, json_file), "r") as f:
                     dtemp = json.load(f)
                 #print(f"\n--- {json_file} ---")
-                
-                if dtemp["status"] != "success":
-                    #print(f"Error status: {dtemp['status']}. Skipping comparison.")
-                    continue
-                else: 
-                    if ":" in dtemp["model"]:
+                if ":" in dtemp["model"]:
                         t = dtemp["model"].split(":")
                         dtemp["model"] = t[0] + t[1]
-                    if "Vision" in direc:
-                        dtemp["model"] = dtemp["model"] + "_vision"
-                    print(f"Extraction with {dtemp['model']} from {hosts[direc.split('/')[1]]}for {hospital} report")
+                if "Vision" in direc:
+                        dtemp["model"] = dtemp["model"] + "*ImageInput*"
+                if "qwen/qwen2.5-vl-72b-instruct" in dtemp["model"] :
+                        dtemp["model"] = "qwen2.5:72b"
+                if "meta-llama/llama-4-scout" in dtemp["model"]:
+                        dtemp["model"] = "llama-4-scout"
+                if "google/gemini-2.0-flash-exp" in dtemp["model"]:
+                        dtemp["model"] = "gemini-2.0"
+                if "devstral-small" in dtemp["model"]:
+                        dtemp["model"] = "devstral-small"
+                dtemp["model"] = dtemp["model"].split("/")[-1] 
+
+                if dtemp["status"] != "success":
+                    #print(f"Error status: {dtemp['status']}. Skipping comparison.")
+                    if hospital == "fakeHospital1":
+                        fakehospital1results[dtemp["model"]] = {
+                            "False Positives": 88,
+                            "False Negatives": 88,
+                            "Incorrect Extractions": 88,
+                            "Correct Matches": 0,
+                            "Precision": 0,
+                            "Recall": 0,
+                            "F1score": 0,
+                            "Accuracy": 0,
+                            "Source": source, 
+                            "Hospital": "hospital1"
+                        }
+                    elif hospital == "fakeHospital2":
+                        fakehospital2results[dtemp["model"]] = {
+                            "False Positives": 88,
+                            "False Negatives": 88,
+                            "Incorrect Extractions": 88,
+                            "Correct Matches": 0,
+                            "Precision": 0,
+                            "Recall": 0,
+                            "F1score": 0,
+                            "Accuracy": 0,
+                            "Source": source,
+                            "Hospital": "hospital2"
+                        }
+                    continue
+                else:  
                     try:
                         data = dtemp["data"]["report_id"]
                     except KeyError:
@@ -390,10 +427,12 @@ def main():
                             "False Negatives": fn,
                             "Incorrect Extractions": ic,
                             "Correct Matches": matching_values,
-                            "Total Values": total_values,
-                            "precision": precision,
-                            "recall": recall,
-                            "f1score": f1score
+                            "Precision": precision,
+                            "Recall": recall,
+                            "F1score": f1score,
+                            "Accuracy": accuracy,
+                            "Source": source, 
+                            "Hospital": "hospital1"
                         }
                     elif hospital == "fakeHospital2":
                         fakehospital2results[dtemp["model"]] = {
@@ -401,10 +440,12 @@ def main():
                             "False Negatives": fn,
                             "Incorrect Extractions": ic,
                             "Correct Matches": matching_values,
-                            "Total Values": total_values,
-                            "precision": precision,
-                            "recall": recall,
-                            "f1score": f1score
+                            "Precision": precision,
+                            "Recall": recall,
+                            "F1score": f1score, 
+                            "Accuracy": accuracy,
+                            "Source": source,
+                            "Hospital": "hospital2"
                         }
                     continue
 
@@ -412,26 +453,16 @@ def main():
     import pandas as pd
     h1 = pd.DataFrame.from_dict(fakehospital1results, orient='index')
     h2 = pd.DataFrame.from_dict(fakehospital2results, orient='index')
-    h1 = h1.rename(columns={"Unnamed: 0": "LLM Model",
-                            "False Positives": "False Positives", 
-                            "False Negatives": "False Negatives", 
-                            "Incorrect Extractions": "Incorrect Extractions", 
-                            "Correct Matches": "Correct Matches", 
-                            "Total Values": "Total Values", 
-                            "precision": "Precision", 
-                            "recall": "Recall", 
-                            "f1score": "F1-Score"})
-    h2 = h2.rename(columns={"Unnamed: 0": "LLM Model",
-                            "False Positives": "False Positives", 
-                            "False Negatives": "False Negatives", 
-                            "Incorrect Extractions": "Incorrect Extractions", 
-                            "Correct Matches": "Correct Matches", 
-                            "Total Values": "Total Values", 
-                            "precision": "Precision", 
-                            "recall": "Recall", 
-                            "f1score": "F1-Score"})
     h1.to_csv("fakeHospital1_results.csv")
     h2.to_csv("fakeHospital2_results.csv")
-
+    h1 = pd.read_csv("fakeHospital1_results.csv")
+    h2 = pd.read_csv("fakeHospital2_results.csv")
+    h1.rename(columns={'Unnamed: 0': 'LLM'}, inplace=True)
+    h2.rename(columns={'Unnamed: 0': 'LLM'}, inplace=True)
+    h1.sort_values(by='LLM', ascending=False, inplace = True)
+    h2.sort_values(by='LLM', ascending=False, inplace = True)
+    h1.to_csv("fakeHospital1_results.csv", index=False)
+    h2.to_csv("fakeHospital2_results.csv", index=False)
+    
 if __name__ == "__main__":
     main()
