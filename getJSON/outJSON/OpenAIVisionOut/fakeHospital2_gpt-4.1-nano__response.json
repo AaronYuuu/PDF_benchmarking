@@ -1,0 +1,41 @@
+{
+  "model": "gpt-4.1-nano",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "",
+      "date_received": "",
+      "date_verified": "",
+      "report_type": "Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "",
+      "testing_laboratory": "",
+      "sequencing_scope": "WES",
+      "tested_genes": {},
+      "num_tested_genes": "",
+      "sample_type": "",
+      "analysis_type": "Variant analysis",
+      "variants": [
+        {
+          "gene_symbol": "",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "Variant of [clinical significance...]",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        }
+      ],
+      "num_variants": "",
+      "reference_genome": ""
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital2"
+}

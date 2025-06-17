@@ -1,0 +1,350 @@
+{
+  "model": "granite3.3:2b",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "2020-12-07",
+      "date_received": "",
+      "date_verified": "",
+      "report_type": "Molecular Genetics",
+      "testing_context": "Research",
+      "ordering_clinic": "Ontario Cancer Hospital 123 Main St, West, Toronto, ON, A4B5G9 info@och.on.ca fax: 416-456-7890 phone: 437 - 416-6470",
+      "testing_laboratory": "Division of Tumor Sequencing and Diagnostics",
+      "sequencing_scope": "Targeted variant testing",
+      "tested_genes": {
+        "ATM": {
+          "gene_symbol": "ATM",
+          "refseq_mrna": "NM_002719.3"
+        },
+        "ACKR3": {
+          "gene_symbol": "ACKR3",
+          "refseq_mrna": "NM_004576.3"
+        },
+        "LRP2": {
+          "gene_symbol": "LRP2",
+          "refseq_mrna": "NM_002918.2"
+        },
+        "CCND3": {
+          "gene_symbol": "CCND3",
+          "refseq_mrna": "NM_001005916.2"
+        },
+        "RHOH": {
+          "gene_symbol": "RHOH",
+          "refseq_mrna": "NM_002476.3"
+        },
+        "FANCD2": {
+          "gene_symbol": "FANCD2",
+          "refseq_mrna": "NM_00103985.3"
+        },
+        "ING4": {
+          "gene_symbol": "ING4",
+          "refseq_mrna": "NM_002109.3"
+        },
+        "MPO": {
+          "gene_symbol": "MPO",
+          "refseq_mrna": "NM_002637.2"
+        },
+        "HMGA1": {
+          "gene_symbol": "HMGA1",
+          "refseq_mrna": "NM_002114957.2"
+        },
+        "KDM6A": {
+          "gene_symbol": "KDM6A",
+          "refseq_mrna": "NM_031418.2"
+        },
+        "ZHX2": {
+          "gene_symbol": "ZHX2",
+          "refseq_mrna": "NM_014966.3"
+        },
+        "CHD4": {
+          "gene_symbol": "CHD4",
+          "refseq_mrna": "NM_031325.1"
+        },
+        "PSIPI": {
+          "gene_symbol": "PSIPI",
+          "refseq_mrna": "NM_078629.2"
+        },
+        "FOXA2": {
+          "gene_symbol": "FOXA2",
+          "refseq_mrna": "NM_014354.3"
+        },
+        "PRRCZA": {
+          "gene_symbol": "PRRCZA",
+          "refseq_mrna": "NM_006897.3"
+        },
+        "TMP3": {
+          "gene_symbol": "TMP3",
+          "refseq_mrna": "NM_002912.2"
+        },
+        "BCLZA": {
+          "gene_symbol": "BCLZA",
+          "refseq_mrna": "NM_004586.2"
+        }
+      },
+      "num_tested_genes": 18,
+      "sample_type": "Other RNA fractions",
+      "analysis_type": "Variant analysis",
+      "variants": [
+        {
+          "gene_symbol": "ATM",
+          "variant_id": "c.5514T>A (p.Cys1838Ter)",
+          "chromosome": "chr19",
+          "hgvsg": "",
+          "hgvsc": "c.5514T>A",
+          "hgvsp": "",
+          "transcript_id": "NM_002719.3",
+          "exon": "19",
+          "zygosity": "Heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "ACKR3",
+          "variant_id": "c.3627A>T (p.Ile1209*)",
+          "chromosome": "chrX",
+          "hgvsg": "",
+          "hgvsc": "c.3627A>T",
+          "hgvsp": "",
+          "transcript_id": "NM_004576.3",
+          "exon": "3",
+          "zygosity": "Heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "LRP2",
+          "variant_id": "",
+          "chromosome": "chr15",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_002918.2",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "CCND3",
+          "variant_id": "",
+          "chromosome": "chr12",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_001005916.2",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "RHOH",
+          "variant_id": "",
+          "chromosome": "chr16",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_002476.3",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "FANCD2",
+          "variant_id": "",
+          "chromosome": "chr20",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_00103985.3",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "ING4",
+          "variant_id": "",
+          "chromosome": "chr10",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_002109.3",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "MPO",
+          "variant_id": "",
+          "chromosome": "chr17",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_002524.3",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "HMGA1",
+          "variant_id": "",
+          "chromosome": "chr4",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_002114957.2",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "KDM6A",
+          "variant_id": "c.3627A>T (p.Ile1209*)",
+          "chromosome": "chrX",
+          "hgvsg": "",
+          "hgvsc": "c.3627A>T",
+          "hgvsp": "",
+          "transcript_id": "NM_031418.2",
+          "exon": "3",
+          "zygosity": "Heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "ZHX2",
+          "variant_id": "",
+          "chromosome": "chr17",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_014966.3",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "CHD4",
+          "variant_id": "",
+          "chromosome": "chr12p13",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_014778.2",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "PSIPI",
+          "variant_id": "",
+          "chromosome": "chr1p36.23-p36.12",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_078629.2",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "FOXA2",
+          "variant_id": "",
+          "chromosome": "chr1p36.33",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_004579.3",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "PRRCZA",
+          "variant_id": "",
+          "chromosome": "chr10p14.3",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_006897.3",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "TMP3",
+          "variant_id": "",
+          "chromosome": "chr4p15.33",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_002912.2",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        },
+        {
+          "gene_symbol": "BCLZA",
+          "variant_id": "",
+          "chromosome": "chr18p12.3",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "NM_004586.2",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "population_frequency": "",
+          "in_silico_prediction": "",
+          "clinvar": ""
+        }
+      ]
+    },
+    "recommendations": "We recommend a precision oncology approach: These variants are associated with constitutive pathway activation and are well-established drivers of tumourigenesis. Targeted therapies should be evaluated based on these molecular findings. Specifically, pharmaceutical treatment is also recommended to correct hormone imbalances. In-depth discussion with the medical team is encouraged for personalized treatment plan.",
+    "conclusion": "This genetic analysis reveals heterozygous variants in several genes including LRP2, CCND3, FANCD2, ZHX2, CHD4, PSIPI, FOXA2, PRRCZA, TMP3, and BCLZA. The clinical implications suggest potential associations with various pathological conditions such as cancer and hormone imbalance disorders. However, further functional studies are warranted to elucidate the precise impact of these variants on disease phenotypes."
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital1__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+}

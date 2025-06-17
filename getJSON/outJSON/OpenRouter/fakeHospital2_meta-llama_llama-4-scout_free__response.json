@@ -1,0 +1,144 @@
+{
+  "model": "meta-llama/llama-4-scout:free",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "2020-12-07",
+      "date_received": "",
+      "date_verified": "",
+      "report_type": "Pathology",
+      "testing_context": "Research",
+      "ordering_clinic": "Orillia Soldiers Memorial Hospital (Orillia)",
+      "testing_laboratory": "Toronto Cancer Hospital Division of Tumor Sequencing and Diagnostics (Toronto)",
+      "sequencing_scope": "Gene panel",
+      "tested_genes": {
+        "LRP2": {
+          "gene_symbol": "LRP2",
+          "refseq_mrna": "NM_002329.3"
+        },
+        "CCND3": {
+          "gene_symbol": "CCND3",
+          "refseq_mrna": "NM_001760.5"
+        },
+        "RHOH": {
+          "gene_symbol": "RHOH",
+          "refseq_mrna": "NM_004310.5"
+        },
+        "FANCD2": {
+          "gene_symbol": "FANCD2",
+          "refseq_mrna": "NM_001018115.3"
+        },
+        "ING4": {
+          "gene_symbol": "ING4",
+          "refseq_mrna": "NM_016162.4"
+        },
+        "ACKR3": {
+          "gene_symbol": "ACKR3",
+          "refseq_mrna": "NM_020311.3"
+        },
+        "GNAS": {
+          "gene_symbol": "GNAS",
+          "refseq_mrna": "NM_000516.7"
+        },
+        "MPO": {
+          "gene_symbol": "MPO",
+          "refseq_mrna": "NM_000250.2"
+        },
+        "HMGA1": {
+          "gene_symbol": "HMGA1",
+          "refseq_mrna": "NM_145899.3"
+        },
+        "KDM5A": {
+          "gene_symbol": "KDM5A",
+          "refseq_mrna": "NM_001291415.2"
+        },
+        "ZHX2": {
+          "gene_symbol": "ZHX2",
+          "refseq_mrna": "NM_014943.5"
+        },
+        "CHD1": {
+          "gene_symbol": "CHD1",
+          "refseq_mrna": "NM_001273.5"
+        },
+        "PSIP1": {
+          "gene_symbol": "PSIP1",
+          "refseq_mrna": "NM_033222.5"
+        },
+        "FOXA2": {
+          "gene_symbol": "FOXA2",
+          "refseq_mrna": "NM_021784.5"
+        },
+        "PRRC2A": {
+          "gene_symbol": "PRRC2A",
+          "refseq_mrna": "NM_004638.4"
+        },
+        "TPM3": {
+          "gene_symbol": "TPM3",
+          "refseq_mrna": "NM_152263.4"
+        },
+        "BCL2A": {
+          "gene_symbol": "BCL2A",
+          "refseq_mrna": "NM_001024808.3"
+        },
+        "ATM": {
+          "gene_symbol": "ATM",
+          "refseq_mrna": "NM_000051.4"
+        }
+      },
+      "num_tested_genes": "18",
+      "sample_type": "Other RNA fractions",
+      "analysis_type": "Karyotyping",
+      "variants": [
+        {
+          "gene_symbol": "ATM",
+          "variant_id": "",
+          "chromosome": "chr11",
+          "hgvsg": "g.108228317T>A",
+          "hgvsc": "c.5514T>A",
+          "hgvsp": "p.Cys1838Ter",
+          "transcript_id": "NM_000051.4",
+          "exon": "19",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "ACKR3",
+          "variant_id": "",
+          "chromosome": "chr2",
+          "hgvsg": "g.236568008C>A",
+          "hgvsc": "c.222C>A",
+          "hgvsp": "p.Thr74=",
+          "transcript_id": "NM_020311.3",
+          "exon": "10",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "KDM5A",
+          "variant_id": "",
+          "chromosome": "chrX",
+          "hgvsg": "g.44876814A>T",
+          "hgvsc": "c.3627A>T",
+          "hgvsp": "p.Ile1209=",
+          "transcript_id": "NM_001291415.2",
+          "exon": "3",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        }
+      ],
+      "num_variants": "3",
+      "reference_genome": "GRCh38"
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital2__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+}

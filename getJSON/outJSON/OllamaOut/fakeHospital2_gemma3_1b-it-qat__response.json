@@ -1,0 +1,43 @@
+{
+  "model": "gemma3:1b-it-qat",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "2020-12-07",
+      "date_received": "2020-12-07",
+      "date_verified": "2020-12-09",
+      "report_type": "Pathology",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Orillia Soldiers Memo- rial Hospital (Orillia, Sim coe/ Muskoka)",
+      "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
+      "sequencing_scope": "Gene panel, Targeted variant testing, WES, WGS, WTS",
+      "tested_genes": {
+        "ATM": {
+          "gene_symbol": "ATM",
+          "refseq_mrna": "NM_004525.3"
+        },
+        "ACKR3": {
+          "gene_symbol": "ACKR3",
+          "refseq_mrna": "NM_020311.3"
+        },
+        "KDMGA": {
+          "gene_symbol": "KDMGA",
+          "refseq_mrna": "NM_001291415.5"
+        }
+      },
+      "num_tested_genes": "42",
+      "sample_type": "Amplified DNA",
+      "analysis_type": "Variant analysis, Karyotyping, Microarray"
+    },
+    "report_metadata": {
+      "report_dates": "2020-12-07",
+      "report_type": "Pathology",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Orillia Soldiers Memo- rial Hospital (Orillia, Sim coe/ Muskoka)",
+      "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
+      "testing_information": "PCR, Sequencing, Validation"
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital2__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+}

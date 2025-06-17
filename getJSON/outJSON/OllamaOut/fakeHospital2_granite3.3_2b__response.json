@@ -1,0 +1,86 @@
+{
+  "model": "granite3.3:2b",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "",
+      "date_received": "",
+      "date_verified": "2020-12-09",
+      "report_type": "Pathology",
+      "testing_context": "Research",
+      "ordering_clinic": "Toronto Cancer Hospital Division of Tumor Sequencing and Diagnostics, info@och.on.ca",
+      "testing_laboratory": "North York General Hospital (Toronto)",
+      "sequencing_scope": "Gene panel",
+      "tested_genes": {
+        "ATM": {
+          "gene_symbol": "ATM",
+          "refseq_mrna": "NM_000051.4"
+        },
+        "ACKR3": {
+          "gene_symbol": "ACKR3",
+          "refseq_mrna": "NM_020311.3"
+        },
+        "KDMGA": {
+          "gene_symbol": "KDMGA",
+          "refseq_mrna": "NM_001291415.2"
+        }
+      },
+      "additional_genes": [
+        "LRP2",
+        "CCND3",
+        "RHOH",
+        "FANCD2",
+        "ING4",
+        "ACKR3",
+        "GNAS",
+        "MPO",
+        "HMGA1",
+        "KDMGA",
+        "ZHX2",
+        "CHDA",
+        "PSIPI",
+        "FOXA2",
+        "PRRCZA",
+        "TPM3",
+        "BCLZA",
+        "ATM"
+      ]
+    },
+    "variants": [
+      {
+        "gene": "ATM",
+        "variant": "c.1215G>A",
+        "effect_class": "Pathogenic/Likely Pathogenic",
+        "description": "Missense, R to H"
+      },
+      {
+        "gene": "ACKR3",
+        "variant": "c.904G>C",
+        "effect_class": "Variant of Uncertain Significance (VUS)",
+        "description": "Nonsense, R to X"
+      },
+      {
+        "gene": "KDMGA",
+        "variant": "c.3627A>T",
+        "effect_class": "Variant of Uncertain Significance (VUS)",
+        "description": "Missense, Ile1209="
+      }
+    ],
+    "test_details": {
+      "methodology": "RNA fractions sequenced with Gene panel and analyzed using Karyotyping",
+      "variants_called": "Using GATK and VarSeq, annotated with population databases, predictive algorithms, and ClinVar"
+    },
+    "recommendations": [
+      "Precision oncology approach advised. Targeted therapies, including hormone-correcting agents, may be considered; PI3K inhibitors could be explored for PIK3CA-mutated cases",
+      "Germline testing is not indicated, as all mutations are consistent with somatic events",
+      "Multidisciplinary tumor board review recommended to integrate findings into care"
+    ],
+    "limitations": [
+      "Limited sensitivity in pseudogene regions (e.g., PMS2, CHEK2)",
+      "Inability to detect certain structural variants (e.g., MSH2 inversions), deep intronic changes, or low-level mosaicism",
+      "PMS2 exons 11-15 are not analyzed"
+    ]
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital2__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+}

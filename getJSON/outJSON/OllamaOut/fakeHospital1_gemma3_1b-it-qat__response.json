@@ -1,0 +1,72 @@
+{
+  "model": "gemma3:1b-it-qat",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "2020-12-07",
+      "date_received": "2020-12-07",
+      "date_verified": "2020-12-09",
+      "report_type": "Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Ontario Cancer Hospital",
+      "testing_laboratory": "Ontario Cancer Hospital",
+      "sequencing_scope": "Gene panel",
+      "tested_genes": {
+        "EXON1": {
+          "gene_symbol": "EXON1",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "EXON2": {
+          "gene_symbol": "EXON2",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        }
+      },
+      "num_tested_genes": "3",
+      "sample_type": "Other RNA fractions",
+      "analysis_type": "Variant analysis, Karyotyping, Microarray"
+    },
+    "report_metadata": {
+      "report_dates": "2020-12-07",
+      "report_type": "Pathology or Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Ontario Cancer Hospital",
+      "testing_laboratory": "Ontario Cancer Hospital",
+      "sequencing_scope": "Gene panel",
+      "tested_genes": {
+        "EXON1": {
+          "gene_symbol": "EXON1",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "EXON2": {
+          "gene_symbol": "EXON2",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        }
+      },
+      "num_tested_genes": "3",
+      "sample_type": "Other RNA fractions",
+      "analysis_type": "Variant analysis, Karyotyping, Microarray"
+    },
+    "variant_details": {
+      "variant_id": "OMIM",
+      "gene_symbol": "HGNC",
+      "transcript_id": "NM_xxxxxxx.x",
+      "chromosome": "chr1\u201322",
+      "hgvsc": "None",
+      "hgvsp": "None",
+      "hgvta": "None",
+      "hgvac": "None",
+      "hgvb": "None",
+      "hgvc": "None",
+      "hgva": "None",
+      "hgvf": "None",
+      "hgvg": "None",
+      "hgvx": "None",
+      "mt": "None",
+      "h": "None",
+      "d": "None",
+      "p": "None"
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital1__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+}

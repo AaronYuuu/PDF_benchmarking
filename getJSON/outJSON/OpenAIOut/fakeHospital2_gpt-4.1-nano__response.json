@@ -1,0 +1,84 @@
+{
+  "model": "gpt-4.1-nano",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "",
+      "date_received": "",
+      "date_verified": "2020-12-09",
+      "report_type": "Pathology",
+      "testing_context": "Research",
+      "ordering_clinic": "Orillia Soldiers Memorial Hospital (Orillia)",
+      "testing_laboratory": "North York General Hospital (Toronto)",
+      "sequencing_scope": "Gene panel",
+      "tested_genes": {
+        "ATM": {
+          "gene_symbol": "ATM",
+          "refseq_mrna": "NM_000051.4"
+        },
+        "ACKR3": {
+          "gene_symbol": "ACKR3",
+          "refseq_mrna": "NM_020311.3"
+        },
+        "KDMGA": {
+          "gene_symbol": "KDMGA",
+          "refseq_mrna": "NM_001291415.2"
+        }
+      },
+      "num_tested_genes": "18",
+      "sample_type": "",
+      "analysis_type": "Variant analysis, Karyotyping",
+      "variants": [
+        {
+          "gene_symbol": "ATM",
+          "variant_id": "5514T>A",
+          "chromosome": "chr19",
+          "hgvsg": "g.5514T>A",
+          "hgvsc": "c.5514T>A",
+          "hgvsp": "p.Cys1838Ter",
+          "transcript_id": "NM_000051.4",
+          "exon": "19",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "0.00026",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "ACKR3",
+          "variant_id": "222C>A",
+          "chromosome": "chr2",
+          "hgvsg": "g.236568008C>A",
+          "hgvsc": "c.222C>A",
+          "hgvsp": "p.Thr74=",
+          "transcript_id": "NM_020311.3",
+          "exon": "10",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "0.000453",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "KDMGA",
+          "variant_id": "3627A>T",
+          "chromosome": "chrX",
+          "hgvsg": "g.44876814A>T",
+          "hgvsc": "c.3627A>T",
+          "hgvsp": "p.Ile1209=",
+          "transcript_id": "NM_001291415.2",
+          "exon": "3",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "0.00292",
+          "mafan": "",
+          "mafaf": ""
+        }
+      ],
+      "num_variants": "3",
+      "reference_genome": "GRCh38"
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital2__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+}

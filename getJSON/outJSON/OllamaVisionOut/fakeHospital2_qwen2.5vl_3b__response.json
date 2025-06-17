@@ -1,0 +1,46 @@
+{
+  "model": "qwen2.5vl:3b",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "",
+      "date_received": "",
+      "date_verified": "",
+      "report_type": "Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Toronto Cancer Cancer Hospital",
+      "testing_laboratory": "Toronto Cancer Cancer Hospital",
+      "sequencing_scope": "Gene panel",
+      "tested_genes": {
+        "GENE1": {
+          "gene_symbol": "GENE1",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        }
+      },
+      "num_tested_genes": "1",
+      "sample_type": "Total DNA",
+      "analysis_type": "Variant analysis",
+      "variants": [
+        {
+          "gene_symbol": "GENE1",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        }
+      ],
+      "num_variants": "1",
+      "reference_genome": ""
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital2"
+}

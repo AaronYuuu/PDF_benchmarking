@@ -1,0 +1,82 @@
+{
+  "model": "llama3.2:1b",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "",
+      "date_received": "",
+      "date_verified": "",
+      "report_type": "",
+      "testing_context": "",
+      "ordering_clinic": "",
+      "testing_laboratory": "",
+      "sequencing_scope": "Gene panel, Targeted variant testing, WES, WGS, WTS",
+      "tested_genes": {
+        "GENE1": {
+          "gene_symbol": "",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "GENE2": {
+          "gene_symbol": "",
+          "refseq_mrna": ""
+        },
+        "ACKR3": {
+          "gene_symbol": "",
+          "variant_id": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        }
+      },
+      "num_tested_genes": "",
+      "sample_type": "",
+      "analysis_type": "Variant analysis, Karyotyping",
+      "variants": [
+        {
+          "gene_symbol": "",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        }
+      ],
+      "num_variants": 0,
+      "reference_genome": ""
+    },
+    "report_metadata": {
+      "Report Dates": "",
+      "Report Type": "Pathology or Molecular Genetics",
+      "Testing Context": "Clinical",
+      "Ordering Clinic": "",
+      "Testing Laboratory": ""
+    },
+    "variant_details": {
+      "Variant ID": "OMIM, ClinVar, dbSNP",
+      "Gene Symbol": "HGNC",
+      "Transcript ID": "NM_000123.3",
+      "HGVS": "g., c., p.",
+      "Chromosome": "chr1\u201322, chrX, chrY",
+      "Exon": "Number(s)",
+      "Zygosity": "",
+      "Interpretation": "'Variant of [clinical significance...]'",
+      "MAF": "mafac, mafan, mafaf"
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital2__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+}

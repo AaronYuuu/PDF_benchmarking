@@ -1,0 +1,144 @@
+{
+  "model": "google/gemini-2.0-flash-exp:free",
+  "status": "success",
+  "data": {
+    "report_id": {
+      "date_collected": "2020-12-07",
+      "date_received": "2020-12-09",
+      "date_verified": "2020-12-09",
+      "report_type": "Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Ontario Cancer Hospital (Toronto)",
+      "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
+      "sequencing_scope": "Gene panel",
+      "tested_genes": {
+        "LRP2": {
+          "gene_symbol": "LRP2",
+          "refseq_mrna": ""
+        },
+        "CCND3": {
+          "gene_symbol": "CCND3",
+          "refseq_mrna": ""
+        },
+        "RHOH": {
+          "gene_symbol": "RHOH",
+          "refseq_mrna": ""
+        },
+        "FANCD2": {
+          "gene_symbol": "FANCD2",
+          "refseq_mrna": ""
+        },
+        "ING4": {
+          "gene_symbol": "ING4",
+          "refseq_mrna": ""
+        },
+        "ACKR3": {
+          "gene_symbol": "ACKR3",
+          "refseq_mrna": ""
+        },
+        "GNAS": {
+          "gene_symbol": "GNAS",
+          "refseq_mrna": ""
+        },
+        "MPO": {
+          "gene_symbol": "MPO",
+          "refseq_mrna": ""
+        },
+        "HMGA1": {
+          "gene_symbol": "HMGA1",
+          "refseq_mrna": ""
+        },
+        "KDM6A": {
+          "gene_symbol": "KDM6A",
+          "refseq_mrna": ""
+        },
+        "ZHX2": {
+          "gene_symbol": "ZHX2",
+          "refseq_mrna": ""
+        },
+        "CHD4": {
+          "gene_symbol": "CHD4",
+          "refseq_mrna": ""
+        },
+        "PSIPI": {
+          "gene_symbol": "PSIPI",
+          "refseq_mrna": ""
+        },
+        "FOXA2": {
+          "gene_symbol": "FOXA2",
+          "refseq_mrna": ""
+        },
+        "PRRCZA": {
+          "gene_symbol": "PRRCZA",
+          "refseq_mrna": ""
+        },
+        "TPM3": {
+          "gene_symbol": "TPM3",
+          "refseq_mrna": ""
+        },
+        "BCL7A": {
+          "gene_symbol": "BCL7A",
+          "refseq_mrna": ""
+        },
+        "ATM": {
+          "gene_symbol": "ATM",
+          "refseq_mrna": ""
+        }
+      },
+      "num_tested_genes": "18",
+      "sample_type": "Other RNA fractions",
+      "analysis_type": "Variant analysis",
+      "variants": [
+        {
+          "gene_symbol": "ATM",
+          "variant_id": "VCV006516823",
+          "chromosome": "chr11",
+          "hgvsg": "",
+          "hgvsc": "c.5514T>A",
+          "hgvsp": "p.Cys1838Ter",
+          "transcript_id": "",
+          "exon": "19",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "ACKR3",
+          "variant_id": "VCV006460873",
+          "chromosome": "chr2",
+          "hgvsg": "",
+          "hgvsc": "c.222C>A",
+          "hgvsp": "p.Thr74=",
+          "transcript_id": "",
+          "exon": "10",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "KDM6A",
+          "variant_id": "VCVO02228307",
+          "chromosome": "chrX",
+          "hgvsg": "",
+          "hgvsc": "c.3627A>T",
+          "hgvsp": "p.lle1209=",
+          "transcript_id": "",
+          "exon": "3",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        }
+      ],
+      "num_variants": "3",
+      "reference_genome": "GRCh37"
+    }
+  },
+  "timestamp": "2025-06-05",
+  "source_file": "report_fakeHospital1__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+}
