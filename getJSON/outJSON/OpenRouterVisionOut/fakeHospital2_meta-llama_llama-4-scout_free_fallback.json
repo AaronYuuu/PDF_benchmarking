@@ -1,8 +1,0 @@
-{
-  "model": "meta-llama/llama-4-scout:free",
-  "status": "json_extraction_failed",
-  "error": "Could not extract valid JSON from response",
-  "raw_response": "",
-  "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital2"
-}

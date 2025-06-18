@@ -3,79 +3,41 @@
   "status": "success",
   "data": {
     "report_id": {
-      "date_collected": "2020-12-07",
+      "date_collected": "2024-06-15",
       "date_received": "",
       "date_verified": "",
       "report_type": "Molecular Genetics",
-      "testing_context": "Research",
-      "ordering_clinic": "Ontario Cancer Hospital (Toronto)",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Mount Sinai Hospital (Toronto)",
       "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
       "sequencing_scope": "Gene panel",
       "tested_genes": {
-        "ATM": {
-          "gene_symbol": "ATM",
+        "GENE1": {
+          "gene_symbol": "OTOF",
           "refseq_mrna": "NM_000123.3"
-        },
-        "ACKR3": {
-          "gene_symbol": "ACKR3",
-          "refseq_mrna": "NM_001019317.3"
-        },
-        "KDM6A": {
-          "gene_symbol": "KDM6A",
-          "refseq_mrna": "NM_006333.3"
         }
       },
-      "num_tested_genes": "3",
+      "num_tested_genes": "1",
       "sample_type": "ctDNA",
-      "analysis_type": "Variant analysis, Karyotyping",
+      "analysis_type": "Variant analysis",
       "variants": [
         {
-          "gene_symbol": "ATM",
-          "variant_id": "OMIM, ClinVar, dbSNP",
-          "chromosome": "chr1",
-          "hgvsg": "c.5514T>A p.Cys1838Ter",
-          "hgvsc": "",
+          "gene_symbol": "OTOF",
+          "variant_id": "c.5436G>T",
+          "chromosome": "chr7",
+          "hgvsg": "heterozygous",
+          "hgvsc": "p.Glu1812Asp",
           "hgvsp": "",
           "transcript_id": "NM_000123.3",
-          "exon": "19",
+          "exon": "7",
           "zygosity": "heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "",
-          "mafan": "",
-          "mafaf": ""
-        },
-        {
-          "gene_symbol": "ACKR3",
-          "variant_id": "OMIM, ClinVar, dbSNP",
-          "chromosome": "chr1",
-          "hgvsg": "c.222C>A p.Thr74",
-          "hgvsc": "",
-          "hgvsp": "",
-          "transcript_id": "NM_001019317.3",
-          "exon": "10",
-          "zygosity": "heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "",
-          "mafan": "",
-          "mafaf": ""
-        },
-        {
-          "gene_symbol": "KDM6A",
-          "variant_id": "OMIM, ClinVar, dbSNP",
-          "chromosome": "chr1",
-          "hgvsg": "c.3627A>T p.Ile1209",
-          "hgvsc": "",
-          "hgvsp": "",
-          "transcript_id": "NM_006333.3",
-          "exon": "3",
-          "zygosity": "heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
+          "interpretation": "Likely pathogenic",
           "mafac": "",
           "mafan": "",
           "mafaf": ""
         }
       ],
-      "num_variants": "3",
+      "num_variants": "1",
       "reference_genome": ""
     }
   },

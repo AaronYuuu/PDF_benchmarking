@@ -1,8 +1,0 @@
-{
-  "model": "qwen2.5vl:3b",
-  "status": "json_extraction_failed",
-  "error": "Could not extract valid JSON from response",
-  "raw_response": "```json\n{\n  \"report_id\": {\n    \"date_collected\": \"2020-12-07\",\n    \"date_received\": \"2020-12-09\",\n    \"date_verified\": \"2020-12-09\",\n    \"report_type\": \"Molecular Genetics\",\n    \"testing_context\": \"Clinical\",\n    \"ordering_clinic\": \"Orillia Soldiers Memorial Hospital (Orillia, Simcoe/Muskoka)\",\n    \"testing_laboratory\": \"Toronto Cancer Hospital Division of Tumor Sequencing and Diagnostics\",\n (Toronto, ON)\",\nMain St, West, date verified: 2020-12-09\",\n    \"sequencing_scope\": \"Gene panel\",\n    \"tested_genes\": {\n      \"ATM\": {\n        \"gene_symbol\": \"ATM\",\n \"refseq_mrna\": \"NM_000051.4\"\n      },\n      \"ACKR3\": {\n        \"gene_symbol\": \"ACKR3\",\n \"refseq_mrna\": \"NM_020311.3\"\n      },\n      \"KDMGA\": {\n        \"gene_symbol\": \"KDMGA\",\n \"refseq_mrna\": \"NM_001291415.2\"\n      }\n    },\n    \"num_tested_genes\": \"3\",\n    \"sample_type\": \"Total DNA\",\n    \"analysis_type\": \"Variant analysis\",\n    \"variants\": [\n      {\n        \"gene_symbol\": \"ATM\",\n \"variant_id\": \"C.5514T>A\",\n \"chromosome\": \"chr1\",\n \"hgvsg\": \"g.\",\n \"hgvsc\": \"c.\",\n \"hgvsp\": \"p.Cys1838Ter\",\n \"transcript_id\": \"\",\n \"exon\": \"\",\n \"zygosity\": \"heterozygous\",\n \"interpretation\": \"Variant of uncertain clinical significance\",\n \"maf\": \"0.00025514\",\n \"mafan\": \"0.0000000000000000000000000000000",
-  "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital2__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
-}
