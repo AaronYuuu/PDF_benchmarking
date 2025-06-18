@@ -3,6 +3,7 @@ import json
 import os
 import pprint
 import copy as c
+import pandas as pd  # Ensure pandas is imported with alias 'pd'
 
 def compare(json1, json2):
     """
@@ -271,40 +272,10 @@ def compare_values_with_template(template, data):
         return True, 0, total_values, []
     else:
         return False, len(differences), total_values, differences
-
-def visualize(df1, df2):
-    """
-    Visualize the results of two dataframes side by side.
-    """
-    import matplotlib.pyplot as plt
-    import seaborn as sns
-    
-    # Set up the figure
-    fig, axes = plt.subplots(nrows=1, ncols=2, figsize=(14, 6))
-    
-    # Plot for fakeHospital1
-    sns.barplot(x=df1.index, y='Precision', data=df1, ax=axes[0], color='blue', label='Precision')
-    sns.barplot(x=df1.index, y='Recall', data=df1, ax=axes[0], color='orange', label='Recall')
-    sns.barplot(x=df1.index, y='F1-Score', data=df1, ax=axes[0], color='green', label='F1-Score')
-    axes[0].set_title('Fake Hospital 1 Results')
-    axes[0].set_ylabel('Scores')
-    axes[0].set_xlabel('LLM Model')
-    axes[0].legend()
-    
-    # Plot for fakeHospital2
-    sns.barplot(x=df2.index, y='Precision', data=df2, ax=axes[1], color='blue', label='Precision')
-    sns.barplot(x=df2.index, y='Recall', data=df2, ax=axes[1], color='orange', label='Recall')
-    sns.barplot(x=df2.index, y='F1-Score', data=df2, ax=axes[1], color='green', label='F1-Score')
-    axes[1].set_title('Fake Hospital 2 Results')
-    axes[1].set_ylabel('Scores')
-    axes[1].set_xlabel('LLM Model')
-    axes[1].legend()
-    
-    plt.tight_layout()
-    plt.show()
     
 
 def main():
+    import pandas as pd
     with open("../makeTemplatePDF/out/mock_data.json", "r") as f:
         temp = json.load(f)
     k = list(temp.keys())[0]
@@ -312,9 +283,10 @@ def main():
     print("Template loaded successfully.")
     template = template_to_string(template)  
 
-    fakehospital1results = {}
-    fakehospital2results = {}
-    
+    if os.path.exists("Hospital.csv"):
+        ovr = pd.read_csv("Hospital.csv") 
+    else:
+        ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital"])  # Load existing CSV if it exists to append results
 
     json_direcs = ["OllamaOut", "OpenAIOut", "OpenRouter", "OpenRouterVisionOut", "OllamaVisionOut", "OpenAiVisionOut"]
     hospitals = ["fakeHospital1", "fakeHospital2"] ##update according to latex templates generated
@@ -352,7 +324,8 @@ def main():
                 if dtemp["status"] != "success":
                     #print(f"Error status: {dtemp['status']}. Skipping comparison.")
                     if hospital == "fakeHospital1":
-                        fakehospital1results[dtemp["model"]] = {
+                        temp = {
+                            "LLM": dtemp["model"],
                             "False Positives": 88,
                             "False Negatives": 88,
                             "Incorrect Extractions": 88,
@@ -364,8 +337,10 @@ def main():
                             "Source": source, 
                             "Hospital": "hospital1"
                         }
+                        ovr = pd.concat([ovr, pd.DataFrame([temp])], ignore_index=True)
                     elif hospital == "fakeHospital2":
-                        fakehospital2results[dtemp["model"]] = {
+                        temp = {
+                            "LLM": dtemp["model"],
                             "False Positives": 88,
                             "False Negatives": 88,
                             "Incorrect Extractions": 88,
@@ -377,6 +352,7 @@ def main():
                             "Source": source,
                             "Hospital": "hospital2"
                         }
+                        ovr = pd.concat([ovr, pd.DataFrame([temp])], ignore_index=True)
                     continue
                 else:  
                     try:
@@ -422,7 +398,8 @@ def main():
                         print(f"F1 Score: {f1score:.1f}\n")
                     
                     if hospital == "fakeHospital1":
-                        fakehospital1results[dtemp["model"]] = {
+                        temp = {
+                            "LLM": dtemp["model"],
                             "False Positives": fp,
                             "False Negatives": fn,
                             "Incorrect Extractions": ic,
@@ -434,8 +411,10 @@ def main():
                             "Source": source, 
                             "Hospital": "hospital1"
                         }
+                        ovr = pd.concat([ovr, pd.DataFrame([temp])], ignore_index=True)
                     elif hospital == "fakeHospital2":
-                        fakehospital2results[dtemp["model"]] = {
+                        temp = {
+                            "LLM": dtemp["model"],
                             "False Positives": fp,
                             "False Negatives": fn,
                             "Incorrect Extractions": ic,
@@ -447,22 +426,13 @@ def main():
                             "Source": source,
                             "Hospital": "hospital2"
                         }
+                        ovr = pd.concat([ovr, pd.DataFrame([temp])], ignore_index=True)
                     continue
 
     # Save as pandas dataframe and export to csv
-    import pandas as pd
-    h1 = pd.DataFrame.from_dict(fakehospital1results, orient='index')
-    h2 = pd.DataFrame.from_dict(fakehospital2results, orient='index')
-    h1.to_csv("fakeHospital1_results.csv")
-    h2.to_csv("fakeHospital2_results.csv")
-    h1 = pd.read_csv("fakeHospital1_results.csv")
-    h2 = pd.read_csv("fakeHospital2_results.csv")
-    h1.rename(columns={'Unnamed: 0': 'LLM'}, inplace=True)
-    h2.rename(columns={'Unnamed: 0': 'LLM'}, inplace=True)
-    h1.sort_values(by='LLM', ascending=False, inplace = True)
-    h2.sort_values(by='LLM', ascending=False, inplace = True)
-    h1.to_csv("fakeHospital1_results.csv", index=False)
-    h2.to_csv("fakeHospital2_results.csv", index=False)
+    ovr.to_csv("Hospital.csv")
+    print("Visualization complete.")
+
     
 if __name__ == "__main__":
     main()

@@ -34,3 +34,9 @@ echo "Check the respective output directories:"
 echo "- OllamaOut/ for Ollama results"
 echo "- OpenAIOut/ for OpenAI results" 
 echo "- JSONout/ for OpenRouter results"
+
+echo "4. Checking accuracy"
+echo "---------------------"
+# Run accuracy check script
+python3 compareJSON.py
+echo "Accuracy check completed! Check the Hospital.csv file for results."
