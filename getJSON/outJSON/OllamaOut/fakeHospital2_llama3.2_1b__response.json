@@ -2,42 +2,24 @@
   "model": "llama3.2:1b",
   "status": "success",
   "data": {
-    "report_id": {
-      "date_collected": "",
-      "date_received": "",
-      "date_verified": "",
-      "report_type": "",
-      "testing_context": "",
-      "ordering_clinic": "",
-      "testing_laboratory": "",
+    "clinical_testing_info": {
       "sequencing_scope": "Gene panel, Targeted variant testing, WES, WGS, WTS",
       "tested_genes": {
         "GENE1": {
           "gene_symbol": "",
-          "refseq_mrna": "NM_xxxxxxx.x"
+          "refseq_mrna": "NM_000123.3"
         },
         "GENE2": {
-          "gene_symbol": "",
-          "refseq_mrna": ""
-        },
-        "ACKR3": {
-          "gene_symbol": "",
-          "variant_id": "",
-          "hgvsg": "",
-          "hgvsc": "",
-          "hgvsp": "",
-          "transcript_id": "",
-          "exon": "",
-          "zygosity": "",
-          "interpretation": "",
-          "mafac": "",
-          "mafan": "",
-          "mafaf": ""
+          "gene_symbol": ""
         }
       },
       "num_tested_genes": "",
-      "sample_type": "",
-      "analysis_type": "Variant analysis, Karyotyping",
+      "sample_type": "Amplified DNA, ctDNA, Total DNA, Total RNA",
+      "analysis_type": [
+        "Variant analysis",
+        "Karyotyping",
+        "Microarray"
+      ],
       "variants": [
         {
           "gene_symbol": "",
@@ -49,34 +31,39 @@
           "transcript_id": "",
           "exon": "",
           "zygosity": "",
-          "interpretation": "",
-          "mafac": "",
-          "mafan": "",
-          "mafaf": ""
+          "interpretation": ""
         }
       ],
-      "num_variants": 0,
+      "num_variants": "",
       "reference_genome": ""
     },
     "report_metadata": {
-      "Report Dates": "",
-      "Report Type": "Pathology or Molecular Genetics",
-      "Testing Context": "Clinical",
-      "Ordering Clinic": "",
-      "Testing Laboratory": ""
+      "report_dates": [
+        "2024-06-15",
+        "2024-06-16",
+        "2024-06-17"
+      ],
+      "report_type": "Pathology or Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Mount Sinai Hospital (Toronto)",
+      "testing_laboratory": "Ontario Cancer Hospital (Toronto)"
     },
     "variant_details": {
-      "Variant ID": "OMIM, ClinVar, dbSNP",
-      "Gene Symbol": "HGNC",
-      "Transcript ID": "NM_000123.3",
-      "HGVS": "g., c., p.",
-      "Chromosome": "chr1\u201322, chrX, chrY",
-      "Exon": "Number(s)",
-      "Zygosity": "",
-      "Interpretation": "'Variant of [clinical significance...]'",
-      "MAF": "mafac, mafan, mafaf"
+      "variant_id": "OMIM, ClinVar, dbSNP",
+      "gene_symbol": "GENE1",
+      "transcript_id": "NM_000123.3",
+      "hgvs": {
+        "genomic": "g.",
+        "coding": "c.",
+        "protein": "p."
+      },
+      "chromosome": "chr1-22, chrX, chrY",
+      "exon": "",
+      "zygosity": "Heterozygous",
+      "interpretation": "\"Variant of clinical significance...\"",
+      "maf": ""
     }
   },
   "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital2__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+  "source_file": "report_fakeHospital2__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
 }

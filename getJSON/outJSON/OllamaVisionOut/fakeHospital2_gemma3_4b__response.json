@@ -3,80 +3,42 @@
   "status": "success",
   "data": {
     "report_id": {
-      "date_collected": "2020-12-07",
-      "date_received": "2020-12-07",
-      "date_verified": "2020-12-07",
-      "report_type": "Pathology",
+      "date_collected": "2024-06-15",
+      "date_received": "2024-06-16",
+      "date_verified": "2024-06-17",
+      "report_type": "Molecular Genetics",
       "testing_context": "Clinical",
-      "ordering_clinic": "Ontario Soldiers\u2019 Memorial Hospital (Orillia, Simcoe/Muskoka)",
-      "testing_laboratory": "Toronto Cancer Hospital (Toronto)",
-      "sequencing_scope": "Gene panel",
+      "ordering_clinic": "Mount Sinai Hospital (Toronto)",
+      "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
+      "sequencing_scope": "Targeted variant testing",
       "tested_genes": {
-        "ATM": {
-          "gene_symbol": "ATM",
+        "OTOF": {
+          "gene_symbol": "OTOF",
           "refseq_mrna": "NM_000123.3"
-        },
-        "ACKR3": {
-          "gene_symbol": "ACR3",
-          "refseq_mrna": "NM_0032817.2"
-        },
-        "KDMD6A": {
-          "gene_symbol": "KDMD6A",
-          "refseq_mrna": "NM_0044768.3"
         }
       },
-      "num_tested_genes": "3",
-      "sample_type": "Total DNA",
-      "analysis_type": "Variant analysis, Karyotyping",
+      "num_tested_genes": "1",
+      "sample_type": "ctDNA",
+      "analysis_type": "Variant analysis",
       "variants": [
         {
-          "gene_symbol": "ATM",
-          "variant_id": "C.55147A",
+          "gene_symbol": "OTOF",
+          "variant_id": "c.5436G>T",
           "chromosome": "chr1",
           "hgvsg": "g.",
           "hgvsc": "c.",
-          "hgvsp": "p.Cys183Ter",
+          "hgvsp": "p.Glu1812Asp",
           "transcript_id": "NM_000123.3",
-          "exon": "1838",
+          "exon": "7",
           "zygosity": "heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "2.606e-04",
-          "mafan": "148 alleles",
-          "mafaf": ""
-        },
-        {
-          "gene_symbol": "ACR3",
-          "variant_id": "C.222C>A",
-          "chromosome": "chr2",
-          "hgvsg": "g.",
-          "hgvsc": "c.",
-          "hgvsp": "p.Thr74>Phe74",
-          "transcript_id": "NM_0032817.2",
-          "exon": "74",
-          "zygosity": "heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "4.53e-04",
-          "mafan": "587186 alleles",
-          "mafaf": ""
-        },
-        {
-          "gene_symbol": "KDMD6A",
-          "variant_id": "C.3627A>T",
-          "chromosome": "chrX",
-          "hgvsg": "g.",
-          "hgvsc": "c.",
-          "hgvsp": "p.Ile120>Ile120",
-          "transcript_id": "NM_0044768.3",
-          "exon": "1209",
-          "zygosity": "heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "2.92e-03",
-          "mafan": "559603 alleles",
-          "mafaf": ""
+          "interpretation": "Likely pathogenic",
+          "mafac": null,
+          "mafan": null,
+          "mafaf": null
         }
       ],
-      "num_variants": "3",
-      "reference_genome": "GRCH38"
+      "num_variants": "1",
+      "reference_genome": "GRCh37"
     }
   },
   "timestamp": "2025-06-05",

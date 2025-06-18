@@ -10,19 +10,47 @@
       "testing_context": "Clinical",
       "ordering_clinic": "Toronto Cancer Cancer Hospital",
       "testing_laboratory": "Toronto Cancer Cancer Hospital",
-      "sequencing_scope": "Gene panel",
+      "sequencing_scope": "Targeted variant testing",
       "tested_genes": {
-        "GENE1": {
-          "gene_symbol": "GENE1",
-          "refseq_mrna": "NM_xxxxxxx.x"
+        "IL6ST": {
+          "gene_symbol": "IL6ST",
+          "refseq_mrna": "NM_000123.3"
+        },
+        "OTOF": {
+          "gene_symbol": "OTOF",
+          "refseq_mrna": "NM_000123.3"
+        },
+        "IGF2R": {
+          "gene_symbol": "IGF2R",
+          "refseq_mrna": "NM_000123.3"
+        },
+        "TCF12": {
+          "gene_symbol": "TCF12",
+          "refseq_mrna": "NM_000123.3"
+        },
+        "NCKIPSD": {
+          "gene_symbol": "NCKIPSD",
+          "refseq_mrna": "NM_000123.3"
+        },
+        "DAB2IP": {
+          "gene_symbol": "DAB2IP",
+          "refseq_mrna": "NM_000123.3"
+        },
+        "MDM2": {
+          "gene_symbol": "MDM2",
+          "refseq_mrna": "NM_000123.3"
+        },
+        "RAP1GDS1": {
+          "gene_symbol": "RAP1GDS1",
+          "refseq_mrna": "NM_000123.3"
         }
       },
-      "num_tested_genes": "1",
-      "sample_type": "Total DNA",
+      "num_tested_genes": "8",
+      "sample_type": "ctDNA",
       "analysis_type": "Variant analysis",
       "variants": [
         {
-          "gene_symbol": "GENE1",
+          "gene_symbol": "IL6ST",
           "variant_id": "",
           "chromosome": "",
           "hgvsg": "",
@@ -31,13 +59,118 @@
           "transcript_id": "",
           "exon": "",
           "zygosity": "",
-          "interpretation": "",
+          "interpretation": "Likely pathogenic",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "OTOF",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "Likely pathogenic",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "IGF2R",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "Likely pathogenic",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "TCF12",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "Likely pathogenic",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "NCKIPSD",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "Likely pathogenic",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "DAB2IP",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "Likely pathogenic",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "MDM2",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "Likely pathogenic",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
+        },
+        {
+          "gene_symbol": "RAP1GDS1",
+          "variant_id": "",
+          "chromosome": "",
+          "hgvsg": "",
+          "hgvsc": "",
+          "hgvsp": "",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "",
+          "interpretation": "Likely pathogenic",
           "mafac": "",
           "mafan": "",
           "mafaf": ""
         }
       ],
-      "num_variants": "1",
+      "num_variants": "8",
       "reference_genome": ""
     }
   },

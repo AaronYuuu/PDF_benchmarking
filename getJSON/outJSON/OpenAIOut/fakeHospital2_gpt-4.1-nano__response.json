@@ -5,80 +5,70 @@
     "report_id": {
       "date_collected": "",
       "date_received": "",
-      "date_verified": "2020-12-09",
-      "report_type": "Pathology",
-      "testing_context": "Research",
-      "ordering_clinic": "Orillia Soldiers Memorial Hospital (Orillia)",
-      "testing_laboratory": "North York General Hospital (Toronto)",
-      "sequencing_scope": "Gene panel",
+      "date_verified": "2024-06-17",
+      "report_type": "Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Windsor Regional Hospital (Windsor)",
+      "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
+      "sequencing_scope": "Targeted variant testing",
       "tested_genes": {
-        "ATM": {
-          "gene_symbol": "ATM",
-          "refseq_mrna": "NM_000051.4"
+        "OTOF": {
+          "gene_symbol": "OTOF",
+          "refseq_mrna": "NM_194248.3"
         },
-        "ACKR3": {
-          "gene_symbol": "ACKR3",
-          "refseq_mrna": "NM_020311.3"
+        "IL6ST": {
+          "gene_symbol": "IL6ST",
+          "refseq_mrna": "NM_002184.4"
         },
-        "KDMGA": {
-          "gene_symbol": "KDMGA",
-          "refseq_mrna": "NM_001291415.2"
+        "IGFZR": {
+          "gene_symbol": "IGFZR",
+          "refseq_mrna": "NM_000876.4"
+        },
+        "TCF12": {
+          "gene_symbol": "TCF12",
+          "refseq_mrna": "NM_001322159.3"
+        },
+        "NCKIPSD": {
+          "gene_symbol": "NCKIPSD",
+          "refseq_mrna": "NM_016453.4"
+        },
+        "DABZIP": {
+          "gene_symbol": "DABZIP",
+          "refseq_mrna": "NM_001395010.1"
+        },
+        "MDM2": {
+          "gene_symbol": "MDM2",
+          "refseq_mrna": "NM_002392.6"
+        },
+        "RAPIGDSI": {
+          "gene_symbol": "RAPIGDSI",
+          "refseq_mrna": "NM_001100427.2"
         }
       },
-      "num_tested_genes": "18",
+      "num_tested_genes": "8",
       "sample_type": "",
-      "analysis_type": "Variant analysis, Karyotyping",
+      "analysis_type": "Variant analysis",
       "variants": [
         {
-          "gene_symbol": "ATM",
-          "variant_id": "5514T>A",
-          "chromosome": "chr19",
-          "hgvsg": "g.5514T>A",
-          "hgvsc": "c.5514T>A",
-          "hgvsp": "p.Cys1838Ter",
-          "transcript_id": "NM_000051.4",
-          "exon": "19",
-          "zygosity": "heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "0.00026",
-          "mafan": "",
-          "mafaf": ""
-        },
-        {
-          "gene_symbol": "ACKR3",
-          "variant_id": "222C>A",
+          "gene_symbol": "OTOF",
+          "variant_id": "54366",
           "chromosome": "chr2",
-          "hgvsg": "g.236568008C>A",
-          "hgvsc": "c.222C>A",
-          "hgvsp": "p.Thr74=",
-          "transcript_id": "NM_020311.3",
-          "exon": "10",
-          "zygosity": "heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "0.000453",
-          "mafan": "",
-          "mafaf": ""
-        },
-        {
-          "gene_symbol": "KDMGA",
-          "variant_id": "3627A>T",
-          "chromosome": "chrX",
-          "hgvsg": "g.44876814A>T",
-          "hgvsc": "c.3627A>T",
-          "hgvsp": "p.Ile1209=",
-          "transcript_id": "NM_001291415.2",
-          "exon": "3",
-          "zygosity": "heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "0.00292",
-          "mafan": "",
-          "mafaf": ""
+          "hgvsg": "g.54366>T",
+          "hgvsc": "c.54366>1",
+          "hgvsp": "p.Glu1812Asp",
+          "transcript_id": "NM_194248.3",
+          "exon": "7",
+          "zygosity": "Heterozygous",
+          "interpretation": "Variant of clinical significance: Likely pathogenic",
+          "mafac": "0.00",
+          "mafan": "0.00",
+          "mafaf": "0.00"
         }
       ],
-      "num_variants": "3",
-      "reference_genome": "GRCh38"
+      "num_variants": "1",
+      "reference_genome": "GRCh37"
     }
   },
   "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital2__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+  "source_file": "report_fakeHospital2__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
 }
