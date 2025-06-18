@@ -14,3 +14,5 @@ api_keys.txt
 test.ipynb
 /makeTemplate/out/
 /getJSON/visResults.ipynb
+
+/getJSON/outJSON
