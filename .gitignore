@@ -15,10 +15,14 @@ test.ipynb
 /makeTemplate/out/
 /getJSON/visResults.ipynb
 
-/getJSON/outJSON/OllamaOUt
-/getJSON/outJSON/OllamaVisionOut
-/getJSON/outJSON/OpenAIOut
-/getJSON/outJSON/OPenAIVisionOut
-/getJSON/outJSON/OpenRouter
-/getJSON/outJSON/OpenRouterVisionOut
+/getJSON/outJSON/OllamaOut/*
+/getJSON/outJSON/OllamaVisionOut/*
+/getJSON/outJSON/OpenAIOut/*
+/getJSON/outJSON/OPenAIVisionOut/*
+/getJSON/outJSON/OpenRouter/*
+/getJSON/outJSON/OpenRouterVisionOut/*
+/getJSON/outJSON/OllamaOut/*
+/getJSON/outJSON/OllamaVisionOut/*
 /getJSON/visualization_outputs
+
+/visualization_outputs/*
