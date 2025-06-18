@@ -25,7 +25,7 @@ echo ""
 # Run openRouterLLMs.py
 echo "3. Running OpenRouter models..."
 echo "-------------------------------"
-python3 openRouterLLMs.py
+#python3 openRouterLLMs.py
 echo ""
 
 echo "======================================="

@@ -132,13 +132,14 @@ def main():
     # List of OpenAI models to try
     OPENAI_MODELS = [
         "gpt-4o-mini",
-        "gpt-4.1-nano"
+        "gpt-4.1-nano", 
+        "gpt-4o"
         # Add more OpenAI models as needed
     ]
     
     print("Starting OpenAI model processing...")
     print(f"Available models: {OPENAI_MODELS}")
-    '''
+    
     # Use the shared processing function
     process_text_files_with_models(
         models=OPENAI_MODELS,
@@ -147,14 +148,14 @@ def main():
         prompt_path="ollamaprompt.txt", 
         llm_function=textToLLM
     )
-    '''
+    
+    
     process_grouped_images_with_models(
         models=OPENAI_MODELS,
         output_dir="OpenAIVisionOut/",
         image_directory="../output_pdfs/images/",
         prompt_path="ollamaPrompt.txt"
     )
-
     print("Processing completed.")
 
 if __name__ == "__main__":

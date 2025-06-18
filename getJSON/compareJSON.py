@@ -288,10 +288,16 @@ def main():
     else:
         ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital"])  # Load existing CSV if it exists to append results
 
-    json_direcs = ["OllamaOut", "OpenAIOut", "OpenRouter", "OpenRouterVisionOut", "OllamaVisionOut", "OpenAiVisionOut"]
+    json_direcs = [#"OllamaOut", 
+                   "OpenAIOut", 
+                   #"OpenRouter", 
+                   #"OpenRouterVisionOut", 
+                   #"OllamaVisionOut", 
+                   #"OpenAIVisionOut"
+                   ]
     hospitals = ["fakeHospital1", "fakeHospital2"] ##update according to latex templates generated
     sources = {"OllamaOut": "Ollama", "OpenAIOut": "OpenAI", "OpenRouter": "OpenRouter",
-               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAiVisionOut": "OpenAi"}
+               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAIVisionOut": "OpenAi"}
     #json_direcs = ["OpenAIOut"]
     for direc in json_direcs:
         source = sources[direc]
@@ -319,6 +325,15 @@ def main():
                         dtemp["model"] = "gemini-2.0"
                 if "devstral-small" in dtemp["model"]:
                         dtemp["model"] = "devstral-small"
+                if "mistral-small-3.1-24b-instruct" in dtemp["model"]:
+                        dtemp["model"] = "mistral-3.1-24b"
+                if "granite3.2-vision" in dtemp["model"]:
+                        dtemp["model"] = "granite3.2"
+                if "llama3.2_1b" in dtemp["model"]:
+                        dtemp["model"] = "llama3.2:1b"
+                if "llama3.2_3b" in dtemp["model"]:
+                        dtemp["model"] = "llama3.2:3b"
+
                 dtemp["model"] = dtemp["model"].split("/")[-1] 
 
                 if dtemp["status"] != "success":

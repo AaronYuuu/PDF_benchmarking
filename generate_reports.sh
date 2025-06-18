@@ -36,3 +36,4 @@ cd getJSON
 python3 pdfToText.py
 echo "Text files generated successfully!"
 echo "=============================================="
+
