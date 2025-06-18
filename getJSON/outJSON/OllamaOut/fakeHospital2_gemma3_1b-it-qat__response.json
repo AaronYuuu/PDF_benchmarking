@@ -3,41 +3,72 @@
   "status": "success",
   "data": {
     "report_id": {
-      "date_collected": "2020-12-07",
-      "date_received": "2020-12-07",
-      "date_verified": "2020-12-09",
-      "report_type": "Pathology",
+      "date_collected": "",
+      "date_received": "",
+      "date_verified": "",
+      "report_type": "Molecular Genetics",
       "testing_context": "Clinical",
-      "ordering_clinic": "Orillia Soldiers Memo- rial Hospital (Orillia, Sim coe/ Muskoka)",
+      "ordering_clinic": "Windsor Regional Hospital (Windsor)",
       "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
-      "sequencing_scope": "Gene panel, Targeted variant testing, WES, WGS, WTS",
+      "sequencing_scope": "Gene panel",
       "tested_genes": {
-        "ATM": {
-          "gene_symbol": "ATM",
-          "refseq_mrna": "NM_004525.3"
+        "IL6ST": {
+          "gene_symbol": "IL6ST",
+          "refseq_mrna": "NM_002184.4"
         },
-        "ACKR3": {
-          "gene_symbol": "ACKR3",
-          "refseq_mrna": "NM_020311.3"
-        },
-        "KDMGA": {
-          "gene_symbol": "KDMGA",
-          "refseq_mrna": "NM_001291415.5"
+        "OTOF": {
+          "gene_symbol": "OTOF",
+          "refseq_mrna": "NM_000876.4"
         }
       },
-      "num_tested_genes": "42",
-      "sample_type": "Amplified DNA",
-      "analysis_type": "Variant analysis, Karyotyping, Microarray"
+      "num_tested_genes": "",
+      "sample_type": "ctDNA",
+      "analysis_type": "Variant analysis, Karyotyping"
     },
     "report_metadata": {
-      "report_dates": "2020-12-07",
-      "report_type": "Pathology",
+      "report_dates": "2024-06-15",
+      "report_type": "Molecular Genetics",
       "testing_context": "Clinical",
-      "ordering_clinic": "Orillia Soldiers Memo- rial Hospital (Orillia, Sim coe/ Muskoka)",
+      "ordering_clinic": "Windsor Regional Hospital (Windsor)",
       "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
-      "testing_information": "PCR, Sequencing, Validation"
-    }
+      "sequencing_scope": "Gene panel",
+      "tested_genes": {
+        "IL6ST": {
+          "gene_symbol": "IL6ST",
+          "refseq_mrna": "NM_002184.4"
+        },
+        "OTOF": {
+          "gene_symbol": "OTOF",
+          "refseq_mrna": "NM_000876.4"
+        }
+      },
+      "num_tested_genes": "",
+      "sample_type": "ctDNA",
+      "analysis_type": "Variant analysis, Karyotyping"
+    },
+    "variant_details": {
+      "variant_id": "OMIM:0000229",
+      "gene_symbol": "IL6ST",
+      "transcript_id": "NM_002184.4",
+      "hgvs": "1",
+      "hgvsc": "1",
+      "hgvsp": "1",
+      "hgvseq": "1",
+      "exon": "0",
+      "zygosity": "heterozygous",
+      "interpretation": "Variant of clinical significance",
+      "mafac": "0"
+    },
+    "numerical_variants": [
+      {
+        "gene_symbol": "OTOF",
+        "variant_id": "c.54366>1",
+        "amino": "Zikely pathogenic",
+        "Likely pathogenic": true
+      }
+    ],
+    "reference_genome": "GRCh37"
   },
   "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital2__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+  "source_file": "report_fakeHospital2__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
 }
