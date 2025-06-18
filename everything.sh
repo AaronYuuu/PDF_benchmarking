@@ -59,3 +59,10 @@ echo ""
 echo "============================================"
 echo "Complete pipeline finished successfully!"
 echo "============================================"
+
+echo "Graphing results into the pdf"
+python3 genGraphs.py
+echo "Graph and final report generated successfully!"
+echo "============================================"
+
+
