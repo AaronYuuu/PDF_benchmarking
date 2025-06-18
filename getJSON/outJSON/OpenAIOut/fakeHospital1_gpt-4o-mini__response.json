@@ -3,82 +3,72 @@
   "status": "success",
   "data": {
     "report_id": {
-      "date_collected": "2020-12-07",
-      "date_received": "2020-12-09",
-      "date_verified": "2020-12-09",
+      "date_collected": "2024-06-15",
+      "date_received": "2024-06-16",
+      "date_verified": "2024-06-17",
       "report_type": "Molecular Genetics",
-      "testing_context": "Research",
+      "testing_context": "Clinical",
       "ordering_clinic": "Ontario Cancer Hospital (Toronto)",
       "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
-      "sequencing_scope": "Gene panel",
+      "sequencing_scope": "Targeted variant testing",
       "tested_genes": {
-        "ATM": {
-          "gene_symbol": "ATM",
-          "refseq_mrna": "NM_000051.3"
+        "OTOF": {
+          "gene_symbol": "OTOF",
+          "refseq_mrna": "NM_001195.4"
         },
-        "ACKR3": {
-          "gene_symbol": "ACKR3",
-          "refseq_mrna": "NM_001001430.2"
+        "IL6ST": {
+          "gene_symbol": "IL6ST",
+          "refseq_mrna": "NM_000600.4"
         },
-        "KDM6A": {
-          "gene_symbol": "KDM6A",
-          "refseq_mrna": "NM_001199.3"
+        "IGFZR": {
+          "gene_symbol": "IGFZR",
+          "refseq_mrna": "NM_001080.4"
+        },
+        "TCF12": {
+          "gene_symbol": "TCF12",
+          "refseq_mrna": "NM_001195.4"
+        },
+        "NCKIPSD": {
+          "gene_symbol": "NCKIPSD",
+          "refseq_mrna": "NM_001195.4"
+        },
+        "DABZIP": {
+          "gene_symbol": "DABZIP",
+          "refseq_mrna": "NM_001195.4"
+        },
+        "MDM2": {
+          "gene_symbol": "MDM2",
+          "refseq_mrna": "NM_002392.3"
+        },
+        "RAPIGDSI": {
+          "gene_symbol": "RAPIGDSI",
+          "refseq_mrna": "NM_001195.4"
         }
       },
-      "num_tested_genes": "18",
-      "sample_type": "Total RNA",
-      "analysis_type": "Karyotyping",
+      "num_tested_genes": "8",
+      "sample_type": "ctDNA",
+      "analysis_type": "Methylation analysis",
       "variants": [
         {
-          "gene_symbol": "ATM",
-          "variant_id": "VCV006516823",
-          "chromosome": "chr11",
-          "hgvsg": "g.5514T>A",
-          "hgvsc": "c.5514T>A",
-          "hgvsp": "p.Cys1838Ter",
-          "transcript_id": "NM_000051.3",
-          "exon": "19",
-          "zygosity": "Heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "",
-          "mafan": "",
-          "mafaf": ""
-        },
-        {
-          "gene_symbol": "ACKR3",
-          "variant_id": "VCV006460873",
+          "gene_symbol": "OTOF",
+          "variant_id": "VCV000920952",
           "chromosome": "chr2",
-          "hgvsg": "g.222C>A",
-          "hgvsc": "c.222C>A",
-          "hgvsp": "p.Thr74=",
-          "transcript_id": "NM_001001430.2",
-          "exon": "10",
+          "hgvsg": "g.5436G>T",
+          "hgvsc": "c.5436G>T",
+          "hgvsp": "p.Glu1812Asp",
+          "transcript_id": "NM_001195.4",
+          "exon": "7",
           "zygosity": "Heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
-          "mafac": "",
-          "mafan": "",
-          "mafaf": ""
-        },
-        {
-          "gene_symbol": "KDM6A",
-          "variant_id": "VCV002228307",
-          "chromosome": "chrX",
-          "hgvsg": "g.3627A>T",
-          "hgvsc": "c.3627A>T",
-          "hgvsp": "p.Ile1209=",
-          "transcript_id": "NM_001199.3",
-          "exon": "3",
-          "zygosity": "Heterozygous",
-          "interpretation": "Variant of uncertain clinical significance",
+          "interpretation": "Variant of likely pathogenic",
           "mafac": "",
           "mafan": "",
           "mafaf": ""
         }
       ],
-      "num_variants": "3",
+      "num_variants": "1",
       "reference_genome": "GRCh37/hg19"
     }
   },
   "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital1__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+  "source_file": "report_fakeHospital1__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
 }

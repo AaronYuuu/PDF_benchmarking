@@ -105,6 +105,8 @@ def fix_json_structure(json_str):
     
     return fixed_json
 
+
+##TODO if everything ehre all fails then can look for the part in text that says: {"report_id"}
 def extract_json_from_response(response):
     """
     Extract JSON from responses that may have extra text or markdown formatting.
