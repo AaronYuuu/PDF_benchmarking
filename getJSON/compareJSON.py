@@ -315,8 +315,7 @@ def main():
                 if ":" in dtemp["model"]:
                         t = dtemp["model"].split(":")
                         dtemp["model"] = t[0] + t[1]
-                if "Vision" in direc:
-                        dtemp["model"] = dtemp["model"] + "*ImageInput*"
+                
                 if "qwen/qwen2.5-vl-72b-instruct" in dtemp["model"] :
                         dtemp["model"] = "qwen2.5:72b"
                 if "meta-llama/llama-4-scout" in dtemp["model"]:
@@ -333,6 +332,8 @@ def main():
                         dtemp["model"] = "llama3.2:1b"
                 if "llama3.2_3b" in dtemp["model"]:
                         dtemp["model"] = "llama3.2:3b"
+                if "Vision" in direc:
+                        dtemp["model"] = dtemp["model"] + "*ImageInput*"
 
                 dtemp["model"] = dtemp["model"].split("/")[-1] 
 

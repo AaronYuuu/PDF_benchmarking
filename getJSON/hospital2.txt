@@ -13,7 +13,7 @@ num_variants
 reference_genome
 gene_symbol
 variant_id
-- chromosome
+chromosome
 hgvsg
 hgvsc
 hgvsp
