@@ -26,3 +26,6 @@ test.ipynb
 /getJSON/visualization_outputs
 
 /visualization_outputs/*
+
+run_all_llms.sh
+generate_reports.sh
