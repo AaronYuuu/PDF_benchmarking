@@ -203,7 +203,7 @@ def main():
     print("\n=== Processing Text Files ===")
     process_text_files_with_models(models, output_dir="localout/", llm_function=NuToLLM)
     
-    print("\n=== Processing Image Files ===")
-    process_images_with_models(vision_models, output_dir="localout/")
+    #print("\n=== Processing Image Files ===")
+    #process_images_with_models(vision_models, output_dir="localout/")
 print("Starting")
 main()

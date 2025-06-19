@@ -16,6 +16,8 @@ client = OpenAI(
   api_key=os.environ["OPENROUTER_API_KEY"]
 )
 
+#TODO trouble shoot why it doesn't work no choices what does that mean
+
 def textToLLM(prompt, text, model, max_retries=3):
     """
     Function to send text to a specific LLM model and get response.
