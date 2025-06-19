@@ -107,10 +107,15 @@ python3 openAItoJSON.py
 echo ""
 
 # Run openRouterLLMs.py
-echo "3. Running OpenRouter models..."
-echo "-------------------------------"
+#echo "3. Running OpenRouter models..."
+#echo "-------------------------------"
 #python3 openRouterLLMs.py
-echo ""
+#echo ""
+
+echo "4. Running localLLMS..."
+echo "__________________________________"
+python3 localLLM.py
+echo "done"
 
 echo "======================================="
 echo "All LLM processing scripts completed!"

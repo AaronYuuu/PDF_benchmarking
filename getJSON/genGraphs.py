@@ -1,19 +1,3 @@
-"""
-Comprehensive LLM Benchmarking Analysis Script
-==============================================
-
-This script analyzes LLM performance for clinical data extraction from cancer reports.
-It provides detailed visualizations and comparisons across multiple dimensions:
-- Model families (Qwen, GPT, Gemma, Llama, etc.)
-- Input types (text vs vision-enabled)
-- Parameter sizes
-- Hospital templates
-- Source platforms (Ollama vs others)
-
-Author: Generated for PDF_benchmarking project
-Date: June 2025
-"""
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -96,7 +80,7 @@ def extract_model_info(llm_name):
     elif 'mistral' in llm_lower or 'devstral' in llm_lower:
         family = 'Mistral'
     else:
-        family = 'Other'
+        family = 'HuggingFace'
     
     # Create base model name (without vision indicators)
     base_name = normalize_model_name(llm_name)
@@ -237,7 +221,7 @@ def load_and_prepare_data():
     """Load and prepare the hospital data with comprehensive feature engineering"""
     # Load the data
     hospitals = pd.read_csv('Hospital.csv')
-    
+    hospitals = hospitals[hospitals['Source'] != "OpenRouter"]
     # Clean unnecessary columns
     cols_to_drop = [col for col in hospitals.columns if 'Unnamed' in col]
     hospitals = hospitals.drop(columns=cols_to_drop, errors='ignore')
@@ -707,8 +691,7 @@ def create_combined_pdf():
 def main():
     """Main execution function - streamlined to include only key visualizations"""
     # Load and prepare data
-    df = load_and_prepare_data()
-    
+    df = load_and_prepare_data() #function added ignore openRouter models, not enough data
     # Calculate summary statistics
     stats = calculate_summary_statistics(df)
     
