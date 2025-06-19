@@ -5,10 +5,7 @@ import base64
 from collections import defaultdict
 
 def read_text_file(file_path):
-    """
-    Read the content of a text file.
-    Returns the file content as a string or None if failed.
-    """
+    """Read the content of a text file."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return f.read()
@@ -17,41 +14,30 @@ def read_text_file(file_path):
         return None
 
 def read_prompt_file(prompt_path="getJSON/prompt.txt"):
-    """
-    Read the prompt file content.
-    Returns the prompt as a string or None if failed.
-    """
+    """Read the prompt file content."""
     with open(prompt_path, "r", encoding="utf-8") as f:
         return f.read()
 
 def encode_image_to_base64(image_path):
-    """
-    Encode a single image to base64.
-    Returns the base64 encoded string.
-    """
+    """Encode a single image to base64."""
     try:
         with open(image_path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-            return encoded_string
+            return base64.b64encode(image_file.read()).decode('utf-8')
     except Exception as e:
         print(f"Error encoding image {image_path}: {e}")
         return None
 
 def group_images_by_source(directory="output_pdfs/images/"):
-    """
-    Group images by their source document (hospital report).
-    Returns a dictionary where keys are source names and values are lists of image paths.
-    """
+    """Group images by their source document (hospital report)."""
     try:
         image_files = [f for f in os.listdir(directory) if f.lower().endswith(('.png', '.jpg', '.jpeg'))]
         grouped_images = defaultdict(list)
         
         for image_file in image_files:
-            # Extract source name from filename (e.g., "fakeHospital1" from "report_fakeHospital1__...")
             if image_file.startswith("report_"):
                 parts = image_file.split("_")
                 if len(parts) >= 2:
-                    source_name = parts[1]  # e.g., "fakeHospital1"
+                    source_name = parts[1]
                     grouped_images[source_name].append(os.path.join(directory, image_file))
         
         # Sort images within each group by page number
@@ -64,314 +50,53 @@ def group_images_by_source(directory="output_pdfs/images/"):
         return {}
 
 def encode_image_group_to_base64(image_paths):
-    """
-    Encode multiple images to base64.
-    Returns a list of base64 encoded strings.
-    """
-    encoded_images = []
-    for image_path in image_paths:
-        encoded = encode_image_to_base64(image_path)
-        if encoded:
-            encoded_images.append(encoded)
-    return encoded_images
+    """Encode multiple images to base64."""
+    return [encode_image_to_base64(path) for path in image_paths if encode_image_to_base64(path)]
 
-def fix_json_structure(json_str):
-    """
-    Fix common JSON structure issues, particularly with the tested_genes field.
-    """
-    # Fix the tested_genes structure - convert from object with duplicate keys to array
-    # Look for the pattern: "tested_genes": { "gene_id": {...}, "gene_id": {...}, ... }
-    tested_genes_pattern = r'"tested_genes":\s*\{([^}]+(?:\{[^}]*\}[^}]*)*)\}'
-    
-    def fix_tested_genes(match):
-        content = match.group(1)
-        
-        # Extract all gene_id objects
-        gene_objects = []
-        gene_pattern = r'"gene_id":\s*(\{[^}]*\})'
-        
-        for gene_match in re.finditer(gene_pattern, content):
-            gene_objects.append(gene_match.group(1))
-        
-        if gene_objects:
-            # Convert to array format
-            genes_array = ',\n      '.join(gene_objects)
-            return f'"tested_genes": [\n      {genes_array}\n    ]'
-        else:
-            return match.group(0)
-    
-    # Apply the fix
-    fixed_json = re.sub(tested_genes_pattern, fix_tested_genes, json_str, flags=re.DOTALL)
-    
-    return fixed_json
-
-
-##TODO if everything ehre all fails then can look for the part in text that says: {"report_id"}
 def extract_json_from_response(response):
     """
-    Extract JSON from responses that may have extra text or markdown formatting.
+    Unified JSON extraction from responses with multiple fallback methods.
     Returns the parsed JSON object or None if no valid JSON is found.
     """
     if not response:
         return None
     
-    # First try the existing cleaning method
+    # Method 1: Try direct parsing after basic cleaning
     cleaned = response.strip()
-    if cleaned.startswith("{\"report_id\":"):
-        temp = "```json\n" + cleaned + "\n```"
-        cleaned = temp
+    
+    # Handle common markdown formatting
     if cleaned.startswith("```json"):
         cleaned = cleaned[7:]
-    if cleaned.startswith("```"):
+    elif cleaned.startswith("```"):
         cleaned = cleaned[3:]
     if cleaned.endswith("```"):
         cleaned = cleaned[:-3]
-    if cleaned.startswith("{\"report_id\":"):
-        cleaned = cleaned.strip()
+    
     cleaned = cleaned.strip()
     
-    # Try to fix JSON structure issues
+    # Try direct parsing
     try:
-        fixed_cleaned = fix_json_structure(cleaned)
-        return json.loads(fixed_cleaned)
+        return json.loads(cleaned)
     except json.JSONDecodeError:
         pass
     
-    comment_pattern = r'^\s*//.*$'
-    json_nocomment = re.sub(comment_pattern, '', cleaned, flags=re.MULTILINE)
+    # Method 2: Remove comments and try again
     try:
+        comment_pattern = r'^\s*//.*$'
+        json_nocomment = re.sub(comment_pattern, '', cleaned, flags=re.MULTILINE)
         return json.loads(json_nocomment)
     except json.JSONDecodeError:
         pass
-    # If that fails, try to find JSON within the text
-    # Look for content between ```json and ``` or just between { and }
-        
-    # Try to find JSON block with just ``` markers
     
-
-    return None
-
-def save_model_response(model, response, source_file, output_dir):
-    """
-    Save the response from a specific model to a JSON file.
-    """
-    # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Clean the source filename to get template name
-    clean_name = source_file.split("_")[1]
-    print(clean_name)
-    
-    # Create a clean filename from model name
-    model_name = model.replace("/", "_").replace(":", "_")
-    filename = f"{output_dir}/{clean_name}_{model_name}__response.json"
-    
-    try:
-        if response is None:
-            # Save error info if model failed
-            output_data = {
-                "model": model,
-                "status": "failed",
-                "error": "Model returned None response",
-                "timestamp": "2025-06-05",
-                "source_file": source_file
-            }
-            
-            with open(filename, "w") as f:
-                json.dump(output_data, f, indent=2)
-            
-            print(f"Error response saved to {filename}")
-            return
-        
-        # Try to extract JSON using the improved extraction function
-        parsed_json = extract_json_from_response(response)
-        
-        if parsed_json is not None:
-            # Successfully extracted JSON
-            output_data = {
-                "model": model,
-                "status": "success",
-                "data": parsed_json,
-                "timestamp": "2025-06-05",
-                "source_file": source_file
-            }
-            
-            with open(filename, "w") as f:
-                json.dump(output_data, f, indent=2)
-            
-            print(f"✓ JSON response saved to {filename}")
-            
-        else:
-            # Primary extraction failed, try the raw response extraction method
-            print(f"Primary JSON extraction failed for {model}, trying raw response extraction...")
-            
-            # Try to extract JSON from raw response (handles cases where JSON is mixed with text)
-            extracted_json = extract_json_from_raw_response(response)
-            
-            if extracted_json is not None:
-                # Successfully extracted from raw response
-                output_data = {
-                    "model": model,
-                    "status": "success",
-                    "data": extracted_json,
-                    "timestamp": "2025-06-05",
-                    "source_file": source_file,
-                    "extraction_method": "raw_response_extraction"
-                }
-                
-                with open(filename, "w") as f:
-                    json.dump(output_data, f, indent=2)
-                
-                print(f"✓ JSON extracted from raw response and saved to {filename}")
-            
-            else:
-                # Could not extract valid JSON with either method
-                print(f"Could not extract valid JSON from {model} using any method")
-                
-                # Save raw response as fallback
-                output_data = {
-                    "model": model,
-                    "status": "json_extraction_failed",
-                    "error": "Could not extract valid JSON from response using any method",
-                    "raw_response": response,
-                    "timestamp": "2025-06-05",
-                    "source_file": source_file
-                }
-                
-                with open(filename, "w") as f:
-                    json.dump(output_data, f, indent=2)
-                
-                print(f"✗ Raw response saved to {filename} (JSON extraction failed)")
-            
-    except Exception as e:
-        print(f"Error saving response for {model}: {e}")
-
-def get_text_files_from_directory(directory="output_pdfs/text/"):
-    """
-    Get all text files from the specified directory.
-    Returns a list of text file names.
-    """
-    try:
-        return [f for f in os.listdir(directory) if f.endswith('.txt')]
-    except Exception as e:
-        print(f"Error reading directory {directory}: {e}")
-        return []
-    
-def get_images_from_directory(directory="output_pdfs/images/"):
-    """
-    Get all image files from the specified directory.
-    Returns a list of image file names.
-    """
-    try:
-        return [f for f in os.listdir(directory) if f.lower().endswith(('.png'))]
-    except Exception as e:
-        print(f"Error reading directory {directory}: {e}")
-        return []
-
-def process_text_files_with_models(models, output_dir,text_directory="../output_pdfs/text/", prompt_path="prompt.txt", llm_function=None ):
-    """
-    Process all text files with the given models using the provided LLM function.
-    
-    Args:
-        models: List of model names/identifiers
-        text_directory: Directory containing text files to process
-        prompt_path: Path to the prompt file
-        llm_function: Function to call LLM (should accept prompt, text, model as parameters)
-    """
-    if llm_function is None:
-        raise ValueError("llm_function must be provided")
-    
-    # Read the prompt file content
-    prompt = read_prompt_file(prompt_path)
-    os.makedirs("outJSON", exist_ok=True)
-
-    output_dir = "outJSON/"+output_dir
-    # Find all text files in the directory
-    text_files = get_text_files_from_directory(text_directory)
-    
-    print(f"Found {len(text_files)} text files to process")
-    print(f"Running extraction with {len(models)} models...")
-    
-    # Process each text file
-    for text_file in text_files:
-        print(f"\n{'='*60}")
-        print(f"Processing file: {text_file}")
-        print(f"{'='*60}")
-        
-        # Read the text file content
-        text = read_text_file(os.path.join(text_directory, text_file))
-        if text is None:
-            print(f"Failed to read {text_file}, skipping...")
-            continue
-        
-        # Try each model for this text file
-        for model in models:
-            print(f"\nProcessing {text_file} with model: {model}")
-            
-            response = llm_function(prompt, text, model)
-            save_model_response(model, response, text_file, output_dir)
-    
-    print(f"\n{'='*60}")
-    print(f"All files and models completed. Check {output_dir} folder for results.")
-    print(f"{'='*60}")
-
-def process_image_with_models(models, outputdir, image_path = "../output_pdfs/images", prompt_path = "prompt.txt", llm_function=None):
-    """
-    Process a single image with the given models using the provided LLM function.
-    
-    Args:
-        models: List of model names/identifiers
-        image_path: Path to the image file
-        prompt_path: Path to the prompt file
-        llm_function: Function to call LLM (should accept prompt, text, model as parameters)
-    """
-    if llm_function is None:
-        raise ValueError("llm_function must be provided")
-    
-    # Read the prompt file content
-    prompt = read_prompt_file(prompt_path)
-    
-    # Create output directory if it doesn't exist
-    os.makedirs(outputdir, exist_ok=True)
-    
-    print(f"Processing image: {image_path}")
-    
-    # Read the image file content
-    try:
-        with open(image_path, "rb") as f:
-            image_content = f.read()
-    except Exception as e:
-        print(f"Error reading image {image_path}: {e}")
-        return
-    
-    # Try each model for this image
-    for model in models:
-        print(f"\nProcessing image with model: {model}")
-        
-        response = llm_function(prompt, image_content, model)
-        save_model_response(model, response, os.path.basename(image_path), outputdir)
-    
-    print(f"\nAll models completed. Check {outputdir} folder for results.")
-
-def extract_json_from_raw_response(raw_response):
-    """
-    Extract JSON from raw responses that contain JSON followed by explanatory text.
-    Returns the parsed JSON object or None if no valid JSON is found.
-    """
-    if not raw_response:
-        return None
-    
-    # First, try to find JSON that starts with { and ends with }
-    # Look for the first { and find its matching }
-    start_idx = raw_response.find('{')
+    # Method 3: Extract JSON from mixed content (brace matching)
+    start_idx = response.find('{')
     if start_idx == -1:
         return None
     
-    # Count braces to find the end of the JSON object
     brace_count = 0
     end_idx = start_idx
     
-    for i, char in enumerate(raw_response[start_idx:], start_idx):
+    for i, char in enumerate(response[start_idx:], start_idx):
         if char == '{':
             brace_count += 1
         elif char == '}':
@@ -380,79 +105,107 @@ def extract_json_from_raw_response(raw_response):
                 end_idx = i
                 break
     
-    if brace_count != 0:
-        # Unmatched braces, try a different approach
-        return None
+    if brace_count == 0:
+        json_str = response[start_idx:end_idx + 1]
+        try:
+            return json.loads(json_str)
+        except json.JSONDecodeError:
+            # Try cleaning formatting issues
+            try:
+                cleaned_json = json_str.replace('\n', ' ').replace('  ', ' ')
+                return json.loads(cleaned_json)
+            except json.JSONDecodeError:
+                pass
     
-    # Extract the JSON portion
-    json_str = raw_response[start_idx:end_idx + 1]
+    return None
+
+def save_model_response(model, response, source_file, output_dir):
+    """Save the response from a specific model to a JSON file with integrated JSON extraction."""
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Clean the source filename to get template name
+    clean_name = source_file.split("_")[1]
+    print(clean_name)
+    
+    # Create filename
+    model_name = model.replace("/", "_").replace(":", "_")
+    filename = f"{output_dir}/{clean_name}_{model_name}__response.json"
     
     try:
-        # Try to parse the extracted JSON
-        return json.loads(json_str)
-    except json.JSONDecodeError:
-        # If parsing fails, try to clean common issues
-        try:
-            # Fix common formatting issues
-            cleaned_json = json_str.replace('\n', ' ').replace('  ', ' ')
-            return json.loads(cleaned_json)
-        except json.JSONDecodeError:
-            return None
-
-def process_existing_raw_responses(input_dir="outJSON/localout/"):
-    """
-    Process existing response files that have raw_response data and extract clean JSON.
-    Creates new cleaned files with properly extracted JSON.
-    """
-    if not os.path.exists(input_dir):
-        print(f"Directory {input_dir} does not exist")
-        return
-    
-    # Find all JSON response files
-    response_files = [f for f in os.listdir(input_dir) if f.endswith('__response.json')]
-    
-    print(f"Found {len(response_files)} response files to process")
-    
-    for filename in response_files:
-        file_path = os.path.join(input_dir, filename)
-        
-        try:
-            # Read the existing response file
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+        if response is None:
+            output_data = {
+                "model": model,
+                "status": "failed",
+                "error": "Model returned None response",
+                "timestamp": "2025-06-19",
+                "source_file": source_file
+            }
+        else:
+            # Try to extract JSON using unified extraction function
+            parsed_json = extract_json_from_response(response)
             
-            # Check if this file has a raw_response that needs processing
-            if (data.get('status') == 'success' and 
-                'data' in data and 
-                'raw_response' in data['data'] and 
-                data['data'].get('error') == 'Could not parse as JSON'):
-                
-                print(f"Processing {filename}...")
-                
-                # Extract JSON from raw_response
-                raw_response = data['data']['raw_response']
-                extracted_json = extract_json_from_raw_response(raw_response)
-                
-                if extracted_json:
-                    # Update the data structure with clean extracted JSON
-                    data['data'] = extracted_json
-                    data['status'] = 'success_cleaned'
-                    
-                    # Create a new filename for the cleaned version
-                    clean_filename = filename.replace('__response.json', '__cleaned_response.json')
-                    clean_file_path = os.path.join(input_dir, clean_filename)
-                    
-                    # Save the cleaned version
-                    with open(clean_file_path, 'w', encoding='utf-8') as f:
-                        json.dump(data, f, indent=2)
-                    
-                    print(f"✓ Cleaned JSON saved to {clean_filename}")
-                else:
-                    print(f"✗ Could not extract JSON from {filename}")
+            if parsed_json is not None:
+                output_data = {
+                    "model": model,
+                    "status": "success",
+                    "data": parsed_json,
+                    "timestamp": "2025-06-19",
+                    "source_file": source_file
+                }
+                print(f"✓ JSON response saved to {filename}")
             else:
-                print(f"Skipping {filename} - no raw_response to process")
-                
-        except Exception as e:
-            print(f"Error processing {filename}: {e}")
+                output_data = {
+                    "model": model,
+                    "status": "json_extraction_failed",
+                    "error": "Could not extract valid JSON from response",
+                    "raw_response": response,
+                    "timestamp": "2025-06-19",
+                    "source_file": source_file
+                }
+                print(f"✗ Raw response saved to {filename} (JSON extraction failed)")
+        
+        with open(filename, "w") as f:
+            json.dump(output_data, f, indent=2)
+            
+    except Exception as e:
+        print(f"Error saving response for {model}: {e}")
+
+def get_text_files_from_directory(directory="output_pdfs/text/"):
+    """Get all text files from the specified directory."""
+    try:
+        return [f for f in os.listdir(directory) if f.endswith('.txt')]
+    except Exception as e:
+        print(f"Error reading directory {directory}: {e}")
+        return []
+
+def process_text_files_with_models(models, output_dir, text_directory="../output_pdfs/text/", prompt_path="prompt.txt", llm_function=None):
+    """Process all text files with the given models using the provided LLM function."""
+    if llm_function is None:
+        raise ValueError("llm_function must be provided")
     
-    print("Processing complete!")
+    prompt = read_prompt_file(prompt_path)
+    os.makedirs("outJSON", exist_ok=True)
+    output_dir = f"outJSON/{output_dir}"
+    
+    text_files = get_text_files_from_directory(text_directory)
+    print(f"Found {len(text_files)} text files to process")
+    print(f"Running extraction with {len(models)} models...")
+    
+    for text_file in text_files:
+        print(f"\n{'='*60}")
+        print(f"Processing file: {text_file}")
+        print(f"{'='*60}")
+        
+        text = read_text_file(os.path.join(text_directory, text_file))
+        if text is None:
+            print(f"Failed to read {text_file}, skipping...")
+            continue
+        
+        for model in models:
+            print(f"\nProcessing {text_file} with model: {model}")
+            response = llm_function(prompt, text, model)
+            save_model_response(model, response, text_file, output_dir)
+    
+    print(f"\n{'='*60}")
+    print(f"All files and models completed. Check {output_dir} folder for results.")
+    print(f"{'='*60}")

@@ -288,17 +288,18 @@ def main():
     else:
         ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital"])  # Load existing CSV if it exists to append results
 
-    json_direcs = [#"OllamaOut", 
+    json_direcs = ["OllamaOut", 
                    "OpenAIOut", 
                    #"OpenRouter", 
                    #"OpenRouterVisionOut", 
-                   #"OllamaVisionOut", 
-                   #"OpenAIVisionOut"
+                   "OllamaVisionOut", 
+                    "OpenAIVisionOut", 
+                    "localout"
                    ]
     hospitals = ["fakeHospital1", "fakeHospital2"] ##update according to latex templates generated
     sources = {"OllamaOut": "Ollama", "OpenAIOut": "OpenAI", "OpenRouter": "OpenRouter",
-               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAIVisionOut": "OpenAi"}
-    #json_direcs = ["OpenAIOut"]
+               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAIVisionOut": "OpenAi", "localout": "huggingface"}
+    #json_direcs = ["localout"]
     for direc in json_direcs:
         source = sources[direc]
         direc = "outJSON/" + direc
@@ -316,14 +317,18 @@ def main():
                         t = dtemp["model"].split(":")
                         dtemp["model"] = t[0] + t[1]
                 
+                if "NuExtract-1.5-tiny" in dtemp["model"]:
+                        dtemp["model"] = "NuExtract:0.5B"
+                if "NuExtract-2.0-2B" in dtemp["model"]:
+                        dtemp["model"] = "NuExtract:2B"
                 if "qwen/qwen2.5-vl-72b-instruct" in dtemp["model"] :
                         dtemp["model"] = "qwen2.5:72b"
                 if "meta-llama/llama-4-scout" in dtemp["model"]:
-                        dtemp["model"] = "llama-4-scout"
+                        dtemp["model"] = "llama-4:17B"
                 if "google/gemini-2.0-flash-exp" in dtemp["model"]:
                         dtemp["model"] = "gemini-2.0"
                 if "devstral-small" in dtemp["model"]:
-                        dtemp["model"] = "devstral-small"
+                        dtemp["model"] = "mistral-3.1-24b"
                 if "mistral-small-3.1-24b-instruct" in dtemp["model"]:
                         dtemp["model"] = "mistral-3.1-24b"
                 if "granite3.2-vision" in dtemp["model"]:
