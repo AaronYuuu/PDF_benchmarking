@@ -84,7 +84,7 @@ def textToLLM(prompt, text, model):
             outputs = gpt_model.generate(
                 **inputs,
                 max_new_tokens=512,
-                temperature=0.7,
+                temperature=0.1,
                 do_sample=True,
                 pad_token_id=tokenizer.eos_token_id,
                 eos_token_id=tokenizer.eos_token_id,
@@ -105,7 +105,9 @@ def textToLLM(prompt, text, model):
 def main():
     # List of GPT models to try (starting with smaller, more reliable models)
     LOCAL_MODELS = [
-        "microsoft/BioGPT-Large"              
+        #"microsoft/BioGPT-Large", 
+        "numind/NuExtract-1.5-tiny", 
+        "Qwen/Qwen2.5-0.5B"              
         # Add more models as needed:
         # "microsoft/phi-2",            # Microsoft Phi-2 (good performance)
         # "stabilityai/stablelm-base-alpha-3b",  # StableLM
@@ -116,7 +118,7 @@ def main():
     print(f"CUDA available: {torch.cuda.is_available()}")
     
     # Use the shared processing function
-    process_text_files_with_models(LOCAL_MODELS,output_dir="localout/", llm_function=textToLLM)
+    process_text_files_with_models(LOCAL_MODELS,output_dir="outJSON/localout/", llm_function=textToLLM)
     
 
 if __name__ == "__main__":

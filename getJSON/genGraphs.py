@@ -70,7 +70,7 @@ def extract_model_info(llm_name):
     llm_lower = llm_name.lower()
     
     # Determine if it's a vision model
-    is_vision = '*imageinput*' in llm_lower or 'vision' in llm_lower or 'vl' in llm_lower
+    Image_Input = '*imageinput*' in llm_lower or 'vision' in llm_lower or 'vl' in llm_lower
     
     # Extract parameter size (look for numbers followed by 'b')
     param_match = re.search(r'(\d+(?:\.\d+)?)b', llm_lower)
@@ -81,6 +81,12 @@ def extract_model_info(llm_name):
         family = 'Qwen'
     elif 'gpt' in llm_lower:
         family = 'GPT'
+        if 'mini' in llm_lower:
+            param_size = 8
+        elif 'nano' in llm_lower:
+            param_size = 2
+        else:
+            param_size = 200
     elif 'gemm' in llm_lower or 'gemini' in llm_lower:
         family = 'Gemma/Gemini'
     elif 'llama' in llm_lower:
@@ -108,7 +114,7 @@ def extract_model_info(llm_name):
     else:
         token_category = 'Unknown'
     
-    return family, param_size, is_vision, base_name, token_category
+    return family, param_size, Image_Input, base_name, token_category
 
 def overall_metrics(df):
     """
@@ -127,7 +133,7 @@ def overall_metrics(df):
         'Recall': 'mean',
         'Family': 'first',
         'Source': 'first',
-        'Is_Vision': lambda x: any(x)  # True if any variant has vision
+        'Image_Input': lambda x: any(x)  # True if any variantvision
     }).round(2)
     
     # Flatten column names
@@ -168,7 +174,7 @@ def overall_metrics(df):
     # Customize the plot
     model_labels = []
     for idx, row in grouped_models_sorted.iterrows():
-        vision_indicator = '+VISION' if row['Has_Vision'] else ''
+        vision_indicator = ' (Image Input)' if row['Has_Vision'] else ''
         count_indicator = f' (n={int(row["Count"])})'
         label = f"{row['Base_Model']}{vision_indicator}{count_indicator}"
         model_labels.append(label)
@@ -218,7 +224,7 @@ def overall_metrics(df):
     # Add vision indicator to legend with better styling
     legend_elements.append(Patch(facecolor='lightgray', hatch='///', 
                                 edgecolor='black', linewidth=1.5,
-                                label='Has Vision Capability'))
+                                label='Given Image Input'))
     
     ax1.legend(handles=legend_elements, loc='lower right', fontsize=9)
     
@@ -238,7 +244,7 @@ def load_and_prepare_data():
     
     # Extract model information
     model_info = hospitals['LLM'].apply(extract_model_info)
-    hospitals[['Family', 'Param_Size', 'Is_Vision', 'Base_Model', 'Token_Category']] = pd.DataFrame(
+    hospitals[['Family', 'Param_Size', 'Image_Input', 'Base_Model', 'Token_Category']] = pd.DataFrame(
         model_info.tolist(), index=hospitals.index
     )
     
@@ -248,7 +254,7 @@ def load_and_prepare_data():
     )
     
     # Create input type column
-    hospitals['Input_Type'] = hospitals['Is_Vision'].map({True: 'Vision', False: 'Text-Only'})
+    hospitals['Input_Type'] = hospitals['Image_Input'].map({True: 'Vision', False: 'Text-Only'})
     
     return hospitals
 
@@ -312,292 +318,188 @@ def create_relational_plots(df):
     df_with_params = df[df['Param_Size'].notna()].copy()
     
     if len(df_with_params) > 0:
-        # 1. Accuracy vs Parameter Size by Family
-        fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+        # 1. F1 Score and Accuracy vs Parameter Size
+        fig, axes = plt.subplots(1, 2, figsize=(16, 6))
         
-        sns.scatterplot(data=df_with_params, x='Param_Size', y='Accuracy', 
-                       hue='Family', size='F1score', sizes=(50, 200), alpha=0.7, ax=axes[0,0])
-        axes[0,0].set_title('Accuracy vs Parameter Size by Family', fontsize=14, fontweight='bold')
-        axes[0,0].set_xlabel('Parameter Size (B)')
-        
+        # F1 Score vs Parameter Size by Family
         sns.scatterplot(data=df_with_params, x='Param_Size', y='F1score', 
-                       hue='Input_Type', style='Hospital', s=100, ax=axes[0,1])
-        axes[0,1].set_title('F1 Score vs Parameter Size by Input Type', fontsize=14, fontweight='bold')
-        axes[0,1].set_xlabel('Parameter Size (B)')
+                       hue='Family', style='Input_Type', s=100, alpha=0.8, ax=axes[0])
+        axes[0].set_title('F1 Score vs Parameter Size by Family and Input Type', fontsize=14, fontweight='bold')
+        axes[0].set_xlabel('Parameter Size (B)')
+        axes[0].set_ylabel('F1 Score')
+        axes[0].grid(alpha=0.3)
         
-        sns.scatterplot(data=df_with_params, x='Param_Size', y='Precision', 
-                       hue='Source_Category', s=100, alpha=0.7, ax=axes[1,0])
-        axes[1,0].set_title('Precision vs Parameter Size by Source', fontsize=14, fontweight='bold')
-        axes[1,0].set_xlabel('Parameter Size (B)')
-        
-        sns.scatterplot(data=df_with_params, x='Param_Size', y='Recall', 
-                       hue='Family', style='Input_Type', s=100, ax=axes[1,1])
-        axes[1,1].set_title('Recall vs Parameter Size by Family and Input Type', fontsize=14, fontweight='bold')
-        axes[1,1].set_xlabel('Parameter Size (B)')
+        # Accuracy vs Parameter Size by Family
+        sns.scatterplot(data=df_with_params, x='Param_Size', y='Accuracy', 
+                       hue='Family', style='Input_Type', s=100, alpha=0.8, ax=axes[1])
+        axes[1].set_title('Accuracy vs Parameter Size by Family and Input Type', fontsize=14, fontweight='bold')
+        axes[1].set_xlabel('Parameter Size (B)')
+        axes[1].set_ylabel('Accuracy')
+        axes[1].grid(alpha=0.3)
         
         plt.tight_layout()
-        save_plot('01_relational_plots_parameter_analysis')
-        ###plt.show()
+        save_plot('01_parameter_size_performance_analysis')
     
-    # 2. Performance correlation matrix
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    # 2. Precision vs Recall Analysis
+    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
     
-    # Line plot showing performance trends by family
-    family_means = df.groupby('Family')[['Accuracy', 'F1score', 'Precision', 'Recall']].mean()
-    family_means.plot(kind='line', marker='o', ax=axes[0])
-    axes[0].set_title('Average Performance Metrics by Model Family', fontsize=14, fontweight='bold')
-    axes[0].set_ylabel('Score')
-    axes[0].legend(title='Metrics')
-    axes[0].tick_params(axis='x', rotation=45)
-    
-    # Scatter plot: Precision vs Recall colored by Accuracy
-    sns.scatterplot(data=df, x='Recall', y='Precision', hue='Accuracy', 
-                   size='F1score', sizes=(30, 200), ax=axes[1])
-    axes[1].set_title('Precision vs Recall (colored by Accuracy)', fontsize=14, fontweight='bold')
-    axes[1].plot([0, 100], [100, 0], 'k--', alpha=0.3, label='Trade-off line')
+    # Precision vs Recall colored by Accuracy, with Family as hue and Input_Type as style
+    sns.scatterplot(data=df, x='Recall', y='Precision', hue='Family', 
+                   style='Input_Type', size='Accuracy', sizes=(50, 200), 
+                   alpha=0.8, ax=ax)
+    ax.set_title('Precision vs Recall by Family and Input Type\n(Size = Accuracy, Color = Family)', 
+                fontsize=14, fontweight='bold')
+    ax.plot([0, 100], [100, 0], 'k--', alpha=0.3, label='Trade-off line')
+    ax.grid(alpha=0.3)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
     
     plt.tight_layout()
-    save_plot('02_relational_performance_trends')
-    ###plt.show()
+    save_plot('02_precision_recall_analysis')
 
 def create_categorical_plots(df):
-    """Create categorical plots showing distributions by input type and family"""
-    # Remove the detailed family comparisons subplot since it overlaps with the overall_metrics
-    # Keep only the main categorical distribution plots
-    
+    """Create key categorical performance comparisons"""
     fig, axes = plt.subplots(2, 2, figsize=(18, 12))
     
+    # F1 Score by Family and Input Type
     sns.boxplot(data=df, x='Family', y='F1score', hue='Input_Type', ax=axes[0,0])
     axes[0,0].set_title('F1 Score Distribution by Family and Input Type', fontsize=12, fontweight='bold')
     axes[0,0].tick_params(axis='x', rotation=45)
+    axes[0,0].grid(axis='y', alpha=0.3)
     
+    # Accuracy by Family and Hospital
     sns.boxplot(data=df, x='Family', y='Accuracy', hue='Hospital', ax=axes[0,1])
     axes[0,1].set_title('Accuracy Distribution by Family and Hospital', fontsize=12, fontweight='bold')
     axes[0,1].tick_params(axis='x', rotation=45)
+    axes[0,1].grid(axis='y', alpha=0.3)
     
-    sns.violinplot(data=df, x='Source_Category', y='F1score', hue='Input_Type', 
-                   split=True, ax=axes[1,0])
-    axes[1,0].set_title('F1 Score Distribution by Source and Input Type', fontsize=12, fontweight='bold')
+    # Average Performance Metrics by Family
+    family_metrics = df.groupby('Family')[['Accuracy', 'F1score', 'Precision', 'Recall']].mean()
+    family_metrics.plot(kind='bar', ax=axes[1,0])
+    axes[1,0].set_title('Average Performance Metrics by Family', fontsize=12, fontweight='bold')
+    axes[1,0].set_ylabel('Score')
+    axes[1,0].tick_params(axis='x', rotation=45)
+    axes[1,0].legend(title='Metrics')
+    axes[1,0].grid(axis='y', alpha=0.3)
     
-    sns.barplot(data=df, x='Token_Category', y='Accuracy', hue='Family', ax=axes[1,1])
-    axes[1,1].set_title('Average Accuracy by Token Size and Family', fontsize=12, fontweight='bold')
-    axes[1,1].tick_params(axis='x', rotation=45)
+    # Performance by Input Type (Vision vs Text-only)
+    input_metrics = df.groupby('Input_Type')[['Accuracy', 'F1score', 'Precision', 'Recall']].mean()
+    input_metrics.plot(kind='bar', ax=axes[1,1])
+    axes[1,1].set_title('Average Performance Metrics by Input Type', fontsize=12, fontweight='bold')
+    axes[1,1].set_ylabel('Score')
+    axes[1,1].tick_params(axis='x', rotation=0)
+    axes[1,1].legend(title='Metrics')
+    axes[1,1].grid(axis='y', alpha=0.3)
     
     plt.tight_layout()
-    save_plot('03_categorical_distributions')
-    ###plt.show()
+    save_plot('03_categorical_performance_analysis')
 
-def create_distribution_plots(df):
-    """Create distribution plots for accuracy, f1, precision, recall"""
-    # 1. Overall distributions
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+def create_matrix_plots(df):
+    """Create key matrix plots - performance heatmaps only"""
+    fig, axes = plt.subplots(1, 2, figsize=(18, 7))
     
-    metrics = ['Accuracy', 'F1score', 'Precision', 'Recall']
-    for i, metric in enumerate(metrics):
-        row = i // 2
-        col = i % 2
-        
-        # Histogram with KDE
-        sns.histplot(data=df, x=metric, hue='Input_Type', kde=True, 
-                    alpha=0.6, ax=axes[row, col])
-        axes[row, col].set_title(f'{metric} Distribution by Input Type', fontweight='bold')
+    # Performance heatmap by Family and Input Type
+    pivot_f1 = df.groupby(['Family', 'Input_Type'])['F1score'].mean().unstack()
+    sns.heatmap(pivot_f1, annot=True, cmap='RdYlBu_r', fmt='.2f', ax=axes[0])
+    axes[0].set_title('Average F1 Score: Family vs Input Type', fontweight='bold')
     
-    plt.tight_layout()
-    save_plot('05_metric_distributions_by_input_type')
-    ###plt.show()
-    
-    # 2. Distributions by source category
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    
-    for i, metric in enumerate(metrics):
-        row = i // 2
-        col = i % 2
-        
-        sns.kdeplot(data=df, x=metric, hue='Source_Category', 
-                   fill=True, alpha=0.6, ax=axes[row, col])
-        axes[row, col].set_title(f'{metric} KDE by Source Category', fontweight='bold')
+    # Performance heatmap by Family and Hospital
+    pivot_acc = df.groupby(['Family', 'Hospital'])['Accuracy'].mean().unstack()
+    sns.heatmap(pivot_acc, annot=True, cmap='viridis', fmt='.2f', ax=axes[1])
+    axes[1].set_title('Average Accuracy: Family vs Hospital', fontweight='bold')
     
     plt.tight_layout()
-    save_plot('06_metric_distributions_by_source')
-    ###plt.show()
+    save_plot('04_performance_heatmaps')
+
+def create_error_analysis_plots(df):
+    """Create comprehensive error analysis plots"""
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
     
-    # 3. Error distributions
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    # 1. False Positives vs False Negatives scatter
+    sns.scatterplot(data=df, x='False Positives', y='False Negatives', 
+                   hue='Family', style='Input_Type', s=100, alpha=0.8, ax=axes[0,0])
+    axes[0,0].set_title('False Positives vs False Negatives by Family and Input Type', 
+                       fontsize=12, fontweight='bold')
+    max_error = df[['False Positives', 'False Negatives']].max().max()
+    axes[0,0].plot([0, max_error], [0, max_error], 'k--', alpha=0.5, label='Equal Errors Line')
+    axes[0,0].grid(alpha=0.3)
+    axes[0,0].legend()
     
-    # False Positives vs False Negatives
-    error_data = df.melt(id_vars=['Hospital', 'Family', 'Input_Type'], 
+    # 2. Error distribution by family
+    error_data = df.melt(id_vars=['Family', 'Hospital', 'Input_Type'], 
                         value_vars=['False Positives', 'False Negatives'],
                         var_name='Error_Type', value_name='Error_Count')
     
-    sns.boxplot(data=error_data, x='Hospital', y='Error_Count', 
-               hue='Error_Type', ax=axes[0])
-    axes[0].set_title('Error Distribution by Hospital', fontweight='bold')
+    sns.boxplot(data=error_data, x='Family', y='Error_Count', hue='Error_Type', ax=axes[0,1])
+    axes[0,1].set_title('Error Distribution by Model Family', fontsize=12, fontweight='bold')
+    axes[0,1].tick_params(axis='x', rotation=45)
+    axes[0,1].grid(axis='y', alpha=0.3)
     
-    sns.violinplot(data=error_data, x='Error_Type', y='Error_Count', 
-                  hue='Input_Type', split=True, ax=axes[1])
-    axes[1].set_title('Error Distribution by Input Type', fontweight='bold')
+    # 3. Error ratio analysis
+    df['Error_Ratio'] = df['False Positives'] / (df['False Negatives'] + 1e-6)
+    df['Total_Errors'] = df['False Positives'] + df['False Negatives']
     
-    plt.tight_layout()
-    save_plot('07_error_distributions')
-    ##plt.show()
-
-def create_matrix_plots(df):
-    """Create matrix plots including heatmaps and correlation matrices"""
-    # 1. Correlation heatmap
-    numeric_cols = ['Accuracy', 'F1score', 'Precision', 'Recall', 
-                   'False Positives', 'False Negatives', 'Incorrect Extractions']
-    correlation_matrix = df[numeric_cols].corr()
+    sns.scatterplot(data=df, x='Total_Errors', y='Error_Ratio', 
+                   hue='Family', style='Input_Type', s=100, alpha=0.8, ax=axes[1,0])
+    axes[1,0].set_title('Error Ratio vs Total Errors\n(Ratio = FP/FN)', fontsize=12, fontweight='bold')
+    axes[1,0].axhline(y=1, color='red', linestyle='--', alpha=0.7, label='Equal FP/FN')
+    axes[1,0].set_ylabel('False Positive / False Negative Ratio')
+    axes[1,0].grid(alpha=0.3)
+    axes[1,0].legend()
     
-    fig, axes = plt.subplots(1, 2, figsize=(18, 7))
+    # 4. Error bias heatmap
+    error_pivot = df.groupby(['Family', 'Hospital'])[['False Positives', 'False Negatives']].mean()
+    error_pivot['FP_minus_FN'] = error_pivot['False Positives'] - error_pivot['False Negatives']
+    error_heatmap = error_pivot['FP_minus_FN'].unstack()
     
-    sns.heatmap(correlation_matrix, annot=True, cmap='RdBu_r', center=0,
-               square=True, ax=axes[0])
-    axes[0].set_title('Performance Metrics Correlation Matrix', fontweight='bold')
-    
-    # 2. Performance heatmap by Family and Input Type
-    pivot_data = df.groupby(['Family', 'Input_Type'])['F1score'].mean().unstack()
-    sns.heatmap(pivot_data, annot=True, cmap='RdYlBu_r', fmt='.2f', ax=axes[1])
-    axes[1].set_title('Average F1 Score: Family vs Input Type', fontweight='bold')
+    sns.heatmap(error_heatmap, annot=True, cmap='RdBu_r', center=0, 
+               fmt='.1f', ax=axes[1,1])
+    axes[1,1].set_title('Error Bias: FP - FN by Family and Hospital\n(+ve = More FP, -ve = More FN)', 
+                       fontsize=12, fontweight='bold')
     
     plt.tight_layout()
-    save_plot('08_correlation_and_performance_heatmaps')
-    ##plt.show()
+    save_plot('05_error_analysis_comprehensive')
     
-    # 3. Detailed performance matrix
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    
-    # Family vs Hospital
-    pivot1 = df.groupby(['Family', 'Hospital'])['Accuracy'].mean().unstack()
-    sns.heatmap(pivot1, annot=True, cmap='viridis', fmt='.2f', ax=axes[0,0])
-    axes[0,0].set_title('Average Accuracy: Family vs Hospital', fontweight='bold')
-    
-    # Source vs Input Type
-    pivot2 = df.groupby(['Source_Category', 'Input_Type'])['Precision'].mean().unstack()
-    sns.heatmap(pivot2, annot=True, cmap='plasma', fmt='.2f', ax=axes[0,1])
-    axes[0,1].set_title('Average Precision: Source vs Input Type', fontweight='bold')
-    
-    # Token Category vs Family (where available)
-    if df['Token_Category'].nunique() > 1:
-        pivot3 = df.groupby(['Token_Category', 'Family'])['Recall'].mean().unstack()
-        sns.heatmap(pivot3, annot=True, cmap='coolwarm', fmt='.2f', ax=axes[1,0])
-        axes[1,0].set_title('Average Recall: Token Size vs Family', fontweight='bold')
-    else:
-        axes[1,0].text(0.5, 0.5, 'Token size data\nnot available', 
-                      ha='center', va='center', transform=axes[1,0].transAxes)
-        axes[1,0].set_title('Token Size Analysis', fontweight='bold')
-    
-    # Family vs Source with F1 Score
-    pivot4 = df.groupby(['Family', 'Source_Category'])['F1score'].mean().unstack()
-    sns.heatmap(pivot4, annot=True, cmap='RdYlGn', fmt='.2f', ax=axes[1,1])
-    axes[1,1].set_title('Average F1 Score: Family vs Source', fontweight='bold')
-    
-    plt.tight_layout()
-    save_plot('09_detailed_performance_matrices')
-    ##plt.show()
-
-def create_pairgrid_analysis(df):
-    """Create PairGrid to explore relationships between all numeric metrics"""
-    # Select numeric columns and relevant categorical columns
-    numeric_cols = ['Accuracy', 'F1score', 'Precision', 'Recall']
-    plot_df = df[numeric_cols + ['Family', 'Input_Type']].copy()
-    
-    # 1. PairGrid colored by Family
-    g1 = sns.PairGrid(plot_df, vars=numeric_cols, hue='Family', height=3)
-    g1.map_diag(sns.histplot, alpha=0.7)
-    g1.map_upper(sns.scatterplot, alpha=0.7)
-    g1.map_lower(sns.regplot, scatter_kws={'alpha': 0.5})
-    g1.add_legend(title='Model Family')
-    
-    plt.suptitle('Performance Metrics Relationships by Model Family', 
-                y=1.02, fontsize=16, fontweight='bold')
-    save_plot('10_pairgrid_by_family', g1.fig)
-    ##plt.show()
-    
-    # 2. PairGrid colored by Input Type
-    g2 = sns.PairGrid(plot_df, vars=numeric_cols, hue='Input_Type', height=3)
-    g2.map_diag(sns.histplot, alpha=0.7)
-    g2.map_upper(sns.scatterplot, alpha=0.7, s=60)
-    g2.map_lower(sns.regplot, scatter_kws={'alpha': 0.5})
-    g2.add_legend(title='Input Type')
-    
-    plt.suptitle('Performance Metrics Relationships by Input Type', 
-                y=1.02, fontsize=16, fontweight='bold')
-    save_plot('11_pairgrid_by_input_type', g2.fig)
-    ##plt.show()
+    return df
 
 def create_hospital_comparison_analysis(df):
-    """Detailed comparison between hospital templates"""
-    # 1. Side-by-side comparison
-    fig, axes = plt.subplots(2, 3, figsize=(20, 12))
+    """Simplified hospital comparison focusing on key metrics"""
+    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     
-    metrics = ['Accuracy', 'F1score', 'Precision']
-    for i, metric in enumerate(metrics):
-        # Box plots
-        sns.boxplot(data=df, x='Hospital', y=metric, hue='Family', ax=axes[0,i])
-        axes[0,i].set_title(f'{metric} by Hospital and Family', fontweight='bold')
-        axes[0,i].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-        
-        # Violin plots for detailed distribution
-        sns.violinplot(data=df, x='Hospital', y=metric, hue='Input_Type', 
-                      split=True, ax=axes[1,i])
-        axes[1,i].set_title(f'{metric} Distribution by Hospital and Input Type', fontweight='bold')
+    # F1 Score comparison by hospital and family
+    sns.boxplot(data=df, x='Hospital', y='F1score', hue='Family', ax=axes[0])
+    axes[0].set_title('F1 Score Distribution by Hospital and Family', fontweight='bold')
+    axes[0].grid(axis='y', alpha=0.3)
+    
+    # Accuracy comparison by hospital and input type
+    sns.boxplot(data=df, x='Hospital', y='Accuracy', hue='Input_Type', ax=axes[1])
+    axes[1].set_title('Accuracy Distribution by Hospital and Input Type', fontweight='bold')
+    axes[1].grid(axis='y', alpha=0.3)
     
     plt.tight_layout()
-    save_plot('12_hospital_comparison_detailed')
-    ##plt.show()
-    
-    # 2. Error analysis by hospital
-    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
-    
-    # False Positives comparison
-    sns.barplot(data=df, x='Hospital', y='False Positives', hue='Family', ax=axes[0])
-    axes[0].set_title('Average False Positives by Hospital and Family', fontweight='bold')
-    
-    # False Negatives comparison
-    sns.barplot(data=df, x='Hospital', y='False Negatives', hue='Family', ax=axes[1])
-    axes[1].set_title('Average False Negatives by Hospital and Family', fontweight='bold')
-    
-    # Total errors
-    df['Total_Errors'] = df['False Positives'] + df['False Negatives']
-    sns.barplot(data=df, x='Hospital', y='Total_Errors', hue='Input_Type', ax=axes[2])
-    axes[2].set_title('Total Errors by Hospital and Input Type', fontweight='bold')
-    
-    plt.tight_layout()
-    save_plot('13_hospital_error_analysis')
-    ##plt.show()
+    save_plot('06_hospital_comparison_analysis')
 
 def create_source_comparison_analysis(df):
-    """Compare Ollama vs Commercial models with token size analysis"""
-    # 1. Ollama vs Commercial comparison
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    """Compare Ollama vs Commercial models"""
+    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     
-    # Performance metrics comparison
-    metrics = ['Accuracy', 'F1score', 'Precision']
-    for i, metric in enumerate(metrics):
-        if i < 3:
-            row = i // 2
-            col = i % 2
-            sns.boxplot(data=df, x='Source_Category', y=metric, hue='Input_Type', ax=axes[row, col])
-            axes[row, col].set_title(f'{metric} by Source Category and Input Type', fontweight='bold')
+    # Performance metrics comparison by source
+    source_metrics = df.groupby('Source_Category')[['Accuracy', 'F1score', 'Precision', 'Recall']].mean()
+    source_metrics.plot(kind='bar', ax=axes[0])
+    axes[0].set_title('Average Performance Metrics by Source Category', fontweight='bold')
+    axes[0].set_ylabel('Score')
+    axes[0].tick_params(axis='x', rotation=0)
+    axes[0].legend(title='Metrics')
+    axes[0].grid(axis='y', alpha=0.3)
     
-    # Token size analysis (where available)
-    df_with_tokens = df[df['Param_Size'].notna()]
-    if len(df_with_tokens) > 0:
-        sns.scatterplot(data=df_with_tokens, x='Param_Size', y='F1score', 
-                       hue='Source_Category', size='Accuracy', sizes=(50, 200), 
-                       alpha=0.7, ax=axes[1,1])
-        axes[1,1].set_title('F1 Score vs Parameter Size by Source', fontweight='bold')
-        axes[1,1].set_xlabel('Parameter Size (B)')
-    else:
-        axes[1,1].text(0.5, 0.5, 'Parameter size\ndata not available', 
-                      ha='center', va='center', transform=axes[1,1].transAxes)
-        axes[1,1].set_title('Parameter Size Analysis', fontweight='bold')
+    # F1 Score distribution by source and input type
+    sns.boxplot(data=df, x='Source_Category', y='F1score', hue='Input_Type', ax=axes[1])
+    axes[1].set_title('F1 Score Distribution by Source and Input Type', fontweight='bold')
+    axes[1].grid(axis='y', alpha=0.3)
     
     plt.tight_layout()
-    save_plot('14_source_comparison_analysis')
-    ##plt.show()
+    save_plot('07_source_comparison_analysis')
     
-    # 2. Detailed source statistics - calculate and format properly
+    # Calculate detailed source statistics
     source_stats = df.groupby(['Source_Category', 'Family']).agg({
         'Accuracy': ['mean', 'std', 'count'],
         'F1score': ['mean', 'std'],
@@ -640,8 +542,8 @@ def generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
     summary_lines.append(f"   • Total Records: {len(df)}")
     summary_lines.append(f"   • Model Families: {', '.join(df['Family'].unique())}")
     summary_lines.append(f"   • Hospitals: {', '.join(df['Hospital'].unique())}")
-    summary_lines.append(f"   • Vision-enabled Models: {df['Is_Vision'].sum()}")
-    summary_lines.append(f"   • Text-only Models: {(~df['Is_Vision']).sum()}")
+    summary_lines.append(f"   • Vision-enabled Models: {df['Image_Input'].sum()}")
+    summary_lines.append(f"   • Text-only Models: {(~df['Image_Input']).sum()}")
     summary_lines.append(f"   • Ollama Models: {(df['Source_Category'] == 'Ollama').sum()}")
     summary_lines.append(f"   • Commercial Models: {(df['Source_Category'] == 'Commercial').sum()}")
     summary_lines.append("")
@@ -650,7 +552,7 @@ def generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
     summary_lines.append("TOP PERFORMERS:")
     top_5 = df.nlargest(5, 'F1score')
     for idx, row in top_5.iterrows():
-        vision_text = 'Vision' if row['Is_Vision'] else 'Text-only'
+        vision_text = 'Vision' if row['Image_Input'] else 'Text-only'
         param_text = f"{row['Param_Size']}B" if pd.notna(row['Param_Size']) else 'Unknown'
         summary_lines.append(f"   • {row['LLM']} ({row['Family']}, {param_text}, {vision_text})")
         summary_lines.append(f"     F1: {row['F1score']:.2f}, Accuracy: {row['Accuracy']:.2f}")
@@ -665,7 +567,7 @@ def generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
     
     # Key Insights
     summary_lines.append("KEY INSIGHTS:")
-    vision_perf = df.groupby('Is_Vision')['F1score'].mean()
+    vision_perf = df.groupby('Image_Input')['F1score'].mean()
     summary_lines.append(f"   • Vision Models Avg F1: {vision_perf[True]:.2f}")
     summary_lines.append(f"   • Text-only Models Avg F1: {vision_perf[False]:.2f}")
     
@@ -760,174 +662,15 @@ def create_summary_page(df, grouped_models, stats, source_stats):
     summary_path = save_plot('00_executive_summary')
     return summary_path
 
-def create_normalized_accuracy_distribution(df):
-    """Create normalized accuracy distribution plot"""
-    # 1. Normalized accuracy by family
-    # Calculate family-wise normalized scores (z-score normalization)
-    df_norm = df.copy()
-    family_stats = df.groupby('Family')['Accuracy'].agg(['mean', 'std'])
-    
-    for family in df['Family'].unique():
-        family_mask = df['Family'] == family
-        family_mean = family_stats.loc[family, 'mean']
-        family_std = family_stats.loc[family, 'std']
-        if family_std > 0:  # Avoid division by zero
-            df_norm.loc[family_mask, 'Accuracy_Normalized'] = (
-                (df.loc[family_mask, 'Accuracy'] - family_mean) / family_std
-            )
-        else:
-            df_norm.loc[family_mask, 'Accuracy_Normalized'] = 0
-    
-    # Plot normalized distributions
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    
-    sns.boxplot(data=df_norm, x='Family', y='Accuracy_Normalized', ax=axes[0,0])
-    axes[0,0].set_title('Normalized Accuracy Distribution by Family\n(Z-score normalized within family)', 
-                       fontsize=12, fontweight='bold')
-    axes[0,0].tick_params(axis='x', rotation=45)
-    axes[0,0].axhline(y=0, color='red', linestyle='--', alpha=0.7, label='Family Mean')
-    axes[0,0].legend()
-    
-    sns.violinplot(data=df_norm, x='Input_Type', y='Accuracy_Normalized', ax=axes[0,1])
-    axes[0,1].set_title('Normalized Accuracy Distribution by Input Type', 
-                       fontsize=12, fontweight='bold')
-    axes[0,1].axhline(y=0, color='red', linestyle='--', alpha=0.7)
-    
-    sns.histplot(data=df_norm, x='Accuracy_Normalized', hue='Hospital', 
-                kde=True, alpha=0.6, ax=axes[1,0])
-    axes[1,0].set_title('Overall Normalized Accuracy Distribution by Hospital', 
-                       fontsize=12, fontweight='bold')
-    axes[1,0].axvline(x=0, color='red', linestyle='--', alpha=0.7, label='Overall Mean')
-    axes[1,0].legend()
-    
-    sns.scatterplot(data=df_norm, x='Accuracy', y='Accuracy_Normalized', 
-                   hue='Family', style='Input_Type', s=80, alpha=0.7, ax=axes[1,1])
-    axes[1,1].set_title('Raw vs Normalized Accuracy', fontsize=12, fontweight='bold')
-    axes[1,1].set_xlabel('Raw Accuracy')
-    axes[1,1].set_ylabel('Normalized Accuracy (Z-score)')
-    
-    plt.tight_layout()
-    save_plot('01_accuracy_distribution_normalized')
-    
-    return df_norm
-
-def create_normalized_f1_hospital_comparison(df):
-    """Create normalized F1 score hospital comparison"""
-    # Calculate hospital-wise normalized F1 scores
-    df_norm = df.copy()
-    hospital_stats = df.groupby('Hospital')['F1score'].agg(['mean', 'std'])
-    
-    for hospital in df['Hospital'].unique():
-        hospital_mask = df['Hospital'] == hospital
-        hospital_mean = hospital_stats.loc[hospital, 'mean']
-        hospital_std = hospital_stats.loc[hospital, 'std']
-        if hospital_std > 0:
-            df_norm.loc[hospital_mask, 'F1score_Normalized'] = (
-                (df.loc[hospital_mask, 'F1score'] - hospital_mean) / hospital_std
-            )
-        else:
-            df_norm.loc[hospital_mask, 'F1score_Normalized'] = 0
-    
-    # 1. Normalized F1 by family and hospital
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    
-    sns.boxplot(data=df_norm, x='Family', y='F1score_Normalized', hue='Hospital', ax=axes[0,0])
-    axes[0,0].set_title('Normalized F1 Score by Family and Hospital\n(Z-score normalized within hospital)', 
-                       fontsize=12, fontweight='bold')
-    axes[0,0].tick_params(axis='x', rotation=45)
-    axes[0,0].axhline(y=0, color='red', linestyle='--', alpha=0.7, label='Hospital Mean')
-    axes[0,0].legend()
-    
-    sns.violinplot(data=df_norm, x='Hospital', y='F1score_Normalized', 
-                  hue='Input_Type', split=True, ax=axes[0,1])
-    axes[0,1].set_title('Normalized F1 Score Distribution\nby Hospital and Input Type', 
-                       fontsize=12, fontweight='bold')
-    axes[0,1].axhline(y=0, color='red', linestyle='--', alpha=0.7)
-    
-    # 3. Side-by-side comparison of raw vs normalized
-    hospital_comparison = df.groupby(['Hospital', 'Family']).agg({
-        'F1score': 'mean'
-    }).reset_index()
-    hospital_comparison_norm = df_norm.groupby(['Hospital', 'Family']).agg({
-        'F1score_Normalized': 'mean'
-    }).reset_index()
-    
-    sns.barplot(data=hospital_comparison, x='Family', y='F1score', hue='Hospital', ax=axes[1,0])
-    axes[1,0].set_title('Raw F1 Scores by Family and Hospital', fontsize=12, fontweight='bold')
-    axes[1,0].tick_params(axis='x', rotation=45)
-    
-    sns.barplot(data=hospital_comparison_norm, x='Family', y='F1score_Normalized', 
-               hue='Hospital', ax=axes[1,1])
-    axes[1,1].set_title('Normalized F1 Scores by Family and Hospital', fontsize=12, fontweight='bold')
-    axes[1,1].tick_params(axis='x', rotation=45)
-    axes[1,1].axhline(y=0, color='red', linestyle='--', alpha=0.7)
-    
-    plt.tight_layout()
-    save_plot('02_f1_score_hospital_comparison_normalized')
-    
-    return df_norm
-
-def create_false_positives_negatives_comparison(df):
-    """Create comprehensive false positives vs false negatives comparison"""
-    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
-    
-    # 1. Scatter plot: False Positives vs False Negatives
-    sns.scatterplot(data=df, x='False Positives', y='False Negatives', 
-                   hue='Family', style='Hospital', s=100, alpha=0.7, ax=axes[0,0])
-    axes[0,0].set_title('False Positives vs False Negatives by Family and Hospital', 
-                       fontsize=12, fontweight='bold')
-    axes[0,0].plot([0, df[['False Positives', 'False Negatives']].max().max()], 
-                   [0, df[['False Positives', 'False Negatives']].max().max()], 
-                   'k--', alpha=0.5, label='Equal Errors Line')
-    axes[0,0].legend()
-    
-    # 2. Error type distribution by family
-    error_data = df.melt(id_vars=['Family', 'Hospital', 'Input_Type'], 
-                        value_vars=['False Positives', 'False Negatives'],
-                        var_name='Error_Type', value_name='Error_Count')
-    
-    sns.boxplot(data=error_data, x='Family', y='Error_Count', hue='Error_Type', ax=axes[0,1])
-    axes[0,1].set_title('Error Distribution by Model Family', fontsize=12, fontweight='bold')
-    axes[0,1].tick_params(axis='x', rotation=45)
-    
-    # 3. Error ratio analysis
-    df['Error_Ratio'] = df['False Positives'] / (df['False Negatives'] + 1e-6)  # Add small epsilon to avoid division by zero
-    df['Total_Errors'] = df['False Positives'] + df['False Negatives']
-    
-    sns.scatterplot(data=df, x='Total_Errors', y='Error_Ratio', 
-                   hue='Input_Type', style='Hospital', s=100, alpha=0.7, ax=axes[1,0])
-    axes[1,0].set_title('Error Ratio vs Total Errors\n(Ratio = FP/FN)', fontsize=12, fontweight='bold')
-    axes[1,0].axhline(y=1, color='red', linestyle='--', alpha=0.7, label='Equal FP/FN')
-    axes[1,0].set_ylabel('False Positive / False Negative Ratio')
-    axes[1,0].legend()
-    # Only set log scale if there are positive values
-    if df['Error_Ratio'].min() > 0:
-        axes[1,0].set_yscale('log')
-    
-    # 4. Heatmap of average errors by family and hospital
-    error_pivot = df.groupby(['Family', 'Hospital'])[['False Positives', 'False Negatives']].mean()
-    error_pivot['FP_minus_FN'] = error_pivot['False Positives'] - error_pivot['False Negatives']
-    error_heatmap = error_pivot['FP_minus_FN'].unstack()
-    
-    sns.heatmap(error_heatmap, annot=True, cmap='RdBu_r', center=0, 
-               fmt='.1f', ax=axes[1,1])
-    axes[1,1].set_title('Error Bias: FP - FN by Family and Hospital\n(+ve = More FP, -ve = More FN)', 
-                       fontsize=12, fontweight='bold')
-    
-    plt.tight_layout()
-    save_plot('03_false_positives_negatives_comparison')
-    
-    return df
-
 def cleanup_output_directory():
-    """Delete the comprehensive_analysis_outputs directory after combining PDFs"""
-    import shutil
-    
+    """Clean up the temporary output directory after PDF creation"""
     try:
+        import shutil
         if os.path.exists(output_dir):
             shutil.rmtree(output_dir)
+            print(f"Cleaned up temporary directory: {output_dir}")
     except Exception as e:
-        pass
+        print(f"Warning: Could not clean up temporary directory: {e}")
 
 def create_combined_pdf():
     """Combine all individual plots into a single comprehensive PDF"""
@@ -962,30 +705,27 @@ def create_combined_pdf():
         return None
 
 def main():
-    """Main execution function"""
+    """Main execution function - streamlined to include only key visualizations"""
     # Load and prepare data
     df = load_and_prepare_data()
     
     # Calculate summary statistics
     stats = calculate_summary_statistics(df)
     
-    # Create all visualizations - starting with the grouped overview
-    grouped_models = overall_metrics(df)
+    # Create key visualizations in logical order
+    grouped_models = overall_metrics(df)  # Keep this as the main overview
     
-    create_normalized_accuracy_distribution(df)
-    create_normalized_f1_hospital_comparison(df)
-    create_false_positives_negatives_comparison(df)
+    create_relational_plots(df)           # Parameter size vs performance
+    create_categorical_plots(df)          # Family and input type comparisons
+    create_matrix_plots(df)              # Performance heatmaps
+    create_error_analysis_plots(df)      # Error analysis
+    create_hospital_comparison_analysis(df)  # Hospital comparisons
+    source_stats = create_source_comparison_analysis(df)  # Source comparisons
+    create_summary_page(df, grouped_models, stats, source_stats)  # Executive summary
     
-    create_relational_plots(df)
-    create_categorical_plots(df)
-    create_distribution_plots(df)
-    create_matrix_plots(df)
-    create_pairgrid_analysis(df)
-    create_hospital_comparison_analysis(df)
-    source_stats = create_source_comparison_analysis(df)
-    create_summary_page(df, grouped_models, stats, source_stats)
-    
-    # Print comprehensive summary
+    # Print comprehensive summary to console
+    summary_text = generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
+    print(summary_text)
     
     # Combine all plots into a single PDF
     combined_pdf_path = create_combined_pdf()
@@ -993,9 +733,9 @@ def main():
     # Clean up the temporary output directory after successful PDF creation
     if combined_pdf_path:
         cleanup_output_directory()
-    
-    if combined_pdf_path:
-        print(f"Final combined PDF saved to: {combined_pdf_path}")
+        print(f"\nFinal combined PDF saved to: {combined_pdf_path}")
+    else:
+        print("\nError creating combined PDF")
 
 if __name__ == "__main__":
     main()
