@@ -117,12 +117,17 @@ def extract_json_from_response(response):
     
     # First try the existing cleaning method
     cleaned = response.strip()
+    if cleaned.startswith("{\"report_id\":"):
+        temp = "```json\n" + cleaned + "\n```"
+        cleaned = temp
     if cleaned.startswith("```json"):
         cleaned = cleaned[7:]
     if cleaned.startswith("```"):
         cleaned = cleaned[3:]
     if cleaned.endswith("```"):
         cleaned = cleaned[:-3]
+    if cleaned.startswith("{\"report_id\":"):
+        cleaned = cleaned.strip()
     cleaned = cleaned.strip()
     
     # Try to fix JSON structure issues
@@ -197,24 +202,46 @@ def save_model_response(model, response, source_file, output_dir):
             print(f"✓ JSON response saved to {filename}")
             
         else:
-            # Could not extract valid JSON
-            print(f"Could not extract valid JSON from {model}")
+            # Primary extraction failed, try the raw response extraction method
+            print(f"Primary JSON extraction failed for {model}, trying raw response extraction...")
             
-            # Save raw response as fallback
-            output_data = {
-                "model": model,
-                "status": "json_extraction_failed",
-                "error": "Could not extract valid JSON from response",
-                "raw_response": response,
-                "timestamp": "2025-06-05",
-                "source_file": source_file
-            }
+            # Try to extract JSON from raw response (handles cases where JSON is mixed with text)
+            extracted_json = extract_json_from_raw_response(response)
             
-            fallback_filename = f"{output_dir}/{clean_name}_{model_name}_fallback.json"
-            with open(fallback_filename, "w") as f:
-                json.dump(output_data, f, indent=2)
+            if extracted_json is not None:
+                # Successfully extracted from raw response
+                output_data = {
+                    "model": model,
+                    "status": "success",
+                    "data": extracted_json,
+                    "timestamp": "2025-06-05",
+                    "source_file": source_file,
+                    "extraction_method": "raw_response_extraction"
+                }
+                
+                with open(filename, "w") as f:
+                    json.dump(output_data, f, indent=2)
+                
+                print(f"✓ JSON extracted from raw response and saved to {filename}")
             
-            print(f"Fallback response saved to {fallback_filename}")
+            else:
+                # Could not extract valid JSON with either method
+                print(f"Could not extract valid JSON from {model} using any method")
+                
+                # Save raw response as fallback
+                output_data = {
+                    "model": model,
+                    "status": "json_extraction_failed",
+                    "error": "Could not extract valid JSON from response using any method",
+                    "raw_response": response,
+                    "timestamp": "2025-06-05",
+                    "source_file": source_file
+                }
+                
+                with open(filename, "w") as f:
+                    json.dump(output_data, f, indent=2)
+                
+                print(f"✗ Raw response saved to {filename} (JSON extraction failed)")
             
     except Exception as e:
         print(f"Error saving response for {model}: {e}")
@@ -325,3 +352,107 @@ def process_image_with_models(models, outputdir, image_path = "../output_pdfs/im
         save_model_response(model, response, os.path.basename(image_path), outputdir)
     
     print(f"\nAll models completed. Check {outputdir} folder for results.")
+
+def extract_json_from_raw_response(raw_response):
+    """
+    Extract JSON from raw responses that contain JSON followed by explanatory text.
+    Returns the parsed JSON object or None if no valid JSON is found.
+    """
+    if not raw_response:
+        return None
+    
+    # First, try to find JSON that starts with { and ends with }
+    # Look for the first { and find its matching }
+    start_idx = raw_response.find('{')
+    if start_idx == -1:
+        return None
+    
+    # Count braces to find the end of the JSON object
+    brace_count = 0
+    end_idx = start_idx
+    
+    for i, char in enumerate(raw_response[start_idx:], start_idx):
+        if char == '{':
+            brace_count += 1
+        elif char == '}':
+            brace_count -= 1
+            if brace_count == 0:
+                end_idx = i
+                break
+    
+    if brace_count != 0:
+        # Unmatched braces, try a different approach
+        return None
+    
+    # Extract the JSON portion
+    json_str = raw_response[start_idx:end_idx + 1]
+    
+    try:
+        # Try to parse the extracted JSON
+        return json.loads(json_str)
+    except json.JSONDecodeError:
+        # If parsing fails, try to clean common issues
+        try:
+            # Fix common formatting issues
+            cleaned_json = json_str.replace('\n', ' ').replace('  ', ' ')
+            return json.loads(cleaned_json)
+        except json.JSONDecodeError:
+            return None
+
+def process_existing_raw_responses(input_dir="outJSON/localout/"):
+    """
+    Process existing response files that have raw_response data and extract clean JSON.
+    Creates new cleaned files with properly extracted JSON.
+    """
+    if not os.path.exists(input_dir):
+        print(f"Directory {input_dir} does not exist")
+        return
+    
+    # Find all JSON response files
+    response_files = [f for f in os.listdir(input_dir) if f.endswith('__response.json')]
+    
+    print(f"Found {len(response_files)} response files to process")
+    
+    for filename in response_files:
+        file_path = os.path.join(input_dir, filename)
+        
+        try:
+            # Read the existing response file
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            # Check if this file has a raw_response that needs processing
+            if (data.get('status') == 'success' and 
+                'data' in data and 
+                'raw_response' in data['data'] and 
+                data['data'].get('error') == 'Could not parse as JSON'):
+                
+                print(f"Processing {filename}...")
+                
+                # Extract JSON from raw_response
+                raw_response = data['data']['raw_response']
+                extracted_json = extract_json_from_raw_response(raw_response)
+                
+                if extracted_json:
+                    # Update the data structure with clean extracted JSON
+                    data['data'] = extracted_json
+                    data['status'] = 'success_cleaned'
+                    
+                    # Create a new filename for the cleaned version
+                    clean_filename = filename.replace('__response.json', '__cleaned_response.json')
+                    clean_file_path = os.path.join(input_dir, clean_filename)
+                    
+                    # Save the cleaned version
+                    with open(clean_file_path, 'w', encoding='utf-8') as f:
+                        json.dump(data, f, indent=2)
+                    
+                    print(f"✓ Cleaned JSON saved to {clean_filename}")
+                else:
+                    print(f"✗ Could not extract JSON from {filename}")
+            else:
+                print(f"Skipping {filename} - no raw_response to process")
+                
+        except Exception as e:
+            print(f"Error processing {filename}: {e}")
+    
+    print("Processing complete!")

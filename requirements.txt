@@ -13,6 +13,8 @@ transformers
 torch
 accelerate
 sentencepiece
+flash-attn
+
 #for biogpt
 sacremoses
 protobuf
