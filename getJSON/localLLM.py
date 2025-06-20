@@ -47,10 +47,9 @@ def load_model(model_name):
     
     print(f"Loading model: {model_name}")
     
-    # Detect best available de`vice for M1 MacBook Pro
     if torch.backends.mps.is_available():
-        device = "mps"  # Metal Performance Shaders for M1/M2 Macs
-        torch_dtype = torch.float16  # More efficient on GPU
+        device = "mps"  
+        torch_dtype = torch.float16  
         print("Using MPS (Metal Performance Shaders) for GPU acceleration")
     elif torch.cuda.is_available():
         device = "cuda"
@@ -61,15 +60,14 @@ def load_model(model_name):
         torch_dtype = torch.float32
         print("Using CPU (no GPU acceleration available)")
     
-    # Common model loading parameters optimized for M1
     common_params = {
         "trust_remote_code": True,
         "torch_dtype": torch_dtype,
-        "device_map": "auto",  # Let transformers choose optimal placement
+        "device_map": "auto",  
         "low_cpu_mem_usage": True
     }
     
-    # Try vision model first, fall back to text model
+    #one model is vision one is text, they use different processors so keep getting value errors
     try:
         model = AutoModelForVision2Seq.from_pretrained(model_name, **common_params)
         processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
@@ -81,7 +79,6 @@ def load_model(model_name):
             processor.pad_token = processor.eos_token
         model_type = "text"
     
-    # Move model to optimal device if device_map didn't handle it
     if hasattr(model, 'to') and not hasattr(model, 'hf_device_map'):
         model = model.to(device)
     
@@ -200,10 +197,11 @@ def main():
     print(f"Available models: {models}")
     
     # Process text and image files
-    print("\n=== Processing Text Files ===")
+    print("\nProcessing Text Files")
     process_text_files_with_models(models, output_dir="localout/", llm_function=NuToLLM)
     
-    #print("\n=== Processing Image Files ===")
+    #keeps giving erros
+    #print("\nProcessing Image Files")
     #process_images_with_models(vision_models, output_dir="localout/")
 print("Starting")
 main()

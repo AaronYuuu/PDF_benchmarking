@@ -113,7 +113,6 @@ def convert_pdf_to_text(pdf_path: str, language_list=["en"], dpi=300) -> str:
     pdf_path: path to the pdf input file
     language_list: A list of languages to detect for OCR
     dpi: The scan resolution to use for OCR
-
   Returns:
     A text string of the OCR result.
 
@@ -125,7 +124,6 @@ def convert_pdf_to_text(pdf_path: str, language_list=["en"], dpi=300) -> str:
 def process_pdf_batch(input_dir: str, output_dir: str, save_text: bool = True, 
                      save_images: bool = True, language_list=["en"], dpi=300):
     """Process a batch of PDF files.
-    
     Args:
         input_dir: Directory containing PDF files
         output_dir: Directory to save outputs
@@ -239,11 +237,11 @@ def main():
 def main2():
     """Main function for testing purposes."""
     os.chdir("/Users/ayu/PDF_benchmarking")
-    input_dir = "makeTemplatePDF/out/"  # Replace with your input directory
+    input_dir = "makeTemplatePDF/out/" 
     # Ensure output directory exists
     if not os.path.exists("output_pdfs"):
         os.makedirs("output_pdfs")
-    output_dir = "output_pdfs"  # Replace with your output directory
+    output_dir = "output_pdfs"  
     process_pdf_batch(input_dir, output_dir, save_text=True, save_images=True, 
                      language_list=["en"], dpi=300)
 

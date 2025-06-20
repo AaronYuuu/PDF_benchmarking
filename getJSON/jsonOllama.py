@@ -12,10 +12,6 @@ from jsonLLM import(
 )
 
 def textToLLM(prompt, text, model):
-    """
-    Function to send text to a specific LLM model using Ollama and get response.
-    Returns the response text or None if failed.
-    """
     try:
         print(f"Trying model: {model}")
         
@@ -66,7 +62,7 @@ def imageGroupToLLM(prompt, image_group, model):
             ]
         )
         
-        print(f"✓ Success with model: {model}")
+        print(f"Success with model: {model}")
         return response['message']['content']
         
     except Exception as e:
@@ -75,12 +71,10 @@ def imageGroupToLLM(prompt, image_group, model):
         return None
 
 def process_grouped_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="ollamaPrompt.txt"):
-    """
-    Process grouped images (by source document) with vision-capable models.
-    
+    """    
     Args:
         models: List of vision-capable model names
-        output_dir: Directory to save results
+        output_dir: Directory to save results with common naming structure manual input
         image_directory: Directory containing images
         prompt_path: Path to the prompt file
     """

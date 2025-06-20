@@ -34,7 +34,7 @@ def textToLLM(prompt, text, model):
                 temperature=0.0
             )
             
-    print(f"✓ Success with model: {model}")
+    print(f"Success with model: {model}")
     return response.choices[0].message.content
             
 def reduce_image_token_size(image_path, max_dim=512, quality=20):
@@ -58,7 +58,6 @@ def imageGroupToLLM(prompt, image_group, model):
     try:
         print(f"Trying model: {model} with {len(image_group)} images")
         
-        # For Ollama, we need to encode images and pass them directly
         images = []
         for image_path in image_group:
             # Reduce image token size by downsizing and compressing
@@ -77,7 +76,7 @@ def imageGroupToLLM(prompt, image_group, model):
             "temperature": 0.0
         }
         response = client.chat.completions.create(**payload)
-        print(f"✓ Success with model: {model}")
+        print(f"Success with model: {model}")
         # use attribute access to avoid subscriptable error
         return response.choices[0].message.content
         
@@ -87,9 +86,7 @@ def imageGroupToLLM(prompt, image_group, model):
         return None
 
 def process_grouped_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="ollamaPrompt.txt"):
-    """
-    Process grouped images (by source document) with vision-capable models.
-    
+    """    
     Args:
         models: List of vision-capable model names
         output_dir: Directory to save results
@@ -158,5 +155,4 @@ def main():
     )
     print("Processing completed.")
 
-if __name__ == "__main__":
-    main()
+main()
