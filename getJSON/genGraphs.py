@@ -80,7 +80,7 @@ def extract_model_info(llm_name):
     elif 'mistral' in llm_lower or 'devstral' in llm_lower:
         family = 'Mistral'
     else:
-        family = 'HuggingFace'
+        family = 'NuExtract'
     
     # Create base model name (without vision indicators)
     base_name = normalize_model_name(llm_name)
@@ -142,7 +142,7 @@ def overall_metrics(df):
         'Llama': colors[3],
         'Granite': colors[4],
         'Mistral': colors[5],
-        'Other': colors[6]
+        'NuExtract': colors[6]
     }
     
     for i, (idx, row) in enumerate(grouped_models_sorted.iterrows()):
@@ -608,7 +608,7 @@ def generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
     return '\n'.join(summary_lines)
 
 def create_summary_page(df, grouped_models, stats, source_stats):
-    """Create executive summary page using the same text as the comprehensive summary"""
+    """Create summary page using the same text as the comprehensive summary"""
     # Generate the summary text using the centralized function
     summary_text = generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
     
@@ -689,7 +689,6 @@ def create_combined_pdf():
         return None
 
 def main():
-    """Main execution function - streamlined to include only key visualizations"""
     # Load and prepare data
     df = load_and_prepare_data() #function added ignore openRouter models, not enough data
     # Calculate summary statistics
