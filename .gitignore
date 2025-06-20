@@ -11,6 +11,12 @@ api_keys.txt
 /makeTemplate/out
 /getJSON/__pycache__
 /getJSON/outJSON/localout/
+/getJSON/outJSON/OllamaOut
+/getJSON/outJSON/OllamaVisionOut
+/getJSON/outJSON/OpenAIOut
+/getJSON/outJSON/OpenAIVisionOut
+/getJSON/outJSON/OpenRouter
+/getJSON/outJSON/OpenRouterVisionOut
 
 test.ipynb
 /makeTemplate/out/
