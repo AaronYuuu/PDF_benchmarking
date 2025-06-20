@@ -2,6 +2,8 @@
 pandas
 seaborn
 matplotlib
+requests
+pillow
 
 # LLM APIs
 openai
