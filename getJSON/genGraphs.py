@@ -8,7 +8,7 @@ from datetime import datetime
 import warnings
 from matplotlib.backends.backend_pdf import PdfPages
 from PyPDF2 import PdfMerger
-import glob
+
 warnings.filterwarnings('ignore')
 
 # Set up plotting parameters

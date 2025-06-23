@@ -1,4 +1,3 @@
-from deepdiff import DeepDiff
 import json
 import os
 import pprint
@@ -11,13 +10,7 @@ def compare(json1, json2):
     """
     return json1 == json2
 
-def findexact(json1, json2):
-    result = DeepDiff(json1, json2, ignore_order=True, ignore_numeric_type_changes=True,
-                      ignore_string_case=True)
-    return result
 
-
-#TODO make this work
 def filter_template(template, reportName):
     """
     Return a copy of `template` with only those entries whose key
@@ -392,7 +385,7 @@ def main():
                     is_equal, num_differences, total_values, differences = compare_values_with_template(copy, data)
                     
                     if is_equal:
-                        print(f"✓ Perfect match - all {total_values} values match!")
+                        print(f"Perfect match - all {total_values} values match!")
                     else:
                         matching_values = total_values - num_differences
                         accuracy = (matching_values / total_values) * 100

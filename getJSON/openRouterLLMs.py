@@ -42,7 +42,7 @@ def textToLLM(prompt, text, model, max_retries=3):
                     }
                 ]
             )
-            print(f"✓ Success with model: {model}")
+            print(f"Success with model: {model}")
             return completion.choices[0].message.content
             
         except Exception as e:
@@ -53,7 +53,7 @@ def textToLLM(prompt, text, model, max_retries=3):
             if "429" in error_str or "rate limit" in error_str.lower():
                 print(f"Rate limit hit on {model}")
                 if retry < max_retries - 1:
-                    wait_time = 2 ** retry  # Exponential backoff: 1s, 2s, 4s
+                    wait_time = 3 ** retry 
                     print(f"Waiting {wait_time} seconds before retry...")
                     time.sleep(wait_time)
                     continue
@@ -116,7 +116,7 @@ def give_image_group_to_llm(prompt, image_group, model, max_retries=3):
             }
             completion = requests.post(json = payload, url = "https://openrouter.ai/api/v1/chat/completions", headers = {"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"})
             completion = completion.json()
-            print(f"✓ Success with model: {model}")
+            print(f"Success with model: {model}")
             return completion["choices"][0]["message"]["content"]
             
         except Exception as e:
@@ -197,6 +197,7 @@ def process_grouped_images_with_openrouter_models(models, output_dir, image_dire
     print(f"All image groups and models completed. Check {full_output_dir} folder for results.")
     print(f"{'='*60}")
 
+#testing
 def main_vision():
     """
     Main function to process images with vision-capable OpenRouter models.
@@ -222,9 +223,7 @@ def main():
         "qwen/qwen2.5-vl-72b-instruct:free",
        "meta-llama/llama-4-scout:free",
         "mistralai/mistral-small-3.1-24b-instruct:free"    
-]
-    #ensure text files are cleaned
-    
+    ]    
     # Use the shared processing function
     process_text_files_with_models(MODELS,output_dir="OpenRouter/", llm_function=textToLLM)
     main_vision()

@@ -55,8 +55,8 @@ def encode_image_group_to_base64(image_paths):
 
 def extract_json_from_response(response):
     """
-    Unified JSON extraction from responses with multiple fallback methods.
-    Returns the parsed JSON object or None if no valid JSON is found.
+    take JSON out from response text looking for the common pattern
+    if not available return None
     """
     if not response:
         return None
