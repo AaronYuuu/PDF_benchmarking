@@ -3,7 +3,7 @@
   "status": "success",
   "data": {
     "testing_laboratory": "MOLECULAR GENETICS LABORATORY Sequencing Diagnostics Twist Bioscience Illumina certified clinical laboratory Toronto Cancer Hospital Sequencing and Division of Tumor",
-    "ordering_clinic": "Windsor Regional Hospital (Windsor) Sinai Health System (Toronto)",
+    "ordering_clinic": "Windsor Regional Hospital (Windsor) Sinai Health System (Toronto",
     "reference_genome": "GRCh37 GRCh37",
     "sequencing_scope": "Sequencing Range Targeted variant testing Sanger sequencing",
     "analysis_type": "Targeted variant testing, Methylation analysis Methylation analysis CNVkit",
@@ -19,5 +19,5 @@
     "date_verified": "Date: 2024-06-15"
   },
   "timestamp": "2025-06-19",
-  "source_file": "hospital2"
+  "source_file": "report_fakeHospital2__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
 }

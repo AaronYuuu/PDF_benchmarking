@@ -267,7 +267,188 @@ def compare_values_with_template(template, data):
         return True, 0, total_values, []
     else:
         return False, len(differences), total_values, differences
+
+def compare_gliner_output(template, data, hospital, source, model_name):
+    """
+    Specialized comparison function for GLiNER output.
+    Handles flat data structure and returns standardized metrics.
+    Partial matches count as 0.5 for both correct and incorrect.
+    """
+    # Create flattened template for GLiNER comparison
+    flat_template = flatten_template_for_gliner(template)
     
+    # Compare values with flattened template
+    is_equal, num_differences, total_values, differences, partial_matches = compare_gliner_with_template(flat_template, data)
+    
+    if is_equal:
+        print(f"Perfect match - all {total_values} values match!")
+        fp, fn, ic = 0, 0, 0
+        matching_values = total_values
+        accuracy = 100.0
+        precision = 100.0
+        recall = 100.0
+        f1score = 100.0
+    else:
+        # Calculate adjusted metrics accounting for partial matches
+        full_differences = num_differences - partial_matches
+        adjusted_correct = total_values - full_differences - (partial_matches * 0.5)
+        
+        matching_values = adjusted_correct
+        accuracy = (adjusted_correct / total_values) * 100 if total_values > 0 else 0
+        
+        print(f"Accuracy: {accuracy:.1f}% (including {partial_matches} partial matches)")
+        
+        # Count different types of errors (excluding partial matches from error counts)
+        fn = sum(1 for diff in differences if "FALSE NEGATIVE" in diff or "Key missing in extracted" in diff)
+        fp = sum(1 for diff in differences if "FALSE POSITIVE" in diff or "Key missing in template" in diff)
+        ic = sum(1 for diff in differences if "Value mismatch" in diff or "Type mismatch" in diff)
+        
+        # Add half counts for partial matches
+        partial_fp = partial_matches * 0.5
+        partial_fn = partial_matches * 0.5
+        
+        total_fp = fp + partial_fp
+        total_fn = fn + partial_fn
+        
+        print(f"False Positives: {total_fp:.1f}, False Negatives: {total_fn:.1f}, Incorrect Extractions: {ic}, Partial Matches: {partial_matches}")
+        
+        # Calculate metrics with adjusted values
+        precision = (adjusted_correct / (adjusted_correct + total_fp)) * 100 if (adjusted_correct + total_fp) > 0 else 0
+        recall = (adjusted_correct / (adjusted_correct + total_fn)) * 100 if (adjusted_correct + total_fn) > 0 else 0
+        f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+        print(f"Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1 Score: {f1score:.1f}\n")
+    
+    # Return standardized result dictionary with adjusted values
+    return {
+        "LLM": model_name,
+        "False Positives": total_fp if 'total_fp' in locals() else 0,
+        "False Negatives": total_fn if 'total_fn' in locals() else 0,
+        "Incorrect Extractions": ic if 'ic' in locals() else 0,
+        "Correct Matches": matching_values,
+        "Precision": precision,
+        "Recall": recall,
+        "F1score": f1score,
+        "Accuracy": accuracy,
+        "Source": source,
+        "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2"
+    }
+
+
+
+def flatten_template_for_gliner(template):
+    """
+    Flatten the nested template structure to match GLiNER's flat output format.
+    Maps nested fields like variants[0].gene_symbol to gene_symbol for comparison.
+    """
+    flattened = {}
+    
+    # Direct mappings for top-level fields
+    direct_fields = [
+        "date_collected", "date_received", "date_verified", "report_type",
+        "testing_context", "ordering_clinic", "testing_laboratory", 
+        "sequencing_scope", "num_tested_genes", "sample_type", 
+        "analysis_type", "num_variants", "reference_genome"
+    ]
+    
+    for field in direct_fields:
+        if field in template:
+            flattened[field] = template[field]
+    
+    # Handle nested structures - flatten variants and tested_genes
+    if "variants" in template and isinstance(template["variants"], list) and template["variants"]:
+        variant = template["variants"][0]  # Take first variant for comparison
+        variant_fields = [
+            "gene_symbol", "chromosome", "hgvsg", "hgvsc", "hgvsp",
+            "transcript_id", "exon", "zygosity", "interpretation",
+            "mafac", "mafan", "mafaf"
+        ]
+        for field in variant_fields:
+            if field in variant:
+                flattened[field] = variant[field]
+    
+    # Handle tested_genes - extract refseq_mrna values
+    if "tested_genes" in template and isinstance(template["tested_genes"], dict):
+        for gene_name, gene_data in template["tested_genes"].items():
+            if isinstance(gene_data, dict) and "refseq_mrna" in gene_data:
+                # Map to a field name GLiNER might extract
+                flattened[f"refseq_mrna"] = gene_data["refseq_mrna"]
+                break  # Take first one for now
+    
+    return flattened
+
+def compare_gliner_with_template(template, gliner_data):
+    """
+    Compare GLiNER's flat output with the flattened template.
+    Returns detailed comparison results with proper difference tracking.
+    Partial matches count as 0.5 for both correct and incorrect.
+    """
+    differences = []
+    total_template_values = count_string_values(template)
+    partial_matches = 0
+    
+    # Check for matches and mismatches
+    all_keys = set(template.keys()) | set(gliner_data.keys())
+    
+    for key in all_keys:
+        if key not in template:
+            if key in gliner_data and gliner_data[key].strip():
+                differences.append(f"FALSE POSITIVE at {key}: template missing but got '{gliner_data[key]}'")
+        elif key not in gliner_data:
+            if template[key].strip():
+                differences.append(f"FALSE NEGATIVE at {key}: expected '{template[key]}' but missing in extraction")
+        else:
+            # Both have the key, compare values
+            template_val = template[key].strip() if template[key] else ""
+            gliner_val = gliner_data[key].strip() if gliner_data[key] else ""
+            
+            if template_val and not gliner_val:
+                differences.append(f"FALSE NEGATIVE at {key}: expected '{template_val}' but got empty")
+            elif not template_val and gliner_val:
+                differences.append(f"FALSE POSITIVE at {key}: template empty but got '{gliner_val}'")
+            elif template_val and gliner_val:
+                # Normalize and compare
+                norm_template = normalizeNames(template_val)
+                norm_gliner = normalizeNames(gliner_val)
+                
+                if norm_template == norm_gliner:
+                    # Perfect match - no difference
+                    continue
+                elif is_partial_match(norm_template, norm_gliner):
+                    # Partial match - count as 0.5 correct, 0.5 incorrect
+                    differences.append(f"PARTIAL MATCH at {key}: expected '{template_val}' but got '{gliner_val}' (partial match)")
+                    partial_matches += 1
+                else:
+                    # No match
+                    differences.append(f"Value mismatch at {key}: expected '{template_val}' but got '{gliner_val}'")
+    
+    num_differences = len(differences)
+    is_equal = num_differences == 0
+    
+    return is_equal, num_differences, total_template_values, differences, partial_matches
+
+def is_partial_match(template_val, gliner_val):
+    """
+    Check if there's a partial match between template and GLiNER values.
+    Returns True if one string contains the other or they share significant overlap.
+    """
+    if not template_val or not gliner_val:
+        return False
+    
+    # Check if one is contained in the other
+    if template_val in gliner_val or gliner_val in template_val:
+        return True
+    
+    # Check for significant word overlap (at least 50% of template words found)
+    template_words = set(template_val.lower().split())
+    gliner_words = set(gliner_val.lower().split())
+    
+    if len(template_words) == 0:
+        return False
+    
+    overlap = len(template_words.intersection(gliner_words))
+    overlap_ratio = overlap / len(template_words)
+    
+    return overlap_ratio >= 0.5
 
 def main():
     import pandas as pd
@@ -283,7 +464,7 @@ def main():
     if os.path.exists("Hospital.csv"):
         ovr = pd.read_csv("Hospital.csv") 
     else:
-        ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital"])  # Load existing CSV if it exists to append results
+        ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital"])
 
     '''json_direcs = ["OllamaOut", 
                    "OpenAIOut", 
@@ -293,57 +474,58 @@ def main():
                     "OpenAIVisionOut", 
                     "localout"
                    ]'''
-    json_direcs = ["glinerJSON"]
-    hospitals = ["fakeHospital1", "fakeHospital2"] ##update according to latex templates generated
+    json_direcs = ["glinerOut"]
+    hospitals = ["fakeHospital1", "fakeHospital2"]
     sources = {"OllamaOut": "Ollama", "OpenAIOut": "OpenAI", "OpenRouter": "OpenRouter",
-               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAIVisionOut": "OpenAi", "localout": "huggingface", "glinerJSON": "GLiNER"}
-    #json_direcs = ["localout"]
+               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAIVisionOut": "OpenAi", "localout": "huggingface", "glinerOut": "GLiNER"}
+    
     for direc in json_direcs:
         source = sources[direc]
-        direc = "outJSON/" + direc
+        direc_path = "outJSON/" + direc
         for hospital in hospitals: 
-            json_files = [f for f in os.listdir(direc) if f.endswith('.json') and f.__contains__(hospital)]
+            json_files = [f for f in os.listdir(direc_path) if f.endswith('.json') and f.__contains__(hospital)]
             copy = template_to_string(filter_template(template, hospital))
-            # Convert template to lowercase
             copy = dict_to_lowercase(copy)
             
             for json_file in json_files:
-                with open(os.path.join(direc, json_file), "r") as f:
+                with open(os.path.join(direc_path, json_file), "r") as f:
                     dtemp = json.load(f)
-                #print(f"\n--- {json_file} ---")
+                print(f"\n--- {json_file} ---")
+                
+                # Model name normalization 
                 if ":" in dtemp["model"]:
-                        t = dtemp["model"].split(":")
-                        dtemp["model"] = t[0] + t[1]
+                    t = dtemp["model"].split(":")
+                    dtemp["model"] = t[0] + t[1]
                 
                 if "NuExtract-1.5-tiny" in dtemp["model"]:
-                        dtemp["model"] = "NuExtract:0.5B"
+                    dtemp["model"] = "NuExtract:0.5B"
                 if "NuExtract-2.0-2B" in dtemp["model"]:
-                        dtemp["model"] = "NuExtract:2B"
+                    dtemp["model"] = "NuExtract:2B"
                 if "qwen/qwen2.5-vl-72b-instruct" in dtemp["model"] :
-                        dtemp["model"] = "qwen2.5:72b"
+                    dtemp["model"] = "qwen2.5:72b"
                 if "meta-llama/llama-4-scout" in dtemp["model"]:
-                        dtemp["model"] = "llama-4:17B"
+                    dtemp["model"] = "llama-4:17B"
                 if "google/gemini-2.0-flash-exp" in dtemp["model"]:
-                        dtemp["model"] = "gemini-2.0"
+                    dtemp["model"] = "gemini-2.0"
                 if "devstral-small" in dtemp["model"]:
-                        dtemp["model"] = "mistral-3.1-24b"
+                    dtemp["model"] = "mistral-3.1-24b"
                 if "mistral-small-3.1-24b-instruct" in dtemp["model"]:
-                        dtemp["model"] = "mistral-3.1-24b"
+                    dtemp["model"] = "mistral-3.1-24b"
                 if "granite3.2-vision" in dtemp["model"]:
-                        dtemp["model"] = "granite3.2"
+                    dtemp["model"] = "granite3.2"
                 if "llama3.2_1b" in dtemp["model"]:
-                        dtemp["model"] = "llama3.2:1b"
+                    dtemp["model"] = "llama3.2:1b"
                 if "llama3.2_3b" in dtemp["model"]:
-                        dtemp["model"] = "llama3.2:3b"
+                    dtemp["model"] = "llama3.2:3b"
                 if "Vision" in direc:
-                        dtemp["model"] = dtemp["model"] + "*ImageInput*"
+                    dtemp["model"] = dtemp["model"] + "*ImageInput*"
                 if "gliner" in direc:
                     dtemp["model"] = "GLiNER:NuNerZero"
 
                 dtemp["model"] = dtemp["model"].split("/")[-1] 
 
                 if dtemp["status"] != "success":
-                    #print(f"Error status: {dtemp['status']}. Skipping comparison.")
+                    # Handle failed extraction 
                     if hospital == "fakeHospital1":
                         temp = {
                             "LLM": dtemp["model"],
@@ -375,7 +557,24 @@ def main():
                         }
                         ovr = pd.concat([ovr, pd.DataFrame([temp])], ignore_index=True)
                     continue
-                else:  
+                
+                # Check if this is GLiNER output and use specialized comparison
+                if direc == "glinerJSON":
+                    try:
+                        data = dtemp["data"]
+                    except KeyError:
+                        print(f"Error: No valid report data found in {json_file}. Skipping comparison.")
+                        continue
+                    
+                    # Convert data to lowercase before comparison
+                    data = dict_to_lowercase(data)
+                    
+                    # Use GLiNER-specific comparison function
+                    temp_row = compare_gliner_output(copy, data, hospital, source, dtemp["model"])
+                    ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
+                    
+                else:
+                    # Original comparison logic for other models
                     try:
                         data = dtemp["data"]["report_id"]
                     except KeyError:
@@ -399,7 +598,6 @@ def main():
                     else:
                         matching_values = total_values - num_differences
                         accuracy = (matching_values / total_values) * 100
-                        #print(f"✗ {matching_values}/{total_values} values match")
                         print(f"Accuracy: {accuracy:.1f}%")
                         fn = 0 
                         fp = 0
@@ -412,7 +610,7 @@ def main():
                             elif "Type mismatch" in diff or "Value mismatch" in diff:
                                 ic += 1
                                 
-                        #print(f"False Positives: {fp}, False Negatives: {fn}, Incorrect Extraction: {ic}")
+                        print(f"False Positives: {fp}, False Negatives: {fn}, Incorrect Extraction: {ic}")
                         fp += ic
                         fn += ic
                         precision = (matching_values / (matching_values + fp)) * 100 if (matching_values + fp) > 0 else 0
@@ -451,11 +649,8 @@ def main():
                             "Hospital": "hospital2"
                         }
                         ovr = pd.concat([ovr, pd.DataFrame([temp])], ignore_index=True)
-                    continue
 
     # Save as pandas dataframe and export to csv
     ovr.to_csv("Hospital.csv")
     print("Comparison complete. Results saved to Hospital.csv")
-    
-if __name__ == "__main__":
-    main()
+main()

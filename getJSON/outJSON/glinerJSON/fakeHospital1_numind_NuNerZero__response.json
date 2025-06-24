@@ -1,0 +1,23 @@
+{
+  "model": "numind/NuNerZero",
+  "status": "success",
+  "data": {
+    "refseq_mrna": "OCH MRN ClinVar",
+    "date_collected": "2024-06-15 2024-06-15 2024-06-16 2024-06-17 2024-06-15",
+    "testing_laboratory": "Tumor Sequencing and Diagnostics LABORATORY certified clinical laboratory",
+    "sample_type": "ctDNA sample Genomic DNA",
+    "analysis_type": "Methylation analysis molecular findings Target enrichment analytical sensitivity draft dataset",
+    "ordering_clinic": "Clinical Referring Physician",
+    "exon": "Gene Exon Base OTOF exon 7 coding exons PMS2 exons 11-15",
+    "interpretation": "Amino Zygosity Interpretation Acid OTOF C variants pathogenic variant Variant 1 clinically relevant based on aggregated evidence Iikely pathogenic deleterious effects on protein function Variant interpretation scientific knowledge",
+    "zygosity": "OTOF C,54366>1 pClul812Asp]heterozygous T T c.54366>T low-level mosaicism",
+    "num_tested_genes": "IL6ST NCKIPSD",
+    "gene_symbol": "IGFZR, TCF12 DABZIP, MDM2, RAPIGDSI OTOF OTOF gene OTOF PMS2 PMS2 , CHEK2 MSH2",
+    "chromosome": "chromosome chr2 flanking intronic regions regions",
+    "testing_context": "region clinical PIK3CA-mutated context. Further germline testing somatic genetic testing",
+    "sequencing_scope": "custom-designed targeted sequenc- ing panel",
+    "reference_genome": "GRCh37 /hg19 human genome"
+  },
+  "timestamp": "2025-06-19",
+  "source_file": "report_fakeHospital1__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
+}
