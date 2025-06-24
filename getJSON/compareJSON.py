@@ -219,6 +219,8 @@ def compare_string(str1, str2, path=""):
         differences.append(f"FALSE POSITIVE at {path}: template empty but got '{str2}'")
     elif str1 and not str2:  # Template has value, but prediction empty
         differences.append(f"FALSE NEGATIVE at {path}: expected '{str1}' but got empty")
+    #elif str2 in str1 or str1 in str2:  # One string is a substring of the other
+        #pass
     else:  # Both have values but don't match
         differences.append(f"Value mismatch at {path}: expected '{str1}' but got '{str2}'")
     
@@ -269,6 +271,8 @@ def compare_values_with_template(template, data):
 
 def main():
     import pandas as pd
+    import os
+    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
     with open("../makeTemplatePDF/out/mock_data.json", "r") as f:
         temp = json.load(f)
     k = list(temp.keys())[0]
@@ -281,17 +285,18 @@ def main():
     else:
         ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital"])  # Load existing CSV if it exists to append results
 
-    json_direcs = ["OllamaOut", 
+    '''json_direcs = ["OllamaOut", 
                    "OpenAIOut", 
                    #"OpenRouter", 
                    #"OpenRouterVisionOut", 
                    "OllamaVisionOut", 
                     "OpenAIVisionOut", 
                     "localout"
-                   ]
+                   ]'''
+    json_direcs = ["glinerJSON"]
     hospitals = ["fakeHospital1", "fakeHospital2"] ##update according to latex templates generated
     sources = {"OllamaOut": "Ollama", "OpenAIOut": "OpenAI", "OpenRouter": "OpenRouter",
-               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAIVisionOut": "OpenAi", "localout": "huggingface"}
+               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAIVisionOut": "OpenAi", "localout": "huggingface", "glinerJSON": "GLiNER"}
     #json_direcs = ["localout"]
     for direc in json_direcs:
         source = sources[direc]
@@ -332,6 +337,8 @@ def main():
                         dtemp["model"] = "llama3.2:3b"
                 if "Vision" in direc:
                         dtemp["model"] = dtemp["model"] + "*ImageInput*"
+                if "gliner" in direc:
+                    dtemp["model"] = "GLiNER:NuNerZero"
 
                 dtemp["model"] = dtemp["model"].split("/")[-1] 
 
@@ -375,8 +382,11 @@ def main():
                         try:
                             data = dtemp["data"]["report"]
                         except KeyError:
-                            #print(f"Error: No valid report data found in {json_file}. Skipping comparison.")
-                            continue
+                            try:
+                                data = dtemp["data"]
+                            except KeyError:
+                                print(f"Error: No valid report data found in {json_file}. Skipping comparison.")
+                                continue
                     
                     # Convert data to lowercase before comparison
                     data = dict_to_lowercase(data)
@@ -445,8 +455,7 @@ def main():
 
     # Save as pandas dataframe and export to csv
     ovr.to_csv("Hospital.csv")
-    print("Visualization complete.")
-
+    print("Comparison complete. Results saved to Hospital.csv")
     
 if __name__ == "__main__":
     main()
