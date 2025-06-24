@@ -79,8 +79,10 @@ def extract_model_info(llm_name):
         family = 'Granite'
     elif 'mistral' in llm_lower or 'devstral' in llm_lower:
         family = 'Mistral'
-    else:
+    elif 'nuextract' in llm_lower or 'nuextract' in llm_lower:
         family = 'NuExtract'
+    else:
+        family = "GLiNER"  # Default to GLiNER if no match
     
     # Create base model name (without vision indicators)
     base_name = normalize_model_name(llm_name)
@@ -688,8 +690,153 @@ def create_combined_pdf():
     except Exception as e:
         return None
 
+def create_source_f1_comparison(df):
+    """
+    Create comprehensive F1 score comparison between different sources
+    Shows overall averages and detailed breakdowns
+    """
+    # Filter out OpenRouter if it has limited data (as mentioned in load_and_prepare_data)
+    df_sources = df[df['Source'] != "OpenRouter"].copy()
+    
+    # Calculate overall F1 averages by source
+    source_f1_avg = df_sources.groupby('Source')['F1score'].agg(['mean', 'std', 'count']).round(2)
+    source_f1_avg.columns = ['Mean_F1', 'Std_F1', 'Count']
+    source_f1_avg = source_f1_avg.sort_values('Mean_F1', ascending=False)
+    
+    # Calculate F1 by source and family
+    source_family_f1 = df_sources.groupby(['Source', 'Family'])['F1score'].agg(['mean', 'std', 'count']).round(2)
+    source_family_f1.columns = ['Mean_F1', 'Std_F1', 'Count']
+    
+    # Calculate F1 by source and input type
+    source_input_f1 = df_sources.groupby(['Source', 'Input_Type'])['F1score'].agg(['mean', 'std', 'count']).round(2)
+    source_input_f1.columns = ['Mean_F1', 'Std_F1', 'Count']
+    
+    # Calculate F1 by source and hospital
+    source_hospital_f1 = df_sources.groupby(['Source', 'Hospital'])['F1score'].agg(['mean', 'std', 'count']).round(2)
+    source_hospital_f1.columns = ['Mean_F1', 'Std_F1', 'Count']
+    
+    # Create comprehensive visualization
+    fig, axes = plt.subplots(2, 2, figsize=(20, 12))
+    
+    # 1. Overall F1 Score by Source
+    bars = axes[0,0].bar(source_f1_avg.index, source_f1_avg['Mean_F1'], 
+                        yerr=source_f1_avg['Std_F1'], capsize=5)
+    axes[0,0].set_title('Average F1 Score by Source\n(Overall Performance Comparison)', 
+                       fontsize=14, fontweight='bold')
+    axes[0,0].set_ylabel('F1 Score')
+    axes[0,0].grid(axis='y', alpha=0.3)
+    
+    # Add value labels and counts on bars
+    for i, (source, row) in enumerate(source_f1_avg.iterrows()):
+        axes[0,0].text(i, row['Mean_F1'] + row['Std_F1'] + 1, 
+                      f"{row['Mean_F1']:.1f}±{row['Std_F1']:.1f}\n(n={int(row['Count'])})", 
+                      ha='center', va='bottom', fontsize=10, fontweight='bold')
+    
+    # Color bars differently
+    colors = ['#2E8B57', '#4169E1', '#DC143C', '#FF8C00', '#8A2BE2', '#00CED1']  # More colors for all sources
+    for i, bar in enumerate(bars):
+        bar.set_color(colors[i % len(colors)])
+    
+    # 2. F1 Score by Source and Family
+    family_pivot = source_family_f1.reset_index().pivot(index='Family', columns='Source', values='Mean_F1')
+    family_pivot.plot(kind='bar', ax=axes[0,1], width=0.8)
+    axes[0,1].set_title('Average F1 Score by Source and Model Family', fontsize=14, fontweight='bold')
+    axes[0,1].set_ylabel('F1 Score')
+    axes[0,1].tick_params(axis='x', rotation=45)
+    axes[0,1].grid(axis='y', alpha=0.3)
+    axes[0,1].legend(title='Source')
+    
+    # 3. F1 Score by Source and Input Type
+    input_pivot = source_input_f1.reset_index().pivot(index='Input_Type', columns='Source', values='Mean_F1')
+    input_pivot.plot(kind='bar', ax=axes[1,0], width=0.6)
+    axes[1,0].set_title('Average F1 Score by Source and Input Type', fontsize=14, fontweight='bold')
+    axes[1,0].set_ylabel('F1 Score')
+    axes[1,0].tick_params(axis='x', rotation=0)
+    axes[1,0].grid(axis='y', alpha=0.3)
+    axes[1,0].legend(title='Source')
+    
+    # 4. F1 Score by Source and Hospital
+    hospital_pivot = source_hospital_f1.reset_index().pivot(index='Hospital', columns='Source', values='Mean_F1')
+    hospital_pivot.plot(kind='bar', ax=axes[1,1], width=0.6)
+    axes[1,1].set_title('Average F1 Score by Source and Hospital', fontsize=14, fontweight='bold')
+    axes[1,1].set_ylabel('F1 Score')
+    axes[1,1].tick_params(axis='x', rotation=0)
+    axes[1,1].grid(axis='y', alpha=0.3)
+    axes[1,1].legend(title='Source')
+    
+    plt.tight_layout()
+    save_plot('08_comprehensive_source_f1_comparison')
+    
+    # Print detailed statistics to console
+    print("\n" + "="*80)
+    print("COMPREHENSIVE SOURCE F1 SCORE COMPARISON")
+    print("="*80)
+    
+    print("\n1. OVERALL F1 SCORE BY SOURCE:")
+    print("-"*40)
+    for source, row in source_f1_avg.iterrows():
+        print(f"   {source}: {row['Mean_F1']:.2f} ± {row['Std_F1']:.2f} (n={int(row['Count'])})")
+    
+    print("\n2. F1 SCORE BY SOURCE AND FAMILY:")
+    print("-"*40)
+    for source in df_sources['Source'].unique():
+        print(f"\n   {source.upper()}:")
+        source_data = source_family_f1.loc[source]
+        for family, row in source_data.iterrows():
+            print(f"     {family}: {row['Mean_F1']:.2f} ± {row['Std_F1']:.2f} (n={int(row['Count'])})")
+    
+    print("\n3. F1 SCORE BY SOURCE AND INPUT TYPE:")
+    print("-"*40)
+    for source in df_sources['Source'].unique():
+        print(f"\n   {source.upper()}:")
+        if source in source_input_f1.index.get_level_values(0):
+            source_data = source_input_f1.loc[source]
+            for input_type, row in source_data.iterrows():
+                print(f"     {input_type}: {row['Mean_F1']:.2f} ± {row['Std_F1']:.2f} (n={int(row['Count'])})")
+    
+    print("\n4. F1 SCORE BY SOURCE AND HOSPITAL:")
+    print("-"*40)
+    for source in df_sources['Source'].unique():
+        print(f"\n   {source.upper()}:")
+        if source in source_hospital_f1.index.get_level_values(0):
+            source_data = source_hospital_f1.loc[source]
+            for hospital, row in source_data.iterrows():
+                print(f"     {hospital}: {row['Mean_F1']:.2f} ± {row['Std_F1']:.2f} (n={int(row['Count'])})")
+    
+    # Calculate and print some key insights
+    print("\n5. KEY INSIGHTS:")
+    print("-"*40)
+    best_source = source_f1_avg.index[0]
+    worst_source = source_f1_avg.index[-1]
+    f1_difference = source_f1_avg.loc[best_source, 'Mean_F1'] - source_f1_avg.loc[worst_source, 'Mean_F1']
+    
+    print(f"   • Best performing source: {best_source} ({source_f1_avg.loc[best_source, 'Mean_F1']:.2f} F1)")
+    print(f"   • Worst performing source: {worst_source} ({source_f1_avg.loc[worst_source, 'Mean_F1']:.2f} F1)")
+    print(f"   • Performance gap: {f1_difference:.2f} F1 points")
+    
+    # Find best family-source combination
+    best_combo = source_family_f1.loc[source_family_f1['Mean_F1'].idxmax()]
+    best_combo_source, best_combo_family = source_family_f1['Mean_F1'].idxmax()
+    print(f"   • Best source-family combo: {best_combo_source} + {best_combo_family} ({best_combo['Mean_F1']:.2f} F1)")
+    
+    # Find best input type-source combination
+    best_input_combo = source_input_f1.loc[source_input_f1['Mean_F1'].idxmax()]
+    best_input_source, best_input_type = source_input_f1['Mean_F1'].idxmax()
+    print(f"   • Best source-input combo: {best_input_source} + {best_input_type} ({best_input_combo['Mean_F1']:.2f} F1)")
+    
+    print("="*80)
+    
+    return {
+        'overall': source_f1_avg,
+        'by_family': source_family_f1,
+        'by_input_type': source_input_f1,
+        'by_hospital': source_hospital_f1
+    }
+
 def main():
     # Load and prepare data
+    import os
+    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
     df = load_and_prepare_data() #function added ignore openRouter models, not enough data
     # Calculate summary statistics
     stats = calculate_summary_statistics(df)
@@ -703,6 +850,10 @@ def main():
     create_error_analysis_plots(df)      # Error analysis
     create_hospital_comparison_analysis(df)  # Hospital comparisons
     source_stats = create_source_comparison_analysis(df)  # Source comparisons
+    
+    # Add the new comprehensive source F1 comparison
+    source_f1_stats = create_source_f1_comparison(df)  # New comprehensive source F1 analysis
+    
     create_summary_page(df, grouped_models, stats, source_stats)  # Executive summary
     
     # Print comprehensive summary to console

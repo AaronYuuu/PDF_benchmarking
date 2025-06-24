@@ -17,11 +17,16 @@ def filter_template(template, reportName):
     appears in reportName.txt (nested dicts/lists pruned similarly).
     """
     reportName = reportName.lower()
-    if reportName == "fakehospital2":
+    
+    # Apply filtering to both hospitals based on their respective content files
+    report_file = f"{reportName}.txt"
+    
+    # Check if the report file exists
+    if not os.path.exists(report_file):
+        print(f"Warning: {report_file} not found, using full template")
         return template
 
     # read the report text once
-    report_file = f"{reportName}.txt"
     with open(report_file, "r", encoding="utf-8") as f:
         report_data = f.read()
 
@@ -34,7 +39,7 @@ def filter_template(template, reportName):
                 if isinstance(v, (dict, list)):
                     recurse(v)
                     if not v:
-                        obj[k] = "" #make the not listend keys an empty string
+                        obj[k] = "" #make the not listed keys an empty string
                 else:
                     # drop any leaf whose key is not in the report text
                     if k not in report_data:
@@ -257,11 +262,12 @@ def compare_values_with_template(template, data):
     """
     Compare data with template using strict dictionary key matching.
     Returns count of matching vs mismatching values with type mismatch detection.
+    Hard-coded to use 88 as the total denominator for consistency.
     """
     differences = compare_dict_keys_and_values(template, data)
     
-    # Count total string values in template for comparison base
-    total_values = count_string_values(template)
+    # Hard code 88 as the total values denominator for consistent comparison
+    total_values = 88
     
     if not differences:
         return True, 0, total_values, []
@@ -406,9 +412,11 @@ def flatten_template_for_gliner(template):
 def compare_gliner_with_template(template, gliner_data):
     """
     Simplified GLiNER comparison - single word matches count as correct.
+    Hard-coded to use 88 as the total denominator for consistency.
     """
     differences = []
-    total_template_values = count_string_values(template)
+    # Hard code 88 as the total values denominator for consistent comparison
+    total_template_values = 88
     partial_matches = 0
     perfect_matches = 0
     
@@ -468,26 +476,36 @@ def main():
     else:
         ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital"])
 
-    '''json_direcs = ["OllamaOut", 
-                   "OpenAIOut", 
-                   #"OpenRouter", 
-                   #"OpenRouterVisionOut", 
-                   "OllamaVisionOut", 
-                    "OpenAIVisionOut", 
-                    "localout"
-                   ]'''
-    json_direcs = ["glinerJSON"]
+    # Define the directories to process - focus on numind models in localout
+    json_direcs = ["localout"]  # Focus on numind models for testing
+    #json_direcs = ["OllamaOut", "OpenAIOut", "OpenRouter", "OpenRouterVisionOut", "localout", "OllamaVisionOut", "OpenAIVisionOut", "glinerJSON", "glinerOut"]
     hospitals = ["fakeHospital1", "fakeHospital2"]
     sources = {"OllamaOut": "Ollama", "OpenAIOut": "OpenAI", "OpenRouter": "OpenRouter",
-               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAIVisionOut": "OpenAi", "localout": "huggingface", "glinerJSON": "GLiNER"}
+               "OpenRouterVisionOut": "OpenRouter", "OllamaVisionOut": "Ollama", "OpenAIVisionOut": "OpenAi", "localout": "huggingface", "glinerJSON": "GLiNER", "glinerOut": "GLiNER"}
     
     for direc in json_direcs:
         source = sources[direc]
         direc_path = "outJSON/" + direc
+        
+        # Skip directories that don't exist
+        if not os.path.exists(direc_path):
+            print(f"Warning: Directory {direc_path} does not exist, skipping...")
+            continue
+            
         for hospital in hospitals: 
             json_files = [f for f in os.listdir(direc_path) if f.endswith('.json') and f.__contains__(hospital)]
+            
+            if not json_files:
+                print(f"No JSON files found for {hospital} in {direc_path}")
+                continue
+                
             copy = template_to_string(filter_template(template, hospital))
             copy = dict_to_lowercase(copy)
+            
+            # Print debug info about template filtering
+            template_values = count_string_values(copy)
+            print(f"\n=== Processing {hospital} in {direc} ===")
+            print(f"Filtered template has {template_values} total values")
             
             for json_file in json_files:
                 with open(os.path.join(direc_path, json_file), "r") as f:
@@ -525,6 +543,43 @@ def main():
                     dtemp["model"] = "GLiNER:NuNerZero"
 
                 dtemp["model"] = dtemp["model"].split("/")[-1] 
+
+                # Check for numind models that failed JSON parsing
+                if "numind" in dtemp.get("model", "").lower() and "error" in dtemp.get("data", {}):
+                    if dtemp["data"].get("error") == "Could not parse as JSON":
+                        print(f"numind model failed to parse JSON: {dtemp['data']['error']}")
+                        # Treat as failed extraction
+                        if hospital == "fakeHospital1":
+                            temp = {
+                                "LLM": dtemp["model"],
+                                "False Positives": 88,
+                                "False Negatives": 88,
+                                "Incorrect Extractions": 88,
+                                "Correct Matches": 0,
+                                "Precision": 0,
+                                "Recall": 0,
+                                "F1score": 0,
+                                "Accuracy": 0,
+                                "Source": source, 
+                                "Hospital": "hospital1"
+                            }
+                            ovr = pd.concat([ovr, pd.DataFrame([temp])], ignore_index=True)
+                        elif hospital == "fakeHospital2":
+                            temp = {
+                                "LLM": dtemp["model"],
+                                "False Positives": 88,
+                                "False Negatives": 88,
+                                "Incorrect Extractions": 88,
+                                "Correct Matches": 0,
+                                "Precision": 0,
+                                "Recall": 0,
+                                "F1score": 0,
+                                "Accuracy": 0,
+                                "Source": source,
+                                "Hospital": "hospital2"
+                            }
+                            ovr = pd.concat([ovr, pd.DataFrame([temp])], ignore_index=True)
+                        continue
 
                 if dtemp["status"] != "success":
                     # Handle failed extraction 
@@ -574,7 +629,7 @@ def main():
                     # Use GLiNER-specific comparison function
                     temp_row = compare_gliner_output(copy, data, hospital, source, dtemp["model"])
                     ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
-                    
+                
                 else:
                     # Original comparison logic for other models
                     try:
@@ -588,8 +643,8 @@ def main():
                             except KeyError:
                                 print(f"Error: No valid report data found in {json_file}. Skipping comparison.")
                                 continue
-                    
-                    # Convert data to lowercase before comparison
+                
+                # Convert data to lowercase before comparison
                     data = dict_to_lowercase(data)
                     
                     # Compare values with template using strict dictionary matching

@@ -23,12 +23,18 @@ if [ -d "getJSON/outJSON" ]; then
     rm -rf getJSON/outJSON/OpenRouter/*
     rm -rf getJSON/outJSON/OpenRouterVisionOut/*
     rm -rf getJSON/outJSON/localout/*
+    rm -rf getJSON/outJSON/glinerJSON/*
 fi
 
 # Remove makeTemplatePDF output folders
 if [ -d "makeTemplatePDF/scripts/out" ]; then
     echo "Removing makeTemplatePDF/scripts/out/*"
     rm -rf makeTemplatePDF/scripts/out/*
+fi
+
+if [ -d "makeTemplatePDF/out" ]; then
+    echo "Removing makeTemplatePDF/out/*"
+    rm -rf makeTemplatePDF/out/*
 fi
 
 # Remove output_pdfs folders
@@ -60,11 +66,11 @@ echo "============================================"
 echo "Complete pipeline finished successfully!"
 echo "============================================"
 
-echo "Generating visualization report..."
-echo "--------------------------------------"
-cd getJSON
-python3 genGraphs.py
-echo "Visualization report generated successfully!"
-echo "============================================"
+#echo "Generating visualization report..."
+#echo "--------------------------------------"
+#cd getJSON
+#python3 genGraphs.py
+#echo "Visualization report generated successfully!"
+#echo "============================================"
 
 
