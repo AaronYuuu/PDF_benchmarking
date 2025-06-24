@@ -16,7 +16,7 @@
     "chromosome": "chromosome chr2 flanking intronic regions regions",
     "testing_context": "region clinical PIK3CA-mutated context. Further germline testing somatic genetic testing",
     "sequencing_scope": "custom-designed targeted sequenc- ing panel",
-    "reference_genome": "GRCh37 /hg19 human genome"
+    "reference_genome": "GRCh37"
   },
   "timestamp": "2025-06-19",
   "source_file": "report_fakeHospital1__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
