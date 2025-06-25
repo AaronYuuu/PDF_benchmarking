@@ -145,13 +145,27 @@ def main():
         prompt_path="ollamaprompt.txt", 
         llm_function=textToLLM
     )
+
+    process_text_files_with_models(
+        models=OPENAI_MODELS,
+        output_dir="OpenAIOutNP/",
+        text_directory="../output_pdfs/text/",
+        prompt_path="NERprompt.txt",
+        llm_function=textToLLM
+    )
     
+    process_grouped_images_with_models(
+        models=OPENAI_MODELS,
+        output_dir="OpenAIVisionOutNP/",
+        image_directory="../output_pdfs/images/",
+        prompt_path="NERprompt.txt"
+    )
     
     process_grouped_images_with_models(
         models=OPENAI_MODELS,
         output_dir="OpenAIVisionOut/",
         image_directory="../output_pdfs/images/",
-        prompt_path="ollamaPrompt.txt"
+        prompt_path="ollamaprompt.txt"
     )
     print("Processing completed.")
 

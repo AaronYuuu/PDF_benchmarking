@@ -1,4 +1,4 @@
-run with /Users/ayu/PDF_benchmarking/.venv/bin/python /Users/ayu/PDF_benchmarking/getJSON/localLLM.py
+#run with /Users/ayu/PDF_benchmarking/.venv/bin/python /Users/ayu/PDF_benchmarking/getJSON/localLLM.py
 from openai import OpenAI
 import time
 import base64
