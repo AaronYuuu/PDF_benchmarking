@@ -277,68 +277,76 @@ def compare_values_with_template(template, data):
 
 def compare_gliner_output(template, data, hospital, source, model_name):
     """
-    Fixed GLiNER comparison function with consistent mathematics.
+    Fixed GLiNER comparison function that handles GLiNER's actual output format.
+    GLiNER outputs flat key-value pairs with concatenated values.
+    Partial matches count as 0.25 points instead of 1.0.
     """
     # Create flattened template for GLiNER comparison
-    flat_template = flatten_template_for_gliner(template)
+    flat_template = flatten_template_for_gliner2(template)
     
-    # CRITICAL FIX: Use the flattened template size, not the original template
-    total_values = len(flat_template)  # Count flattened fields, not original nested structure
-    print(f"Flattened template values for GLiNER: {total_values}")
+    # Get the actual GLiNER data (not nested under report_id)
+    gliner_data = data.get("data", {}) if isinstance(data, dict) else data
     
-    # Compare values with flattened template
-    is_equal, num_differences, _, differences, partial_matches, perfect_matches = compare_gliner_with_template(flat_template, data)
+    total_values = len(flat_template)
+   #print(f"Flattened template values for GLiNER: {total_values}")
+    #print(f"GLiNER extracted fields: {len(gliner_data)}")
     
-    if is_equal and partial_matches == 0 and perfect_matches == total_values:
-        print(f"Perfect match - all {total_values} values match!")
-        fp, fn, ic = 0, 0, 0
-        correct_matches = total_values
-        accuracy = 100.0
-        precision = 100.0
-        recall = 100.0
-        f1score = 100.0
-    else:
-        # Count each type of difference with proper logic
-        fp = 0  # False positives: GLiNER extracts fields not in template
-        fn = 0  # False negatives: template fields missing from GLiNER
-        ic = 0  # Incorrect extractions: wrong values
+    # Special GLiNER comparison - look for partial matches across all values
+    perfect_matches = 0
+    partial_matches = 0
+    
+    # For each template field, check if any GLiNER value contains relevant info
+    for template_key, template_val in flat_template.items():
+        if not template_val or template_val.strip() == "":
+            continue  # Skip empty template values
+            
+        found_match = False
+        template_norm = normalizeNames(template_val.strip().lower())
         
-        for diff in differences:
-            if "Key missing in template" in diff or "FALSE POSITIVE" in diff:
-                fp += 1  # GLiNER extracted something not in template
-            elif "Key missing in extracted" in diff or "FALSE NEGATIVE" in diff:
-                fn += 1  # Template has field but GLiNER missed it
-            elif "PARTIAL MATCH" in diff:
-                # Partial matches are already counted in partial_matches
+        # Check for exact matches first
+        for gliner_key, gliner_val in gliner_data.items():
+            if not gliner_val:
                 continue
-            elif "Value mismatch" in diff or "Type mismatch" in diff:
-                ic += 1  # Wrong value extracted
+            gliner_norm = normalizeNames(str(gliner_val).strip().lower())
+            
+            if template_norm == gliner_norm:
+                perfect_matches += 1
+                found_match = True
+                #print(f"PERFECT: {template_key} = '{template_val}' found in {gliner_key}")
+                break
         
-        # Calculate correct matches: perfect + partial matches
-        correct_matches = perfect_matches + partial_matches
+        # If no perfect match, look for partial matches
+        if not found_match:
+            for gliner_key, gliner_val in gliner_data.items():
+                if not gliner_val:
+                    continue
+                gliner_text = str(gliner_val).lower()
+                
+                # Check if template value appears anywhere in GLiNER output
+                if template_norm in gliner_text or any(word in gliner_text for word in template_norm.split() if len(word) > 2):
+                    partial_matches += 1
+                    found_match = True
+                    #print(f"PARTIAL: {template_key} = '{template_val}' found in {gliner_key} = '{gliner_val}'")
+                    break
         
-        # MATHEMATICAL CONSISTENCY CHECK: 
-        # correct_matches + fn + ic should equal total_values (template fields)
-        # fp can be extra (GLiNER extracting more than template)
-        expected_total = correct_matches + fn + ic
-        if expected_total > total_values:
-            print(f"WARNING: Math inconsistency - adjusting counts")
-            print(f"Expected: {expected_total}, Actual: {total_values}")
-            # Proportionally reduce to maintain ratios
-            scale_factor = total_values / expected_total
-            correct_matches = int(correct_matches * scale_factor)
-            fn = int(fn * scale_factor)
-            ic = int(ic * scale_factor)
-        
-        # Calculate metrics using standard formulas
-        accuracy = (correct_matches / total_values * 100) if total_values > 0 else 0
-        precision = (correct_matches / (correct_matches + fp) * 100) if (correct_matches + fp) > 0 else 0
-        recall = (correct_matches / (correct_matches + fn) * 100) if (correct_matches + fn) > 0 else 0
-        f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-        
-        print(f"FP: {fp}, FN: {fn}, IC: {ic}, Correct: {correct_matches}/{total_values}")
-        print(f"Perfect: {perfect_matches}, Partial: {partial_matches}")
-        print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
+        #if not found_match:
+            #print(f"MISSING: {template_key} = '{template_val}' not found anywhere")
+    
+    # Calculate metrics with partial matches worth 0.25 points
+    correct_matches = perfect_matches + (partial_matches * 0.25)
+    fn = max(0, total_values - perfect_matches - partial_matches)  # Missing template fields
+    fp = max(0, len(gliner_data) - perfect_matches - partial_matches)  # Extra GLiNER fields
+    ic = 0  # For GLiNER, we don't count incorrect extractions separately
+    
+    # Calculate metrics using standard formulas
+    accuracy = (correct_matches / total_values * 100) if total_values > 0 else 0
+    precision = (correct_matches / (correct_matches + fp) * 100) if (correct_matches + fp) > 0 else 0
+    recall = (correct_matches / (correct_matches + fn) * 100) if (correct_matches + fn) > 0 else 0
+    f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+    
+    print(f"FP: {fp}, FN: {fn}, IC: {ic}, Correct: {correct_matches:.2f}/{total_values}")
+    print(f"Perfect: {perfect_matches}, Partial: {partial_matches} (0.25 each)")
+    print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
     
     return {
         "LLM": model_name,
@@ -431,6 +439,26 @@ def flatten_template_for_gliner(template):
     
     return flattened
 
+def flatten_template_for_gliner2(template):
+    """
+    Recursively flatten the nested template structure
+    into a flat dict of exactly one entry per leaf.
+    """
+    flattened = {}
+    def recurse(obj, prefix=""):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                new_key = f"{prefix}_{k}" if prefix else k
+                if isinstance(v, (dict, list)):
+                    recurse(v, new_key)
+                else:
+                    flattened[new_key] = "" if v is None else str(v)
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                recurse(item, f"{prefix}_{i}" if prefix else str(i))
+    recurse(template)
+    return flattened
+
 def compare_gliner_with_template(template, gliner_data):
     """
     Simplified GLiNER comparison - single word matches count as correct.
@@ -482,6 +510,62 @@ def compare_gliner_with_template(template, gliner_data):
     is_equal = num_differences == 0
     
     return is_equal, num_differences, total_template_values, differences, partial_matches, perfect_matches
+
+def determine_model_name(directory, json_data, filename=""):
+    """
+    Determine the appropriate model name based on directory, JSON content, and filename.
+    Handles vision detection and different model types across various sources.
+    
+    Args:
+        directory (str): The directory name (e.g., "OpenAIVisionOut", "localout")
+        json_data (dict): The JSON data containing model information
+        filename (str): The filename for additional context
+    
+    Returns:
+        str: The formatted model name with vision indicator if applicable
+    """
+    model_name = json_data.get("model", "Unknown")
+    
+    # Model name normalization - handle colon separated names
+    if ":" in model_name:
+        t = model_name.split(":")
+        model_name = t[0] + t[1]
+    
+    # Specific model mappings
+    if "NuExtract-1.5-tiny" in model_name:
+        model_name = "NuExtract:0.5B"
+    elif "NuExtract-2.0-2B" in model_name:
+        model_name = "NuExtract:2B"
+    elif "qwen/qwen2.5-vl-72b-instruct" in model_name:
+        model_name = "qwen2.5:72b"
+    elif "meta-llama/llama-4-scout" in model_name:
+        model_name = "llama-4:17B"
+    elif "google/gemini-2.0-flash-exp" in model_name:
+        model_name = "gemini-2.0"
+    elif "devstral-small" in model_name:
+        model_name = "mistral-3.1-24b"
+    elif "mistral-small-3.1-24b-instruct" in model_name:
+        model_name = "mistral-3.1-24b"
+    elif "granite3.2-vision" in model_name:
+        model_name = "granite3.2"
+    elif "llama3.2_1b" in model_name:
+        model_name = "llama3.2:1b"
+    elif "llama3.2_3b" in model_name:
+        model_name = "llama3.2:3b"
+    
+    # Add vision indicator if this is a vision-enabled directory
+    if "Vision" in directory:
+        model_name = model_name + "*ImageInput*"
+    
+    # Handle GLiNER models
+    if "gliner" in directory.lower() or "numind" in model_name.lower():
+        model_name = "GLiNER:NuNerZero"
+    
+    # Extract final model name (remove path prefixes)
+    model_name = model_name.split("/")[-1]
+    
+    return model_name
+ 
 
 def main():
     import pandas as pd
@@ -548,7 +632,7 @@ def main():
                 json_files = [f for f in all_files if hospital in f and "numind" in f]
             else:
                 # Standard naming convention for other sources
-                json_files = [f for f in all_files if hospital in f and "numind" in f]
+                json_files = [f for f in all_files if hospital in f]
             
             if not json_files:
                 print(f"No matching JSON files found for {hospital} in {direc_path}")
@@ -601,7 +685,14 @@ def main():
                         continue
                     
                     # Use simplified comparison for valid extractions
-                    data = dict_to_lowercase(dtemp["data"])
+                    try:
+                        data = dict_to_lowercase(dtemp["data"])
+                        # Handle nested report_id structure - flatten it if it exists
+                        if "report_id" in data and isinstance(data["report_id"], dict):
+                            data = data["report_id"]
+                    except KeyError:
+                        data = {}
+                    
                     is_equal, num_differences, total_values, differences = compare_values_with_template(copy, data)
                     
                     # Properly count each type of difference
@@ -620,19 +711,19 @@ def main():
                         elif "FALSE NEGATIVE" in diff:
                             fn += 1  # Template has value but extraction empty
                         elif "Value mismatch" in diff or "Type mismatch" in diff:
-                            ic += 1  # Wrong value (incorrect extraction)
+                            ic += 1 # Wrong value (incorrect extraction)
                     
                     # Calculate correct matches properly - total minus all error types
-                    correct_matches = max(0, total_values - fn - ic)
+                    correct_matches = max(0, total_values - fp - fn - ic)
                     
                     # Ensure we don't exceed total template values
                     if fp + fn + ic + correct_matches > total_values:
                         # If we have overcounting, prioritize errors and adjust correct matches
-                        correct_matches = max(0, total_values - fn - ic)
+                        correct_matches = max(0, total_values - fp - fn - ic)
                     
                     # Calculate metrics using standard formulas
                     accuracy = (correct_matches / total_values * 100) if total_values > 0 else 0
-                    precision = (correct_matches / (correct_matches + fp) * 100) if (correct_matches + fp) > 0 else 0
+                    precision = (correct_matches / (correct_matches + fp + ic) * 100) if (correct_matches + fp + ic) > 0 else 0
                     recall = (correct_matches / (correct_matches + fn) * 100) if (correct_matches + fn) > 0 else 0
                     f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
                     
@@ -655,65 +746,7 @@ def main():
                     ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
 
     # Save results
-    #ovr.to_csv("Hospital.csv")
+    ovr.to_csv("Hospital.csv")
     #print("Comparison complete. Results saved to Hospital.csv")
 
-
-# Add a test function to verify order independenc
-
-def determine_model_name(directory, json_data, filename=""):
-    """
-    Determine the appropriate model name based on directory, JSON content, and filename.
-    Handles vision detection and different model types across various sources.
-    
-    Args:
-        directory (str): The directory name (e.g., "OpenAIVisionOut", "localout")
-        json_data (dict): The JSON data containing model information
-        filename (str): The filename for additional context
-    
-    Returns:
-        str: The formatted model name with vision indicator if applicable
-    """
-    model_name = json_data.get("model", "Unknown")
-    
-    # Model name normalization - handle colon separated names
-    if ":" in model_name:
-        t = model_name.split(":")
-        model_name = t[0] + t[1]
-    
-    # Specific model mappings
-    if "NuExtract-1.5-tiny" in model_name:
-        model_name = "NuExtract:0.5B"
-    elif "NuExtract-2.0-2B" in model_name:
-        model_name = "NuExtract:2B"
-    elif "qwen/qwen2.5-vl-72b-instruct" in model_name:
-        model_name = "qwen2.5:72b"
-    elif "meta-llama/llama-4-scout" in model_name:
-        model_name = "llama-4:17B"
-    elif "google/gemini-2.0-flash-exp" in model_name:
-        model_name = "gemini-2.0"
-    elif "devstral-small" in model_name:
-        model_name = "mistral-3.1-24b"
-    elif "mistral-small-3.1-24b-instruct" in model_name:
-        model_name = "mistral-3.1-24b"
-    elif "granite3.2-vision" in model_name:
-        model_name = "granite3.2"
-    elif "llama3.2_1b" in model_name:
-        model_name = "llama3.2:1b"
-    elif "llama3.2_3b" in model_name:
-        model_name = "llama3.2:3b"
-    
-    # Add vision indicator if this is a vision-enabled directory
-    if "Vision" in directory:
-        model_name = model_name + "*ImageInput*"
-    
-    # Handle GLiNER models
-    if "gliner" in directory.lower() or "numind" in model_name.lower():
-        model_name = "GLiNER:NuNerZero"
-    
-    # Extract final model name (remove path prefixes)
-    model_name = model_name.split("/")[-1]
-    
-    return model_name
- 
 main()
