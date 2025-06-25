@@ -52,7 +52,7 @@ def reduce_image_token_size(image_path, max_dim=512, quality=20):
 
 def imageGroupToLLM(prompt, image_group, model):
     """
-    Function to send a group of images (multiple pages) to a vision-capable LLM model using Ollama.
+    Function to send a group of images (multiple pages) to a vision-capable LLM model.
     Returns the response text or None if failed.
     """
     try:
@@ -73,7 +73,7 @@ def imageGroupToLLM(prompt, image_group, model):
                     "content": f"{prompt}\n\nImages to analyze:\n{images}"
                 }
             ],
-            "temperature": 0.0
+            "temperature": 0.2
         }
         response = client.chat.completions.create(**payload)
         print(f"Success with model: {model}")
