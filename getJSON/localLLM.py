@@ -190,7 +190,8 @@ def process_images_with_models(models, output_dir, image_directory="../output_pd
 
 def main():
     import os
-    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
     print("Starting")
     models = ["numind/NuExtract-2.0-2B", "numind/NuExtract-1.5-tiny"]
     vision_models = ["numind/NuExtract-2.0-2B"]
