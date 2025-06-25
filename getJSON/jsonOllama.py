@@ -148,5 +148,19 @@ def main(): #if I ran this on an Ollama server would that
         output_dir="OllamaVisionOut"
     )
 
+def main_vision():
+    os.makedirs("OllamaVisionOut", exist_ok=True)
+    vision_models = [
+        "qwen2.5vl:3b",    # Vision language model
+        "gemma3:4b",       # Can handle images
+        "granite3.2-vision:latest", # Vision model
+    ]
+    for model in vision_models:
+        ensure_model_exists(model)
+    print(f"Found {len(vision_models)} vision models to process.")
+    process_grouped_images_with_models(
+        models=vision_models,
+        output_dir="OllamaVisionOut"
+    )
 
-main()
+main_vision()

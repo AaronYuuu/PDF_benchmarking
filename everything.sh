@@ -23,7 +23,7 @@ if [ -d "getJSON/outJSON" ]; then
     rm -rf getJSON/outJSON/OpenRouter/*
     rm -rf getJSON/outJSON/OpenRouterVisionOut/*
     rm -rf getJSON/outJSON/localout/*
-    rm -rf getJSON/outJSON/glinerJSON/*
+    rm -rf getJSON/outJSON/glinerOut/*
 fi
 
 # Remove makeTemplatePDF output folders
@@ -60,6 +60,8 @@ echo ""
 echo "Running run_all_llms.sh..."
 echo "--------------------------------------"
 ./run_all_llms.sh
+
+
 
 echo ""
 echo "============================================"

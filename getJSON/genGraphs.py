@@ -119,7 +119,7 @@ def overall_metrics(df):
         'Recall': 'mean',
         'Family': 'first',
         'Source': 'first',
-        'Image_Input': lambda x: any(x)  # True if any variantvision
+        'Image_Input': lambda x: any(x)  # True if any variant has vision
     }).round(2)
     
     # Flatten column names
@@ -219,11 +219,358 @@ def overall_metrics(df):
     
     return grouped_models
 
+def overall_accuracy_metrics(df):
+    """
+    Create overall accuracy visualization for all models grouped by common base names
+    This combines text/vision variants and averages across hospitals
+    """
+    # Add normalized model names and families if not already present
+    if 'Base_Model' not in df.columns:
+        df['Base_Model'] = df['LLM'].apply(normalize_model_name)
+    
+    # Group by base model name and calculate average metrics
+    grouped_models = df.groupby('Base_Model').agg({
+        'Accuracy': ['mean', 'std', 'count'],
+        'F1score': 'mean',
+        'Precision': 'mean',
+        'Recall': 'mean',
+        'Family': 'first',
+        'Source': 'first',
+        'Image_Input': lambda x: any(x)  # True if any variant has vision
+    }).round(2)
+    
+    # Flatten column names
+    grouped_models.columns = ['Accuracy_Mean', 'Accuracy_Std', 'Count', 'F1_Mean', 'Precision_Mean', 'Recall_Mean', 'Family', 'Source', 'Has_Vision']
+    grouped_models = grouped_models.reset_index()
+    
+    # Sort by accuracy for visualization
+    grouped_models_sorted = grouped_models.sort_values('Accuracy_Mean', ascending=True)
+    
+    # Create the grouped bar plot
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 12))
+    
+    # Plot 1: Grouped models horizontal bar chart
+    bars = ax1.barh(range(len(grouped_models_sorted)), grouped_models_sorted['Accuracy_Mean'])
+    
+    # Color bars by model family
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+    family_colors = {
+        'Qwen': colors[0],
+        'GPT': colors[1], 
+        'Gemma/Gemini': colors[2],
+        'Llama': colors[3],
+        'Granite': colors[4],
+        'Mistral': colors[5],
+        'NuExtract': colors[6]
+    }
+    
+    for i, (idx, row) in enumerate(grouped_models_sorted.iterrows()):
+        bar_color = family_colors.get(row['Family'], colors[6])
+        bars[i].set_color(bar_color)
+        
+        # Add hatching for models with vision capabilities
+        if row['Has_Vision']:
+            bars[i].set_hatch('///')
+            bars[i].set_edgecolor('black')
+            bars[i].set_linewidth(1.5)
+    
+    # Customize the plot
+    model_labels = []
+    for idx, row in grouped_models_sorted.iterrows():
+        vision_indicator = ' (Image Input)' if row['Has_Vision'] else ''
+        count_indicator = f' (n={int(row["Count"])})'
+        label = f"{row['Base_Model']}{vision_indicator}{count_indicator}"
+        model_labels.append(label)
+    
+    ax1.set_yticks(range(len(grouped_models_sorted)))
+    ax1.set_yticklabels(model_labels, fontsize=9)
+    ax1.set_xlabel('Average Accuracy', fontsize=12)
+    ax1.set_title('Overall Accuracy Performance - Models Grouped by Base Name\n(Averaged across hospitals and input types)', 
+                 fontsize=14, fontweight='bold')
+    ax1.grid(axis='x', alpha=0.3)
+    
+    # Add value labels on bars
+    for i, (idx, row) in enumerate(grouped_models_sorted.iterrows()):
+        ax1.text(row['Accuracy_Mean'] + 1, i, f"{row['Accuracy_Mean']:.1f}±{row['Accuracy_Std']:.1f}", 
+                va='center', fontsize=8)
+    
+    # Plot 2: Family performance summary
+    family_summary = grouped_models.groupby('Family').agg({
+        'Accuracy_Mean': ['mean', 'std', 'count']
+    }).round(2)
+    family_summary.columns = ['Avg_Accuracy', 'Std_Accuracy', 'Model_Count']
+    family_summary = family_summary.reset_index().sort_values('Avg_Accuracy', ascending=False)
+    
+    bars2 = ax2.bar(family_summary['Family'], family_summary['Avg_Accuracy'], 
+                    yerr=family_summary['Std_Accuracy'], capsize=5)
+    
+    # Color bars by family
+    for i, family in enumerate(family_summary['Family']):
+        bars2[i].set_color(family_colors.get(family, colors[6]))
+    
+    # Add count labels on bars
+    for bar, count in zip(bars2, family_summary['Model_Count']):
+        ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
+                 f'n={int(count)}', ha='center', va='bottom', fontsize=9)
+    
+    ax2.set_title('Average Accuracy by Model Family', fontsize=14, fontweight='bold')
+    ax2.set_xlabel('Model Family', fontsize=12)
+    ax2.set_ylabel('Average Accuracy', fontsize=12)
+    ax2.tick_params(axis='x', rotation=45)
+    ax2.grid(axis='y', alpha=0.3)
+    
+    # Create legend for families
+    from matplotlib.patches import Patch
+    legend_elements = [Patch(facecolor=color, label=family) 
+                      for family, color in family_colors.items() 
+                      if family in grouped_models['Family'].values]
+    legend_elements.append(Patch(facecolor='lightgray', hatch='///', 
+                                edgecolor='black', linewidth=1.5,
+                                label='Given Image Input'))
+    
+    ax1.legend(handles=legend_elements, loc='lower right', fontsize=9)
+    
+    plt.tight_layout()
+    save_plot('00_overall_accuracy_grouped_models')
+    
+    return grouped_models
+
+def overall_precision_metrics(df):
+    """
+    Create overall precision visualization for all models grouped by common base names
+    This combines text/vision variants and averages across hospitals
+    """
+    # Add normalized model names and families if not already present
+    if 'Base_Model' not in df.columns:
+        df['Base_Model'] = df['LLM'].apply(normalize_model_name)
+    
+    # Group by base model name and calculate average metrics
+    grouped_models = df.groupby('Base_Model').agg({
+        'Precision': ['mean', 'std', 'count'],
+        'F1score': 'mean',
+        'Accuracy': 'mean',
+        'Recall': 'mean',
+        'Family': 'first',
+        'Source': 'first',
+        'Image_Input': lambda x: any(x)  # True if any variant has vision
+    }).round(2)
+    
+    # Flatten column names
+    grouped_models.columns = ['Precision_Mean', 'Precision_Std', 'Count', 'F1_Mean', 'Accuracy_Mean', 'Recall_Mean', 'Family', 'Source', 'Has_Vision']
+    grouped_models = grouped_models.reset_index()
+    
+    # Sort by precision for visualization
+    grouped_models_sorted = grouped_models.sort_values('Precision_Mean', ascending=True)
+    
+    # Create the grouped bar plot
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 12))
+    
+    # Plot 1: Grouped models horizontal bar chart
+    bars = ax1.barh(range(len(grouped_models_sorted)), grouped_models_sorted['Precision_Mean'])
+    
+    # Color bars by model family
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+    family_colors = {
+        'Qwen': colors[0],
+        'GPT': colors[1], 
+        'Gemma/Gemini': colors[2],
+        'Llama': colors[3],
+        'Granite': colors[4],
+        'Mistral': colors[5],
+        'NuExtract': colors[6]
+    }
+    
+    for i, (idx, row) in enumerate(grouped_models_sorted.iterrows()):
+        bar_color = family_colors.get(row['Family'], colors[6])
+        bars[i].set_color(bar_color)
+        
+        # Add hatching for models with vision capabilities
+        if row['Has_Vision']:
+            bars[i].set_hatch('///')
+            bars[i].set_edgecolor('black')
+            bars[i].set_linewidth(1.5)
+    
+    # Customize the plot
+    model_labels = []
+    for idx, row in grouped_models_sorted.iterrows():
+        vision_indicator = ' (Image Input)' if row['Has_Vision'] else ''
+        count_indicator = f' (n={int(row["Count"])})'
+        label = f"{row['Base_Model']}{vision_indicator}{count_indicator}"
+        model_labels.append(label)
+    
+    ax1.set_yticks(range(len(grouped_models_sorted)))
+    ax1.set_yticklabels(model_labels, fontsize=9)
+    ax1.set_xlabel('Average Precision', fontsize=12)
+    ax1.set_title('Overall Precision Performance - Models Grouped by Base Name\n(Averaged across hospitals and input types)', 
+                 fontsize=14, fontweight='bold')
+    ax1.grid(axis='x', alpha=0.3)
+    
+    # Add value labels on bars
+    for i, (idx, row) in enumerate(grouped_models_sorted.iterrows()):
+        ax1.text(row['Precision_Mean'] + 1, i, f"{row['Precision_Mean']:.1f}±{row['Precision_Std']:.1f}", 
+                va='center', fontsize=8)
+    
+    # Plot 2: Family performance summary
+    family_summary = grouped_models.groupby('Family').agg({
+        'Precision_Mean': ['mean', 'std', 'count']
+    }).round(2)
+    family_summary.columns = ['Avg_Precision', 'Std_Precision', 'Model_Count']
+    family_summary = family_summary.reset_index().sort_values('Avg_Precision', ascending=False)
+    
+    bars2 = ax2.bar(family_summary['Family'], family_summary['Avg_Precision'], 
+                    yerr=family_summary['Std_Precision'], capsize=5)
+    
+    # Color bars by family
+    for i, family in enumerate(family_summary['Family']):
+        bars2[i].set_color(family_colors.get(family, colors[6]))
+    
+    # Add count labels on bars
+    for bar, count in zip(bars2, family_summary['Model_Count']):
+        ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
+                 f'n={int(count)}', ha='center', va='bottom', fontsize=9)
+    
+    ax2.set_title('Average Precision by Model Family', fontsize=14, fontweight='bold')
+    ax2.set_xlabel('Model Family', fontsize=12)
+    ax2.set_ylabel('Average Precision', fontsize=12)
+    ax2.tick_params(axis='x', rotation=45)
+    ax2.grid(axis='y', alpha=0.3)
+    
+    # Create legend for families
+    from matplotlib.patches import Patch
+    legend_elements = [Patch(facecolor=color, label=family) 
+                      for family, color in family_colors.items() 
+                      if family in grouped_models['Family'].values]
+    legend_elements.append(Patch(facecolor='lightgray', hatch='///', 
+                                edgecolor='black', linewidth=1.5,
+                                label='Given Image Input'))
+    
+    ax1.legend(handles=legend_elements, loc='lower right', fontsize=9)
+    
+    plt.tight_layout()
+    save_plot('00_overall_precision_grouped_models')
+    
+    return grouped_models
+
+def overall_recall_metrics(df):
+    """
+    Create overall recall visualization for all models grouped by common base names
+    This combines text/vision variants and averages across hospitals
+    """
+    # Add normalized model names and families if not already present
+    if 'Base_Model' not in df.columns:
+        df['Base_Model'] = df['LLM'].apply(normalize_model_name)
+    
+    # Group by base model name and calculate average metrics
+    grouped_models = df.groupby('Base_Model').agg({
+        'Recall': ['mean', 'std', 'count'],
+        'F1score': 'mean',
+        'Accuracy': 'mean',
+        'Precision': 'mean',
+        'Family': 'first',
+        'Source': 'first',
+        'Image_Input': lambda x: any(x)  # True if any variant has vision
+    }).round(2)
+    
+    # Flatten column names
+    grouped_models.columns = ['Recall_Mean', 'Recall_Std', 'Count', 'F1_Mean', 'Accuracy_Mean', 'Precision_Mean', 'Family', 'Source', 'Has_Vision']
+    grouped_models = grouped_models.reset_index()
+    
+    # Sort by recall for visualization
+    grouped_models_sorted = grouped_models.sort_values('Recall_Mean', ascending=True)
+    
+    # Create the grouped bar plot
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(24, 12))
+    
+    # Plot 1: Grouped models horizontal bar chart
+    bars = ax1.barh(range(len(grouped_models_sorted)), grouped_models_sorted['Recall_Mean'])
+    
+    # Color bars by model family
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f']
+    family_colors = {
+        'Qwen': colors[0],
+        'GPT': colors[1], 
+        'Gemma/Gemini': colors[2],
+        'Llama': colors[3],
+        'Granite': colors[4],
+        'Mistral': colors[5],
+        'NuExtract': colors[6]
+    }
+    
+    for i, (idx, row) in enumerate(grouped_models_sorted.iterrows()):
+        bar_color = family_colors.get(row['Family'], colors[6])
+        bars[i].set_color(bar_color)
+        
+        # Add hatching for models with vision capabilities
+        if row['Has_Vision']:
+            bars[i].set_hatch('///')
+            bars[i].set_edgecolor('black')
+            bars[i].set_linewidth(1.5)
+    
+    # Customize the plot
+    model_labels = []
+    for idx, row in grouped_models_sorted.iterrows():
+        vision_indicator = ' (Image Input)' if row['Has_Vision'] else ''
+        count_indicator = f' (n={int(row["Count"])})'
+        label = f"{row['Base_Model']}{vision_indicator}{count_indicator}"
+        model_labels.append(label)
+    
+    ax1.set_yticks(range(len(grouped_models_sorted)))
+    ax1.set_yticklabels(model_labels, fontsize=9)
+    ax1.set_xlabel('Average Recall', fontsize=12)
+    ax1.set_title('Overall Recall Performance - Models Grouped by Base Name\n(Averaged across hospitals and input types)', 
+                 fontsize=14, fontweight='bold')
+    ax1.grid(axis='x', alpha=0.3)
+    
+    # Add value labels on bars
+    for i, (idx, row) in enumerate(grouped_models_sorted.iterrows()):
+        ax1.text(row['Recall_Mean'] + 1, i, f"{row['Recall_Mean']:.1f}±{row['Recall_Std']:.1f}", 
+                va='center', fontsize=8)
+    
+    # Plot 2: Family performance summary
+    family_summary = grouped_models.groupby('Family').agg({
+        'Recall_Mean': ['mean', 'std', 'count']
+    }).round(2)
+    family_summary.columns = ['Avg_Recall', 'Std_Recall', 'Model_Count']
+    family_summary = family_summary.reset_index().sort_values('Avg_Recall', ascending=False)
+    
+    bars2 = ax2.bar(family_summary['Family'], family_summary['Avg_Recall'], 
+                    yerr=family_summary['Std_Recall'], capsize=5)
+    
+    # Color bars by family
+    for i, family in enumerate(family_summary['Family']):
+        bars2[i].set_color(family_colors.get(family, colors[6]))
+    
+    # Add count labels on bars
+    for bar, count in zip(bars2, family_summary['Model_Count']):
+        ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 1,
+                 f'n={int(count)}', ha='center', va='bottom', fontsize=9)
+    
+    ax2.set_title('Average Recall by Model Family', fontsize=14, fontweight='bold')
+    ax2.set_xlabel('Model Family', fontsize=12)
+    ax2.set_ylabel('Average Recall', fontsize=12)
+    ax2.tick_params(axis='x', rotation=45)
+    ax2.grid(axis='y', alpha=0.3)
+    
+    # Create legend for families
+    from matplotlib.patches import Patch
+    legend_elements = [Patch(facecolor=color, label=family) 
+                      for family, color in family_colors.items() 
+                      if family in grouped_models['Family'].values]
+    legend_elements.append(Patch(facecolor='lightgray', hatch='///', 
+                                edgecolor='black', linewidth=1.5,
+                                label='Given Image Input'))
+    
+    ax1.legend(handles=legend_elements, loc='lower right', fontsize=9)
+    
+    plt.tight_layout()
+    save_plot('00_overall_recall_grouped_models')
+    
+    return grouped_models
+
 def load_and_prepare_data():
     """Load and prepare the hospital data with comprehensive feature engineering"""
     # Load the data
     hospitals = pd.read_csv('Hospital.csv')
-    hospitals = hospitals[hospitals['Source'] != "OpenRouter"]
     # Clean unnecessary columns
     cols_to_drop = [col for col in hospitals.columns if 'Unnamed' in col]
     hospitals = hospitals.drop(columns=cols_to_drop, errors='ignore')
@@ -233,12 +580,7 @@ def load_and_prepare_data():
     hospitals[['Family', 'Param_Size', 'Image_Input', 'Base_Model', 'Token_Category']] = pd.DataFrame(
         model_info.tolist(), index=hospitals.index
     )
-    
-    # Add source category
-    hospitals['Source_Category'] = hospitals['Source'].apply(
-        lambda x: 'Ollama' if x.lower() == 'ollama' else 'Commercial'
-    )
-    
+        
     # Create input type column
     hospitals['Input_Type'] = hospitals['Image_Input'].map({True: 'Vision', False: 'Text-Only'})
     
@@ -297,6 +639,9 @@ def calculate_summary_statistics(df):
         'hospital': hospital_stats,
         'source': source_stats
     }
+
+def create_performance_plots(df):
+    df = df.groupby("LLM")
 
 def create_relational_plots(df):
     """Create relational plots comparing performance across models and token sizes"""
@@ -360,7 +705,7 @@ def create_categorical_plots(df):
     
     # Average Performance Metrics by Family
     family_metrics = df.groupby('Family')[['Accuracy', 'F1score', 'Precision', 'Recall']].mean()
-    family_metrics.plot(kind='bar', ax=axes[1,0])
+    family_metrics.plot(kind='bar', ax=axes[1,0], colormap='viridis')
     axes[1,0].set_title('Average Performance Metrics by Family', fontsize=12, fontweight='bold')
     axes[1,0].set_ylabel('Score')
     axes[1,0].tick_params(axis='x', rotation=45)
@@ -463,38 +808,6 @@ def create_hospital_comparison_analysis(df):
     
     plt.tight_layout()
     save_plot('06_hospital_comparison_analysis')
-
-def create_source_comparison_analysis(df):
-    """Compare Ollama vs Commercial models"""
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
-    
-    # Performance metrics comparison by source
-    source_metrics = df.groupby('Source_Category')[['Accuracy', 'F1score', 'Precision', 'Recall']].mean()
-    source_metrics.plot(kind='bar', ax=axes[0])
-    axes[0].set_title('Average Performance Metrics by Source Category', fontweight='bold')
-    axes[0].set_ylabel('Score')
-    axes[0].tick_params(axis='x', rotation=0)
-    axes[0].legend(title='Metrics')
-    axes[0].grid(axis='y', alpha=0.3)
-    
-    # F1 Score distribution by source and input type
-    sns.boxplot(data=df, x='Source_Category', y='F1score', hue='Input_Type', ax=axes[1])
-    axes[1].set_title('F1 Score Distribution by Source and Input Type', fontweight='bold')
-    axes[1].grid(axis='y', alpha=0.3)
-    
-    plt.tight_layout()
-    save_plot('07_source_comparison_analysis')
-    
-    # Calculate detailed source statistics
-    source_stats = df.groupby(['Source_Category', 'Family']).agg({
-        'Accuracy': ['mean', 'std', 'count'],
-        'F1score': ['mean', 'std'],
-        'Precision': ['mean', 'std'],
-        'False Positives': 'mean',
-        'False Negatives': 'mean'
-    }).round(3)
-    
-    return source_stats
 
 def format_source_stats_for_display(source_stats):
     """Format source statistics for clean display in terminal and PDF"""
@@ -833,6 +1146,105 @@ def create_source_f1_comparison(df):
         'by_hospital': source_hospital_f1
     }
 
+def create_individual_model_metrics_plot(df, ax, title_suffix="", top_n=None):
+    """
+    Create a bar plot showing performance metrics for individual models
+    
+    Parameters:
+    df: DataFrame with model performance data
+    ax: matplotlib axis to plot on
+    title_suffix: additional text for the title
+    top_n: if specified, only show top N models by F1 score
+    """
+    # Calculate metrics for individual models
+    model_metrics = df.groupby('LLM')[['Accuracy', 'F1score', 'Precision', 'Recall']].mean()
+    
+    # Sort by F1 score and optionally limit to top N
+    model_metrics = model_metrics.sort_values('F1score', ascending=True)
+    if top_n:
+        model_metrics = model_metrics.tail(top_n)
+    
+    # Create the plot
+    model_metrics.plot(kind='barh', ax=ax, colormap='viridis', width=0.8)
+    ax.set_title(f'Average Performance Metrics by Individual Model{title_suffix}', 
+                fontsize=12, fontweight='bold')
+    ax.set_xlabel('Score')
+    ax.tick_params(axis='y', labelsize=8)  # Smaller font for model names
+    ax.legend(title='Metrics', loc='lower right')
+    ax.grid(axis='x', alpha=0.3)
+    
+    # Adjust y-axis labels for better readability
+    labels = [label.get_text().replace('*ImageInput*', '\n(Vision)') for label in ax.get_yticklabels()]
+    ax.set_yticklabels(labels)
+    
+    return model_metrics
+
+def create_comprehensive_individual_model_analysis(df):
+    """
+    Create comprehensive analysis showing individual model performance
+    """
+    fig, axes = plt.subplots(2, 2, figsize=(20, 16))
+    
+    # 1. Top 15 models overall
+    create_individual_model_metrics_plot(df, axes[0,0], " (Top 15)", top_n=15)
+    
+    # 2. All text-only models
+    text_only_df = df[~df['Image_Input']]
+    create_individual_model_metrics_plot(text_only_df, axes[0,1], " (Text-Only Models)")
+    
+    # 3. All vision models
+    vision_df = df[df['Image_Input']]
+    if len(vision_df) > 0:
+        create_individual_model_metrics_plot(vision_df, axes[1,0], " (Vision Models)")
+    else:
+        axes[1,0].text(0.5, 0.5, 'No Vision Models Available', 
+                      ha='center', va='center', transform=axes[1,0].transAxes)
+        axes[1,0].set_title('Vision Models (None Available)')
+    
+    # 4. Models by specific family (e.g., GPT models)
+    gpt_df = df[df['Family'] == 'GPT']
+    if len(gpt_df) > 0:
+        create_individual_model_metrics_plot(gpt_df, axes[1,1], " (GPT Family)")
+    else:
+        # Try another family if GPT not available
+        largest_family = df['Family'].value_counts().index[0]
+        family_df = df[df['Family'] == largest_family]
+        create_individual_model_metrics_plot(family_df, axes[1,1], f" ({largest_family} Family)")
+    
+    plt.tight_layout()
+    save_plot('09_individual_model_comprehensive_analysis')
+    
+    return fig
+
+# You can also create a simpler version for just one plot:
+def plot_all_individual_models(df, figsize=(16, 12)):
+    """
+    Simple function to plot all individual models in one chart
+    """
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Get all models sorted by F1 score
+    model_metrics = df.groupby('LLM')[['Accuracy', 'F1score', 'Precision', 'Recall']].mean()
+    model_metrics = model_metrics.sort_values('F1score', ascending=True)
+    
+    # Create horizontal bar plot for better label readability
+    model_metrics.plot(kind='barh', ax=ax, colormap='viridis', width=0.7)
+    ax.set_title('Performance Metrics for All Individual Models\n(Sorted by F1 Score)', 
+                fontsize=14, fontweight='bold')
+    ax.set_xlabel('Score')
+    ax.tick_params(axis='y', labelsize=9)
+    ax.legend(title='Metrics', bbox_to_anchor=(1.05, 1), loc='upper left')
+    ax.grid(axis='x', alpha=0.3)
+    
+    # Clean up vision indicator in labels
+    labels = [label.get_text().replace('*ImageInput*', ' (Vision)') for label in ax.get_yticklabels()]
+    ax.set_yticklabels(labels)
+    
+    plt.tight_layout()
+    save_plot('10_all_individual_models_performance')
+    
+    return fig, model_metrics
+
 def main():
     # Load and prepare data
     import os
@@ -842,17 +1254,23 @@ def main():
     stats = calculate_summary_statistics(df)
     
     # Create key visualizations in logical order
-    grouped_models = overall_metrics(df)  # Keep this as the main overview
+    grouped_models = overall_metrics(df)  # F1 score overview
+    overall_accuracy_metrics(df)  # Accuracy overview  
+    overall_precision_metrics(df)  # Precision overview
+    overall_recall_metrics(df)    # Recall overview
     
     create_relational_plots(df)           # Parameter size vs performance
     create_categorical_plots(df)          # Family and input type comparisons
     create_matrix_plots(df)              # Performance heatmaps
     create_error_analysis_plots(df)      # Error analysis
     create_hospital_comparison_analysis(df)  # Hospital comparisons
-    source_stats = create_source_comparison_analysis(df)  # Source comparisons
     
-    # Add the new comprehensive source F1 comparison
-    source_f1_stats = create_source_f1_comparison(df)  # New comprehensive source F1 analysis
+    # Add the comprehensive source F1 comparison
+    source_f1_stats = create_source_f1_comparison(df)  # Comprehensive source F1 analysis
+    
+    # Add individual model analysis
+    create_comprehensive_individual_model_analysis(df)  # Individual model performance analysis
+    plot_all_individual_models(df)  # All individual models in one chart
     
     create_summary_page(df, grouped_models, stats, source_stats)  # Executive summary
     

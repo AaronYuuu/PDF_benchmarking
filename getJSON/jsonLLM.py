@@ -117,6 +117,12 @@ def extract_json_from_response(response):
             except json.JSONDecodeError:
                 pass
     
+    #4 try just straight to json raw
+    try:
+        return json.loads(response)
+    except json.JSONDecodeError:
+        pass
+
     return None
 
 def save_model_response(model, response, source_file, output_dir):
