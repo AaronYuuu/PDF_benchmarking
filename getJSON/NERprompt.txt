@@ -1,0 +1,90 @@
+Extract the following fields into this exact JSON format:
+date_collected, date_received, date_verified, report_type, testing_context, ordering_clinic, testing_laboratory, sequencing_scope, tested_genes, num_tested_genes, sample_type, analysis_type, variants, num_variants, reference_genome.
+
+Format:
+{
+  "report_id": {
+    "date_collected": "",
+    "date_received": "",
+    "date_verified": "",
+    "report_type": "",
+    "testing_context": "",
+    "ordering_clinic": "",
+    "testing_laboratory": "",
+    "sequencing_scope": "",
+    "tested_genes": {
+      "GENE1": {
+        "gene_symbol": "GENE1",
+        "refseq_mrna": "NM_xxxxxxx.x"
+      }
+    },
+    "num_tested_genes": "",
+    "sample_type": "",
+    "analysis_type": "",
+    "variants": [
+      {
+        "gene_symbol": "",
+        "variant_id": "",
+        "chromosome": "",
+        "hgvsg": "",
+        "hgvsc": "",
+        "hgvsp": "",
+        "transcript_id": "",
+        "exon": "",
+        "zygosity": "",
+        "interpretation": "",
+        "mafac": "",
+        "mafan": "",
+        "mafaf": ""
+      }
+    ],
+    "num_variants": "",
+    "reference_genome": ""
+  }
+}
+
+Example:
+Text:
+Ontario Cancer Hospital. Research context. Collected: 2022-07-27, Received: 2022-07-28, Verified: 2022-07-29. Scope: Gene panel, Microarray. Sample: Total DNA. 20 genes tested. Variant in BCL9: c.881G>A, p.Ser294Asn, Exon 17, chr1. VUS. Variant ID: VCV09878164. Genome: GRCh37/hg19.
+
+JSON Output:
+{
+  "report_id": {
+    "date_collected": "2022-07-27",
+    "date_received": "2022-07-28",
+    "date_verified": "2022-07-29",
+    "report_type": "Molecular Genetics",
+    "testing_context": "Research",
+    "ordering_clinic": "Ontario Cancer Hospital",
+    "testing_laboratory": "Ontario Cancer Hospital",
+    "sequencing_scope": "Gene panel",
+    "tested_genes": {
+      "BCL9": {
+        "gene_symbol": "BCL9",
+        "refseq_mrna": ""
+      }
+    },
+    "num_tested_genes": "20",
+    "sample_type": "Total DNA",
+    "analysis_type": "Microarray",
+    "variants": [
+      {
+        "gene_symbol": "BCL9",
+        "variant_id": "VCV09878164",
+        "chromosome": "chr1",
+        "hgvsg": "",
+        "hgvsc": "c.881G>A",
+        "hgvsp": "p.Ser294Asn",
+        "transcript_id": "",
+        "exon": "17",
+        "zygosity": "Heterozygous",
+        "interpretation": "Variant of uncertain clinical significance",
+        "mafac": "",
+        "mafan": "",
+        "mafaf": ""
+      }
+    ],
+    "num_variants": "1",
+    "reference_genome": "GRCh37/hg19"
+  }
+}
