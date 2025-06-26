@@ -343,10 +343,12 @@ def compare_gliner_output(template, data, hospital, source, model_name):
     fp = max(0, len(gliner_data) - perfect_matches - partial_matches)  # Extra GLiNER fields
     ic = 0  # For GLiNER, we don't count incorrect extractions separately
     
-    # Calculate metrics using standard formulas
+    # Calculate metrics using standard formulas.
+    # Precision = (weighted correct) / (total extracted)
+    # Recall = (weighted correct) / (total in template)
     accuracy = (correct_matches / total_values * 100) if total_values > 0 else 0
-    precision = (correct_matches / (correct_matches + fp) * 100) if (correct_matches + fp) > 0 else 0
-    recall = (correct_matches / (correct_matches + fn) * 100) if (correct_matches + fn) > 0 else 0
+    precision = (correct_matches / len(gliner_data) * 100) if len(gliner_data) > 0 else 0
+    recall = (correct_matches / total_values * 100) if total_values > 0 else 0
     f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
     
     print(f"FP: {fp}, FN: {fn}, IC: {ic}, Correct: {correct_matches:.2f}/{total_values}")
@@ -575,6 +577,14 @@ def determine_model_name(directory, json_data, filename=""):
     model_name = model_name.split("/")[-1]
     
     return model_name
+
+def findprompt(model_name):
+    if "prompt" in model_name.lower():
+        return "LTNER/GPT-NER"
+    elif "nuextract" in model_name.lower():
+        return "None"
+    else:
+        return "Normal"
  
 
 def main():
@@ -612,6 +622,7 @@ def main():
         "localout": "huggingface",
         "glinerOut": "gliner",
         "OllamaOut": "ollama",
+        "OllamaOutNP": "ollama",
         "OllamaVisionOut": "ollama_vision", 
         "OpenAIOut": "openai",
         "OpenAIVisionOut": "openai_vision",
@@ -620,6 +631,8 @@ def main():
     }
     
     for direc in json_direcs:
+        if "NP" in direc:
+            direc = direc.replace("NP","")
         source = sources[direc]
         direc_path = "outJSON/" + direc
         
@@ -674,7 +687,7 @@ def main():
                 else:
                     # Use the determine_model_name function for consistent naming
                     model_name = determine_model_name(direc, dtemp, json_file)
-                    
+                    prompt = findprompt(model_name)
                     # Check for failed JSON parsing
                     if "error" in dtemp.get("data", {}) and dtemp["data"].get("error") == "Could not parse as JSON":
                         print(f"Model failed to parse JSON - treating as 0% accuracy")
@@ -690,7 +703,7 @@ def main():
                             "Accuracy": 0,
                             "Source": source,
                             "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2",
-                            "Prompt": "Normal" if "prompt" not in model_name else "LTNER/GPT-NER"
+                            "Prompt": prompt
                         }
                         ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
                         continue
@@ -740,7 +753,6 @@ def main():
                     
                     print(f"FP: {fp}, FN: {fn}, IC: {ic}, Correct: {correct_matches}/{total_values}")
                     print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
-                    
                     temp_row = {
                         "LLM": model_name,
                         "False Positives": fp,
@@ -753,7 +765,7 @@ def main():
                         "Accuracy": accuracy,
                         "Source": source,
                         "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2", 
-                        "Prompt": "Normal" if "prompt" not in model_name else "LTNER/GPT-NER"
+                        "Prompt": prompt
                     }
                     ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
 
