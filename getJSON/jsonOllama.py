@@ -133,6 +133,13 @@ def main(): #if I ran this on an Ollama server would that
             output_dir="OllamaOut",
             llm_function=textToLLM
     )
+
+    process_text_files_with_models(
+        prompt_path="NERprompt.txt",
+        models=models, 
+        output_dir="OllamaOutNP",
+        llm_function=textToLLM
+    )
     
     os.makedirs("OllamaVisionOut", exist_ok=True)
     vision_models = [
@@ -146,6 +153,13 @@ def main(): #if I ran this on an Ollama server would that
     process_grouped_images_with_models(
         models=vision_models,
         output_dir="OllamaVisionOut"
+    )
+
+    process_grouped_images_with_models(
+        models=models,
+        output_dir="OllamaVisionOutNP",
+        image_directory="../output_pdfs/images/",
+        prompt_path="NERprompt.txt"
     )
 
 def main_vision():
@@ -163,4 +177,4 @@ def main_vision():
         output_dir="OllamaVisionOut"
     )
 
-main_vision()
+main()

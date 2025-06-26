@@ -143,9 +143,26 @@ def main():
         output_dir="OpenAIOut/", 
         text_directory="../output_pdfs/text/", 
         prompt_path="ollamaPrompt.txt", 
+<<<<<<< HEAD
+=======
+        llm_function=textToLLM
+    )
+
+    process_text_files_with_models(
+        models=OPENAI_MODELS,
+        output_dir="OpenAIOutNP/",
+        text_directory="../output_pdfs/text/",
+        prompt_path="NERprompt.txt",
+>>>>>>> ffa8ee795cca3ca4d28ca3f2b0ee8209f5c9cd94
         llm_function=textToLLM
     )
     
+    process_grouped_images_with_models(
+        models=OPENAI_MODELS,
+        output_dir="OpenAIVisionOutNP/",
+        image_directory="../output_pdfs/images/",
+        prompt_path="NERprompt.txt"
+    )
     
     process_grouped_images_with_models(
         models=OPENAI_MODELS,

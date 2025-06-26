@@ -699,11 +699,8 @@ def main():
                     try:
                         data = dict_to_lowercase(dtemp["data"])
                         # Handle nested report_id structure - flatten it if it exists
-                        try:
-                            if isinstance(data, dict) and "report_id" in data:
-                                data = data["report_id"]
-                        except (KeyError, TypeError):
-                            pass
+                        if "report_id" in data and isinstance(data["report_id"], dict):
+                            data = data["report_id"]
                     except KeyError:
                         data = {}
                     
