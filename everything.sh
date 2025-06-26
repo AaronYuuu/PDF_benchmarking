@@ -24,6 +24,8 @@ if [ -d "getJSON/outJSON" ]; then
     rm -rf getJSON/outJSON/OpenRouterVisionOut/*
     rm -rf getJSON/outJSON/localout/*
     rm -rf getJSON/outJSON/glinerOut/*
+    rm -rf getJSON/outJSON/OllamaOutNP/*
+    rm -rf getJSON/outJSON/*
 fi
 
 # Remove makeTemplatePDF output folders
