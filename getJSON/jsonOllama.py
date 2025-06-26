@@ -70,7 +70,7 @@ def imageGroupToLLM(prompt, image_group, model):
         print(f"✗ Error with model {model}: {error_str}")
         return None
 
-def process_grouped_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="ollamaPrompt.txt"):
+def process_grouped_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="prompt.txt"):
     """    
     Args:
         models: List of vision-capable model names
@@ -128,7 +128,7 @@ def main(): #if I ran this on an Ollama server would that
         ensure_model_exists(model)   
     print(f"Found {len(models)} models to process.")
     process_text_files_with_models(
-            prompt_path="ollamaPrompt.txt",
+            prompt_path="prompt.txt",
             models=models, 
             output_dir="OllamaOut",
             llm_function=textToLLM

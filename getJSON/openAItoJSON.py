@@ -85,7 +85,7 @@ def imageGroupToLLM(prompt, image_group, model):
         print(f"✗ Error with model {model}: {error_str}")
         return None
 
-def process_grouped_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="ollamaPrompt.txt"):
+def process_grouped_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="prompt.txt"):
     """    
     Args:
         models: List of vision-capable model names
@@ -142,18 +142,6 @@ def main():
         models=OPENAI_MODELS,
         output_dir="OpenAIOut/", 
         text_directory="../output_pdfs/text/", 
-        prompt_path="ollamaPrompt.txt", 
-<<<<<<< HEAD
-=======
-        llm_function=textToLLM
-    )
-
-    process_text_files_with_models(
-        models=OPENAI_MODELS,
-        output_dir="OpenAIOutNP/",
-        text_directory="../output_pdfs/text/",
-        prompt_path="NERprompt.txt",
->>>>>>> ffa8ee795cca3ca4d28ca3f2b0ee8209f5c9cd94
         llm_function=textToLLM
     )
     
@@ -168,7 +156,6 @@ def main():
         models=OPENAI_MODELS,
         output_dir="OpenAIVisionOut/",
         image_directory="../output_pdfs/images/",
-        prompt_path="ollamaPrompt.txt"
     )
     print("Processing completed.")
 
