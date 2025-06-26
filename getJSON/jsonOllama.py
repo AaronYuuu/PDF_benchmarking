@@ -141,7 +141,6 @@ def main(): #if I ran this on an Ollama server would that
         llm_function=textToLLM
     )
     
-    os.makedirs("OllamaVisionOut", exist_ok=True)
     vision_models = [
         "qwen2.5vl:3b",    # Vision language model
         "gemma3:4b",       # Can handle images
@@ -156,7 +155,7 @@ def main(): #if I ran this on an Ollama server would that
     )
 
     process_grouped_images_with_models(
-        models=models,
+        models=vision_models,
         output_dir="OllamaVisionOutNP",
         image_directory="../output_pdfs/images/",
         prompt_path="NERprompt.txt"

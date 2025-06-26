@@ -159,4 +159,26 @@ def main():
     )
     print("Processing completed.")
 
+
+def main2():
+    # List of OpenAI models to try
+    OPENAI_MODELS = [
+        "gpt-4o-mini",
+        "gpt-4.1-nano", 
+        "gpt-4o"
+        # Add more OpenAI models as needed
+    ]
+    
+    print("Starting OpenAI model processing...")
+    print(f"Available models: {OPENAI_MODELS}")
+    
+    # Use the shared processing function
+    process_text_files_with_models(
+        models=OPENAI_MODELS,
+        output_dir="OpenAIOutNP/", 
+        text_directory="../output_pdfs/text/", 
+        llm_function=textToLLM,
+        prompt_path="NERprompt.txt"
+    )
+
 main()

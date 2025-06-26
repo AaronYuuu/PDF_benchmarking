@@ -1,14 +1,8 @@
-from jsonLLM import (
-    save_model_response, 
-    process_text_files_with_models,
-    read_prompt_file,
-    group_images_by_source
-)
-from transformers import AutoModelForVision2Seq, AutoModelForCausalLM, AutoProcessor, AutoTokenizer
+from jsonLLM import save_model_response
 import torch
 import json
-from PIL import Image
 import os
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoModelForVision2Seq, AutoProcessor
 
 # Global cache for loaded models
 model_cache = {}
@@ -40,171 +34,175 @@ EXTRACTION_TEMPLATE = {
     "reference_genome": ["GRCh37", "GRCh38", "NCBI build 34", "hg19", "hg38"]
 }
 
+def get_device_config():
+    """Get optimal device configuration."""
+    if torch.backends.mps.is_available():
+        return "mps", torch.bfloat16
+    elif torch.cuda.is_available():
+        return "cuda", torch.bfloat16
+    else:
+        return "cpu", torch.float32
+
 def load_model(model_name):
-    """Load and cache NuExtract models with automatic device detection for M1 optimization."""
+    """Load and cache NuExtract models."""
+    print(f"Loading model: {model_name}")
+    device, torch_dtype = get_device_config()
+    print(f"Using {device} device")
     if model_name in model_cache:
         return model_cache[model_name]
-    
-    print(f"Loading model: {model_name}")
-    
-    if torch.backends.mps.is_available():
-        device = "mps"  
-        torch_dtype = torch.float16  
-        print("Using MPS (Metal Performance Shaders) for GPU acceleration")
-    elif torch.cuda.is_available():
-        device = "cuda"
-        torch_dtype = torch.float16
-        print("Using CUDA GPU acceleration")
-    else:
-        device = "cpu"
-        torch_dtype = torch.float32
-        print("Using CPU (no GPU acceleration available)")
-    
-    common_params = {
-        "trust_remote_code": True,
-        "torch_dtype": torch_dtype,
-        "device_map": "auto",  
-        "low_cpu_mem_usage": True
-    }
-    
-    #one model is vision one is text, they use different processors so keep getting value errors
-    try:
-        model = AutoModelForVision2Seq.from_pretrained(model_name, **common_params)
+    if model_name == "numind/NuExtract-2.0-2B":
+        model = AutoModelForVision2Seq.from_pretrained(
+            model_name, # <-- FIX: Load the correct model
+            torch_dtype=torch_dtype,
+            trust_remote_code=True
+        ).to(device).eval()
+
+        # <-- FIX: Load the necessary processor for multimodal inputs
         processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
-        model_type = "vision"
-    except ValueError:
-        model = AutoModelForCausalLM.from_pretrained(model_name, **common_params)
-        processor = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-        if processor.pad_token is None:
-            processor.pad_token = processor.eos_token
-        model_type = "text"
-    
-    if hasattr(model, 'to') and not hasattr(model, 'hf_device_map'):
-        model = model.to(device)
-    
-    result = (model, processor, model_type)
+        
+        # The 'processor' handles both tokenization and image processing.
+        # We return it instead of a separate tokenizer.
+        result = (model, processor)
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, 
+            torch_dtype=torch_dtype, 
+            trust_remote_code=True
+        ).to(device).eval()
+        
+        tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+        result = (model, tokenizer)  # <-- FIX: Ensure result is assigned correctly
     model_cache[model_name] = result
-    print(f"✓ Successfully loaded {model_name} on {device} ({model_type} model)")
+    print(f"✓ Successfully loaded {model_name}")
     return result
 
-def generate_response(model, processor, model_type, content, image=None):
-    """Generate response from model with unified input handling."""
-    # Format input based on model type
-    if model_type == "vision":
-        messages = [{"role": "user", "content": content}]
-        formatted_text = processor.tokenizer.apply_chat_template(
-            messages, template=json.dumps(EXTRACTION_TEMPLATE), 
-            tokenize=False, add_generation_prompt=True
-        )
-        inputs = processor(text=[formatted_text], images=[image] if image else None, 
-                         padding=True, return_tensors="pt")
-        tokenizer = processor.tokenizer
-    else:
-        formatted_text = f"Extract the following information as JSON:\n\nTemplate: {json.dumps(EXTRACTION_TEMPLATE)}\n\nText: {content}\n\nJSON:"
-        inputs = processor(formatted_text, return_tensors="pt", padding=True, 
-                         truncation=True, max_length=2048)
-        tokenizer = processor
+def process_with_nuextract(text, model_name):
+    """Process text with NuExtract using official template format."""
+    model, tokenizer = load_model(model_name)
     
-    # Generate response
-    inputs = {k: v.to(model.device) for k, v in inputs.items()}
-    with torch.no_grad():
-        outputs = model.generate(
-            **inputs, max_new_tokens=1024, temperature=0.0, do_sample=False,
-            pad_token_id=tokenizer.eos_token_id, eos_token_id=tokenizer.eos_token_id
-        )
-    
-    # Decode response
-    input_length = inputs['input_ids'].shape[1]
-    generated_tokens = outputs[0][input_length:]
-    return tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
-
-def process_model_response(response):
-    """Process model response and return structured JSON."""
-    if not response:
-        return json.dumps({"error": "Empty response from model"}, indent=2)
+    # Format prompt with official NuExtract structure
+    template = json.dumps(EXTRACTION_TEMPLATE, indent=4)
+    prompt = f"""<|input|>\n### Template:\n{template}\n### Text:\n{text}\n\n<|output|>"""
     
     try:
-        parsed_json = json.loads(response)
-        return json.dumps(parsed_json, indent=2)
-    except json.JSONDecodeError:
-        return json.dumps({"raw_response": response, "error": "Could not parse as JSON"}, indent=2)
-
-def NuToLLM(prompt, text, model):
-    """Process text with NuExtract models."""
-    model_obj, processor, model_type = load_model(model)
-    response = generate_response(model_obj, processor, model_type, text)
-    return process_model_response(response)
-
-def NuImageToLLM(prompt, image_path, model):
-    """Process images with NuExtract vision models."""
-    model_obj, processor, model_type = load_model(model)
-    
-    if model_type != "vision":
-        return json.dumps({"error": f"Model {model} is not a vision model"}, indent=2)
-    
-    if not os.path.exists(image_path):
-        return json.dumps({"error": f"Image file not found: {image_path}"}, indent=2)
-    
-    try:
-        image = Image.open(image_path).convert("RGB")
+        # Tokenize and generate
+        inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=10000).to(model.device)
+        
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs, 
+                max_new_tokens=4000,
+                pad_token_id=tokenizer.eos_token_id,
+                eos_token_id=tokenizer.eos_token_id
+            )
+        
+        # Decode and extract response
+        output = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        response = output.split("<|output|>")[1].strip() if "<|output|>" in output else output.strip()
+        
+        # Validate JSON
+        try:
+            parsed_json = json.loads(response)
+            return json.dumps(parsed_json, indent=2)
+        except json.JSONDecodeError:
+            return json.dumps({"raw_response": response, "error": "Could not parse as JSON"}, indent=2)
+            
     except Exception as e:
-        return json.dumps({"error": f"Error loading image: {str(e)}"}, indent=2)
-    
-    content = prompt
-    response = generate_response(model_obj, processor, model_type, content, image)
-    return process_model_response(response)
+        return json.dumps({"error": f"Model processing failed: {str(e)}"}, indent=2)
 
-def process_images_with_models(models, output_dir, image_directory="../output_pdfs/images/", prompt_path="prompt.txt"):
-    """Process grouped images with NuExtract vision models."""
-    prompt = read_prompt_file(prompt_path)
+def process_with_nuextract_2_0_text(text, model_name):
+    """Process text with NuExtract 2.0 using the specific chat template."""
+    model, processor = load_model(model_name)
     
-    # Create output directory
+    template_str = json.dumps(EXTRACTION_TEMPLATE, indent=4)
+    user_content = f"# Template:\n{template_str}\n# Context:\n{text}"
+    messages = [{"role": "user", "content": user_content}]
+    
+    prompt = processor.tokenizer.apply_chat_template(
+        messages,
+        tokenize=False,
+        add_generation_prompt=True
+    )
+    
+    inputs = processor(
+        text=[prompt],
+        padding=True,
+        return_tensors="pt"
+    ).to(model.device)
+    
+    generation_config = {"do_sample": False, "num_beams": 1, "max_new_tokens": 4000}
+    
+    try:
+        with torch.no_grad():
+            generated_ids = model.generate(**inputs, **generation_config)
+        
+        generated_ids_trimmed = [
+            out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+        ]
+        
+        output_text = processor.batch_decode(
+            generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )
+        
+        response = output_text[0] if output_text else ""
+        
+        try:
+            parsed_json = json.loads(response)
+            return json.dumps(parsed_json, indent=2)
+        except json.JSONDecodeError:
+            return json.dumps({"raw_response": response, "error": "Could not parse as JSON"}, indent=2)
+            
+    except Exception as e:
+        return json.dumps({"error": f"Model processing failed: {str(e)}"}, indent=2)
+
+
+def process_all_text_files(models, output_dir="localout/", text_directory="../output_pdfs/text/"):
+    """Process all text files with NuExtract models."""
+    # Setup output directory
     os.makedirs("outJSON", exist_ok=True)
     full_output_dir = f"outJSON/{output_dir}"
     os.makedirs(full_output_dir, exist_ok=True)
     
-    # Group images by source document
-    grouped_images = group_images_by_source(image_directory)
+    # Get text files
+    text_files = [f for f in os.listdir(text_directory) if f.endswith('.txt')]
+    if not text_files:
+        print(f"No text files found in {text_directory}")
+        return
     
-    print(f"Found {len(grouped_images)} source documents with images")
-    print(f"Running extraction with {len(models)} vision models...")
+    print(f"Found {len(text_files)} text files")
+    print(f"Processing with {len(models)} models...")
     
-    # Process each group of images
-    for source_name, image_paths in grouped_images.items():
-        print(f"\n{'='*60}")
-        print(f"Processing source: {source_name} ({len(image_paths)} pages)")
-        print(f"{'='*60}")
+    # Process each file with each model
+    for text_file in text_files:
+        text_path = os.path.join(text_directory, text_file)
+        try:
+            with open(text_path, 'r', encoding='utf-8') as f:
+                text_content = f.read()
+        except Exception as e:
+            print(f"Error reading {text_file}: {e}")
+            continue
+        
+        print(f"\nProcessing {text_file}...")
         
         for model in models:
-            print(f"\nProcessing {source_name} with model: {model}")
-            
-            for i, image_path in enumerate(image_paths):
-                page_prompt = f"{prompt}\n\nThis is page {i+1} of {len(image_paths)} from document {source_name}."
-                response = NuImageToLLM(page_prompt, image_path, model)
-                filename = f"report_{source_name}_page_{i+1}"
+            print(f"  Using model: {model}")
+            filename = text_file.replace('.txt', '')
+            if model == "numind/NuExtract-2.0-2B":
+                response = process_with_nuextract_2_0_text(text_content, model)
+                save_model_response(model, response, filename, full_output_dir)
+            else:
+                response = process_with_nuextract(text_content, model)
                 save_model_response(model, response, filename, full_output_dir)
     
-    print(f"\n{'='*60}")
-    print(f"All image groups and models completed. Check {full_output_dir} folder for results.")
-    print(f"{'='*60}")
+    print(f"\nCompleted! Results saved to {full_output_dir}")
 
 def main():
-    import os
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(script_dir)
-    print("Starting")
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    
     models = ["numind/NuExtract-2.0-2B", "numind/NuExtract-1.5-tiny"]
-    vision_models = ["numind/NuExtract-2.0-2B"]
+    print(f"Starting NuExtract processing with models: {models}")
     
-    print("Starting NuExtract model processing (CPU-only mode)...")
-    print(f"Available models: {models}")
-    
-    # Process text and image files
-    print("\nProcessing Text Files")
-    process_text_files_with_models(models, output_dir="localout/", llm_function=NuToLLM)
-    
-    #keeps giving erros
-    #print("\nProcessing Image Files")
-    #process_images_with_models(vision_models, output_dir="localout/")
-print("Starting")
-main()
+    process_all_text_files(models)
+
+if __name__ == "__main__":
+    main()
