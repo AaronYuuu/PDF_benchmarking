@@ -1236,14 +1236,7 @@ def main():
     create_comprehensive_individual_model_analysis(df)  # Individual model performance analysis
     plot_all_individual_models(df)  # All individual models in one chart
     
-<<<<<<< HEAD
     create_summary_page(df, grouped_models, stats)  # Executive summary
-=======
-    # Extract source_stats from the stats dictionary
-    source_stats = stats['source']
-    
-    create_summary_page(df, grouped_models, stats, source_stats)  # Executive summary
->>>>>>> ffa8ee795cca3ca4d28ca3f2b0ee8209f5c9cd94
     
     # Print comprehensive summary to console
     summary_text = generate_comprehensive_summary_text(df, stats, grouped_models)
