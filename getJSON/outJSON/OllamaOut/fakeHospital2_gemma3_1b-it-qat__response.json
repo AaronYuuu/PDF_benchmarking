@@ -6,69 +6,40 @@
       "date_collected": "",
       "date_received": "",
       "date_verified": "",
-      "report_type": "Molecular Genetics",
-      "testing_context": "Clinical",
-      "ordering_clinic": "Windsor Regional Hospital (Windsor)",
-      "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
-      "sequencing_scope": "Gene panel",
+      "report_type": "Pathology",
+      "testing_context": "Research",
+      "ordering_clinic": "Health Sciences North (Sudbury)",
+      "testing_laboratory": "Hamilton Health Sciences (Hamilton)",
+      "sequencing_scope": "One or more of: Gene panel, Targeted variant testing, WES, WGS, WTS",
       "tested_genes": {
-        "IL6ST": {
-          "gene_symbol": "IL6ST",
-          "refseq_mrna": "NM_002184.4"
-        },
-        "OTOF": {
-          "gene_symbol": "OTOF",
-          "refseq_mrna": "NM_000876.4"
+        "AKT2": {
+          "gene_symbol": "AKT2",
+          "refseq_mrna": "NM_001626.6"
         }
       },
       "num_tested_genes": "",
-      "sample_type": "ctDNA",
-      "analysis_type": "Variant analysis, Karyotyping"
-    },
-    "report_metadata": {
-      "report_dates": "2024-06-15",
-      "report_type": "Molecular Genetics",
-      "testing_context": "Clinical",
-      "ordering_clinic": "Windsor Regional Hospital (Windsor)",
-      "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
-      "sequencing_scope": "Gene panel",
-      "tested_genes": {
-        "IL6ST": {
-          "gene_symbol": "IL6ST",
-          "refseq_mrna": "NM_002184.4"
-        },
-        "OTOF": {
-          "gene_symbol": "OTOF",
-          "refseq_mrna": "NM_000876.4"
+      "sample_type": "Total DNA",
+      "analysis_type": "Variant analysis",
+      "variants": [
+        {
+          "gene_symbol": "AKT2",
+          "variant_id": "OMIM:000123.3",
+          "chromosome": "chr1",
+          "hgvsc": "NM_001626.6",
+          "hgvsp": "NM_001626.6",
+          "transcript_id": "",
+          "exon": "",
+          "zygosity": "Homozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
         }
-      },
-      "num_tested_genes": "",
-      "sample_type": "ctDNA",
-      "analysis_type": "Variant analysis, Karyotyping"
-    },
-    "variant_details": {
-      "variant_id": "OMIM:0000229",
-      "gene_symbol": "IL6ST",
-      "transcript_id": "NM_002184.4",
-      "hgvs": "1",
-      "hgvsc": "1",
-      "hgvsp": "1",
-      "hgvseq": "1",
-      "exon": "0",
-      "zygosity": "heterozygous",
-      "interpretation": "Variant of clinical significance",
-      "mafac": "0"
-    },
-    "numerical_variants": [
-      {
-        "gene_symbol": "OTOF",
-        "variant_id": "c.54366>1",
-        "amino": "Zikely pathogenic",
-        "Likely pathogenic": true
-      }
-    ],
-    "reference_genome": "GRCh37"
+      ],
+      "num_variants": "",
+      "reference_genome": "NCBI Build 36"
+    }
   },
-  "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital2__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
+  "timestamp": "2025-06-19",
+  "source_file": "report_fakeHospital2__2ed5d8a3-0b68-4ff7-9865-8cb27e56e6d9.txt"
 }

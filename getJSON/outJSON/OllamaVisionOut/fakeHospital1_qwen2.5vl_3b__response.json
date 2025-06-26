@@ -3,17 +3,17 @@
   "status": "success",
   "data": {
     "report_id": {
-      "date_collected": "2024-06-15",
+      "date_collected": "2022-07-27",
       "date_received": "",
       "date_verified": "",
       "report_type": "Molecular Genetics",
       "testing_context": "Clinical",
-      "ordering_clinic": "Ontario Cancer Hospital (Toronto)",
-      "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
+      "ordering_clinic": "Ontario Cancer Hospital",
+      "testing_laboratory": "Ontario Cancer Hospital",
       "sequencing_scope": "Targeted variant testing",
       "tested_genes": {
-        "OTOF": {
-          "gene_symbol": "OTOF",
+        "BCL9": {
+          "gene_symbol": "BCL9",
           "refseq_mrna": "NM_000123.3"
         }
       },
@@ -22,25 +22,25 @@
       "analysis_type": "Variant analysis",
       "variants": [
         {
-          "gene_symbol": "OTOF",
-          "variant_id": "c.5436G>T",
-          "chromosome": "chr7",
-          "hgvsg": "g.1812",
-          "hgvsc": "c.5436G>T",
-          "hgvsp": "p.Glu1812Asp",
+          "gene_symbol": "BCL9",
+          "variant_id": "c.881G>A",
+          "chromosome": "chr1",
+          "hgvsg": "c.",
+          "hgvsc": "881G>A",
+          "hgvsp": "p.Ser294Asn",
           "transcript_id": "NM_000123.3",
-          "exon": "7",
+          "exon": "17",
           "zygosity": "Heterozygous",
-          "interpretation": "likely pathogenic",
-          "mafac": "0.000000",
-          "mafan": "0.000000",
-          "mafaf": "0.000000"
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "",
+          "mafan": "",
+          "mafaf": ""
         }
       ],
       "num_variants": "1",
       "reference_genome": "GRCh37/hg19"
     }
   },
-  "timestamp": "2025-06-05",
+  "timestamp": "2025-06-19",
   "source_file": "report_fakeHospital1"
 }

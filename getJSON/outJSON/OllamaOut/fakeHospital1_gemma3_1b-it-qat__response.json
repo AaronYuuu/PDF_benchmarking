@@ -3,70 +3,96 @@
   "status": "success",
   "data": {
     "report_id": {
-      "date_collected": "2020-12-07",
-      "date_received": "2020-12-07",
-      "date_verified": "2020-12-09",
+      "date_collected": "2022-07-27",
+      "date_received": "2022-07-27",
+      "date_verified": "2022-07-27",
       "report_type": "Molecular Genetics",
-      "testing_context": "Clinical",
+      "testing_context": "Clinical or Research",
       "ordering_clinic": "Ontario Cancer Hospital",
       "testing_laboratory": "Ontario Cancer Hospital",
       "sequencing_scope": "Gene panel",
       "tested_genes": {
-        "EXON1": {
-          "gene_symbol": "EXON1",
+        "AKT2": {
+          "gene_symbol": "AKT2",
           "refseq_mrna": "NM_xxxxxxx.x"
         },
-        "EXON2": {
-          "gene_symbol": "EXON2",
-          "refseq_mrna": "NM_xxxxxxx.x"
-        }
-      },
-      "num_tested_genes": "3",
-      "sample_type": "Other RNA fractions",
-      "analysis_type": "Variant analysis, Karyotyping, Microarray"
-    },
-    "report_metadata": {
-      "report_dates": "2020-12-07",
-      "report_type": "Pathology or Molecular Genetics",
-      "testing_context": "Clinical",
-      "ordering_clinic": "Ontario Cancer Hospital",
-      "testing_laboratory": "Ontario Cancer Hospital",
-      "sequencing_scope": "Gene panel",
-      "tested_genes": {
-        "EXON1": {
-          "gene_symbol": "EXON1",
+        "RHBDF2": {
+          "gene_symbol": "RHBDF2",
           "refseq_mrna": "NM_xxxxxxx.x"
         },
-        "EXON2": {
-          "gene_symbol": "EXON2",
+        "PTPN13": {
+          "gene_symbol": "PTPN13",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "H3F3A": {
+          "gene_symbol": "H3F3A",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "EGR3": {
+          "gene_symbol": "EGR3",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "TLX3": {
+          "gene_symbol": "TLX3",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "PAX5": {
+          "gene_symbol": "PAX5",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "HNFIA": {
+          "gene_symbol": "HNFIA",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "EPHAZ": {
+          "gene_symbol": "EPHAZ",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "TNR": {
+          "gene_symbol": "TNR",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "BTK": {
+          "gene_symbol": "BTK",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "CREB3LI": {
+          "gene_symbol": "CREB3LI",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "PRDMI6": {
+          "gene_symbol": "PRDMI6",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "HOXD13": {
+          "gene_symbol": "HOXD13",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "FOSL2": {
+          "gene_symbol": "FOSL2",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "KIFZ": {
+          "gene_symbol": "KIFZ",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "NR4A3": {
+          "gene_symbol": "NR4A3",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "CTNNDI": {
+          "gene_symbol": "CTNNDI",
+          "refseq_mrna": "NM_xxxxxxx.x"
+        },
+        "BCL9": {
+          "gene_symbol": "BCL9",
           "refseq_mrna": "NM_xxxxxxx.x"
         }
-      },
-      "num_tested_genes": "3",
-      "sample_type": "Other RNA fractions",
-      "analysis_type": "Variant analysis, Karyotyping, Microarray"
+      }
     },
-    "variant_details": {
-      "variant_id": "OMIM",
-      "gene_symbol": "HGNC",
-      "transcript_id": "NM_xxxxxxx.x",
-      "chromosome": "chr1\u201322",
-      "hgvsc": "None",
-      "hgvsp": "None",
-      "hgvta": "None",
-      "hgvac": "None",
-      "hgvb": "None",
-      "hgvc": "None",
-      "hgva": "None",
-      "hgvf": "None",
-      "hgvg": "None",
-      "hgvx": "None",
-      "mt": "None",
-      "h": "None",
-      "d": "None",
-      "p": "None"
-    }
+    "num_variants": "",
+    "reference_genome": "GRCh37 /hg19 human genome reference"
   },
-  "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital1__ed5ad1e3-7f4f-4e33-b2c6-2ea55d40f3e5.txt"
+  "timestamp": "2025-06-19",
+  "source_file": "report_fakeHospital1__2ed5d8a3-0b68-4ff7-9865-8cb27e56e6d9.txt"
 }

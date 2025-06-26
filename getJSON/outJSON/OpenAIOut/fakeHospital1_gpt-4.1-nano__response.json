@@ -3,63 +3,111 @@
   "status": "success",
   "data": {
     "report_id": {
-      "date_collected": "2024-06-15",
-      "date_received": "2024-06-16",
-      "date_verified": "2024-06-17",
+      "date_collected": "2022-07-27",
+      "date_received": "2022-07-28",
+      "date_verified": "2022-07-29",
       "report_type": "Molecular Genetics",
-      "testing_context": "Clinical",
+      "testing_context": "Research",
       "ordering_clinic": "Ontario Cancer Hospital (Toronto)",
       "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
       "sequencing_scope": "Targeted variant testing",
       "tested_genes": {
-        "IL6ST": {
-          "gene_symbol": "IL6ST",
+        "AKT2": {
+          "gene_symbol": "AKT2",
           "refseq_mrna": ""
         },
-        "OTOF": {
-          "gene_symbol": "OTOF",
-          "refseq_mrna": "NM_001287189.2"
-        },
-        "IGFZR": {
-          "gene_symbol": "IGFZR",
+        "RHBDF2": {
+          "gene_symbol": "RHBDF2",
           "refseq_mrna": ""
         },
-        "TCF12": {
-          "gene_symbol": "TCF12",
+        "PTPN13": {
+          "gene_symbol": "PTPN13",
           "refseq_mrna": ""
         },
-        "NCKIPSD": {
-          "gene_symbol": "NCKIPSD",
+        "H3F3A": {
+          "gene_symbol": "H3F3A",
           "refseq_mrna": ""
         },
-        "DABZIP": {
-          "gene_symbol": "DABZIP",
+        "EGR3": {
+          "gene_symbol": "EGR3",
           "refseq_mrna": ""
         },
-        "MDM2": {
-          "gene_symbol": "MDM2",
+        "TLX3": {
+          "gene_symbol": "TLX3",
           "refseq_mrna": ""
         },
-        "RAPIGDSI": {
-          "gene_symbol": "RAPIGDSI",
+        "PAX5": {
+          "gene_symbol": "PAX5",
+          "refseq_mrna": ""
+        },
+        "HNFIA": {
+          "gene_symbol": "HNFIA",
+          "refseq_mrna": ""
+        },
+        "EPHAZ": {
+          "gene_symbol": "EPHAZ",
+          "refseq_mrna": ""
+        },
+        "TNR": {
+          "gene_symbol": "TNR",
+          "refseq_mrna": ""
+        },
+        "BTK": {
+          "gene_symbol": "BTK",
+          "refseq_mrna": ""
+        },
+        "CREB3LI": {
+          "gene_symbol": "CREB3LI",
+          "refseq_mrna": ""
+        },
+        "PRDMI6": {
+          "gene_symbol": "PRDMI6",
+          "refseq_mrna": ""
+        },
+        "HOXD13": {
+          "gene_symbol": "HOXD13",
+          "refseq_mrna": ""
+        },
+        "FOSL2": {
+          "gene_symbol": "FOSL2",
+          "refseq_mrna": ""
+        },
+        "KIFZ": {
+          "gene_symbol": "KIFZ",
+          "refseq_mrna": ""
+        },
+        "NR4A3": {
+          "gene_symbol": "NR4A3",
+          "refseq_mrna": ""
+        },
+        "CTNNDI": {
+          "gene_symbol": "CTNNDI",
+          "refseq_mrna": ""
+        },
+        "BCL9": {
+          "gene_symbol": "BCL9",
+          "refseq_mrna": ""
+        },
+        "KEAPI": {
+          "gene_symbol": "KEAPI",
           "refseq_mrna": ""
         }
       },
-      "num_tested_genes": "8",
-      "sample_type": "ctDNA",
-      "analysis_type": "Variant analysis",
+      "num_tested_genes": "20",
+      "sample_type": "Total DNA",
+      "analysis_type": "Microarray",
       "variants": [
         {
-          "gene_symbol": "OTOF",
-          "variant_id": "VCVO00920952",
-          "chromosome": "chr2",
-          "hgvsg": "g.54366G>T",
-          "hgvsc": "c.5436G>T",
-          "hgvsp": "p.Glu1812Asp",
-          "transcript_id": "NM_001287189.2",
-          "exon": "7",
-          "zygosity": "heterozygous",
-          "interpretation": "Variant of clinical significance: Likely pathogenic",
+          "gene_symbol": "BCL9",
+          "variant_id": "VCV09878164",
+          "chromosome": "chr1",
+          "hgvsg": "g.881G>A",
+          "hgvsc": "c.881G>A",
+          "hgvsp": "p.Ser294Asn",
+          "transcript_id": "NM_001123456.1",
+          "exon": "17",
+          "zygosity": "Heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
           "mafac": "",
           "mafan": "",
           "mafaf": ""
@@ -69,6 +117,6 @@
       "reference_genome": "GRCh37 /hg19"
     }
   },
-  "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital1__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
+  "timestamp": "2025-06-19",
+  "source_file": "report_fakeHospital1__2ed5d8a3-0b68-4ff7-9865-8cb27e56e6d9.txt"
 }

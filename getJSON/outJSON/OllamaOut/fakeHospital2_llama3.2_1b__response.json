@@ -2,23 +2,67 @@
   "model": "llama3.2:1b",
   "status": "success",
   "data": {
+    "report_id": {
+      "date_collected": "",
+      "date_received": "20220729",
+      "date_verified": "20220730",
+      "report_type": "Pathology or Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Health Sciences North (Sudbury)",
+      "testing_laboratory": "Toronto Cancer Hospital"
+    },
     "clinical_testing_info": {
-      "sequencing_scope": "Gene panel, Targeted variant testing, WES, WGS, WTS",
+      "sequencing_scope": [
+        "Gene panel",
+        "Targeted variant testing",
+        "WES",
+        "WGS",
+        "WTS"
+      ],
       "tested_genes": {
-        "GENE1": {
-          "gene_symbol": "",
+        "BCLQ": {
+          "gene_symbol": "BCLQ",
           "refseq_mrna": "NM_000123.3"
         },
-        "GENE2": {
-          "gene_symbol": ""
+        "AKT2": {
+          "gene_symbol": "AKT2",
+          "refseq_mrna": "NM_001626.6"
         }
       },
-      "num_tested_genes": "",
-      "sample_type": "Amplified DNA, ctDNA, Total DNA, Total RNA",
+      "sample_type": "Amplified DNA",
       "analysis_type": [
         "Variant analysis",
-        "Karyotyping",
-        "Microarray"
+        "Karyotyping"
+      ],
+      "num_variants": 1,
+      "reference_genome": ""
+    },
+    "report_metadata": {
+      "report_dates": [
+        "20220729",
+        "20220730"
+      ],
+      "report_type": "Pathology or Molecular Genetics",
+      "testing_context": "Clinical",
+      "ordering_clinic": "Health Sciences North (Sudbury)",
+      "testing_laboratory": "Toronto Cancer Hospital"
+    },
+    "variant_details": {
+      "variant_id": "OMIM",
+      "gene_symbol": "BCLQ",
+      "transcript_id": "NM_000123.3",
+      "hgvs": {
+        "chromosome": "chr1-22",
+        "exon": "17",
+        "zygosity": "heterozygous",
+        "interpretation": "variant of uncertain clinical significance"
+      },
+      "maf": "2.59e-04",
+      "num_tested_genes": "40",
+      "sample_type": "Total DNA",
+      "analysis_type": [
+        "Variant analysis",
+        "Karyotyping"
       ],
       "variants": [
         {
@@ -31,39 +75,15 @@
           "transcript_id": "",
           "exon": "",
           "zygosity": "",
-          "interpretation": ""
+          "interpretation": "",
+          "mafac": "",
+          "mafan": ""
         }
       ],
-      "num_variants": "",
+      "num_variants": 1,
       "reference_genome": ""
-    },
-    "report_metadata": {
-      "report_dates": [
-        "2024-06-15",
-        "2024-06-16",
-        "2024-06-17"
-      ],
-      "report_type": "Pathology or Molecular Genetics",
-      "testing_context": "Clinical",
-      "ordering_clinic": "Mount Sinai Hospital (Toronto)",
-      "testing_laboratory": "Ontario Cancer Hospital (Toronto)"
-    },
-    "variant_details": {
-      "variant_id": "OMIM, ClinVar, dbSNP",
-      "gene_symbol": "GENE1",
-      "transcript_id": "NM_000123.3",
-      "hgvs": {
-        "genomic": "g.",
-        "coding": "c.",
-        "protein": "p."
-      },
-      "chromosome": "chr1-22, chrX, chrY",
-      "exon": "",
-      "zygosity": "Heterozygous",
-      "interpretation": "\"Variant of clinical significance...\"",
-      "maf": ""
     }
   },
-  "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital2__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
+  "timestamp": "2025-06-19",
+  "source_file": "report_fakeHospital2__2ed5d8a3-0b68-4ff7-9865-8cb27e56e6d9.txt"
 }

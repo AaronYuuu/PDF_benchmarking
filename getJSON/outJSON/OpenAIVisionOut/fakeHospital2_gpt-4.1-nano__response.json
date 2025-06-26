@@ -10,10 +10,10 @@
       "testing_context": "Clinical",
       "ordering_clinic": "",
       "testing_laboratory": "",
-      "sequencing_scope": "WES",
+      "sequencing_scope": "Targeted variant testing",
       "tested_genes": {},
       "num_tested_genes": "",
-      "sample_type": "",
+      "sample_type": "Amplified DNA",
       "analysis_type": "Variant analysis",
       "variants": [
         {
@@ -36,6 +36,6 @@
       "reference_genome": ""
     }
   },
-  "timestamp": "2025-06-05",
+  "timestamp": "2025-06-19",
   "source_file": "report_fakeHospital2"
 }

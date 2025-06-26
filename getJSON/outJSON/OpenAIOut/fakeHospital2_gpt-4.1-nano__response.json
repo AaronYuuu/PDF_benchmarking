@@ -5,70 +5,42 @@
     "report_id": {
       "date_collected": "",
       "date_received": "",
-      "date_verified": "2024-06-17",
-      "report_type": "Molecular Genetics",
-      "testing_context": "Clinical",
-      "ordering_clinic": "Windsor Regional Hospital (Windsor)",
-      "testing_laboratory": "Ontario Cancer Hospital (Toronto)",
-      "sequencing_scope": "Targeted variant testing",
+      "date_verified": "2022-07-29",
+      "report_type": "Pathology",
+      "testing_context": "Research",
+      "ordering_clinic": "Health Sciences North (Sudbury)",
+      "testing_laboratory": "Toronto Cancer Hospital (Toronto)",
+      "sequencing_scope": "WTS, Microarray",
       "tested_genes": {
-        "OTOF": {
-          "gene_symbol": "OTOF",
-          "refseq_mrna": "NM_194248.3"
-        },
-        "IL6ST": {
-          "gene_symbol": "IL6ST",
-          "refseq_mrna": "NM_002184.4"
-        },
-        "IGFZR": {
-          "gene_symbol": "IGFZR",
-          "refseq_mrna": "NM_000876.4"
-        },
-        "TCF12": {
-          "gene_symbol": "TCF12",
-          "refseq_mrna": "NM_001322159.3"
-        },
-        "NCKIPSD": {
-          "gene_symbol": "NCKIPSD",
-          "refseq_mrna": "NM_016453.4"
-        },
-        "DABZIP": {
-          "gene_symbol": "DABZIP",
-          "refseq_mrna": "NM_001395010.1"
-        },
-        "MDM2": {
-          "gene_symbol": "MDM2",
-          "refseq_mrna": "NM_002392.6"
-        },
-        "RAPIGDSI": {
-          "gene_symbol": "RAPIGDSI",
-          "refseq_mrna": "NM_001100427.2"
+        "BCLQ": {
+          "gene_symbol": "BCLQ",
+          "refseq_mrna": ""
         }
       },
-      "num_tested_genes": "8",
+      "num_tested_genes": "20",
       "sample_type": "",
       "analysis_type": "Variant analysis",
       "variants": [
         {
-          "gene_symbol": "OTOF",
-          "variant_id": "54366",
-          "chromosome": "chr2",
-          "hgvsg": "g.54366>T",
-          "hgvsc": "c.54366>1",
-          "hgvsp": "p.Glu1812Asp",
-          "transcript_id": "NM_194248.3",
-          "exon": "7",
-          "zygosity": "Heterozygous",
-          "interpretation": "Variant of clinical significance: Likely pathogenic",
-          "mafac": "0.00",
-          "mafan": "0.00",
-          "mafaf": "0.00"
+          "gene_symbol": "BCLQ",
+          "variant_id": "C.8816>A",
+          "chromosome": "chr",
+          "hgvsg": "g.1475423816>A",
+          "hgvsc": "c.881G>A",
+          "hgvsp": "p.Ser294Asn",
+          "transcript_id": "NM_000000.0",
+          "exon": "17",
+          "zygosity": "heterozygous",
+          "interpretation": "Variant of uncertain clinical significance",
+          "mafac": "0.000259",
+          "mafan": "",
+          "mafaf": ""
         }
       ],
       "num_variants": "1",
       "reference_genome": "GRCh37"
     }
   },
-  "timestamp": "2025-06-05",
-  "source_file": "report_fakeHospital2__060f50fd-d0f4-466e-ba50-5847b2a50abf.txt"
+  "timestamp": "2025-06-19",
+  "source_file": "report_fakeHospital2__2ed5d8a3-0b68-4ff7-9865-8cb27e56e6d9.txt"
 }
