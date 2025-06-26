@@ -142,7 +142,7 @@ def main():
         models=OPENAI_MODELS,
         output_dir="OpenAIOut/", 
         text_directory="../output_pdfs/text/", 
-        prompt_path="ollamaprompt.txt", 
+        prompt_path="ollamaPrompt.txt", 
         llm_function=textToLLM
     )
     

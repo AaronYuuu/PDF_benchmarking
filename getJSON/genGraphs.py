@@ -623,21 +623,13 @@ def calculate_summary_statistics(df):
         'False Negatives': ['mean', 'sum']
     }).round(3)
     
-    # By source category
-    source_stats = df.groupby('Source_Category').agg({
-        'Accuracy': ['mean', 'std', 'count'],
-        'F1score': ['mean', 'std'],
-        'Precision': ['mean', 'std'],
-        'False Positives': ['mean', 'sum'],
-        'False Negatives': ['mean', 'sum']
-    }).round(3)
+
     
     return {
         'overall': overall_stats,
         'family': family_stats,
         'input_type': input_stats,
-        'hospital': hospital_stats,
-        'source': source_stats
+        'hospital': hospital_stats
     }
 
 def create_performance_plots(df):
@@ -809,25 +801,8 @@ def create_hospital_comparison_analysis(df):
     plt.tight_layout()
     save_plot('06_hospital_comparison_analysis')
 
-def format_source_stats_for_display(source_stats):
-    """Format source statistics for clean display in terminal and PDF"""
-    formatted_text = ""
-    
-    for source_category in source_stats.index.get_level_values(0).unique():
-        formatted_text += f"\n{source_category.upper()} MODELS:\n"
-        source_data = source_stats.loc[source_category]
-        
-        for family in source_data.index:
-            formatted_text += f"  {family}:\n"
-            formatted_text += f"    Accuracy: {source_data.loc[family, ('Accuracy', 'mean')]:.1f}±{source_data.loc[family, ('Accuracy', 'std')]:.1f} (n={int(source_data.loc[family, ('Accuracy', 'count')])})\n"
-            formatted_text += f"    F1 Score: {source_data.loc[family, ('F1score', 'mean')]:.1f}±{source_data.loc[family, ('F1score', 'std')]:.1f}\n"
-            formatted_text += f"    Precision: {source_data.loc[family, ('Precision', 'mean')]:.1f}±{source_data.loc[family, ('Precision', 'std')]:.1f}\n"
-            formatted_text += f"    False Positives: {source_data.loc[family, ('False Positives', 'mean')]:.1f}\n"
-            formatted_text += f"    False Negatives: {source_data.loc[family, ('False Negatives', 'mean')]:.1f}\n"
-    
-    return formatted_text
 
-def generate_comprehensive_summary_text(df, stats, grouped_models, source_stats):
+def generate_comprehensive_summary_text(df, stats, grouped_models):
     """Generate the comprehensive summary text that can be used by both print and PDF functions"""
     summary_lines = []
     
@@ -843,8 +818,6 @@ def generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
     summary_lines.append(f"   • Hospitals: {', '.join(df['Hospital'].unique())}")
     summary_lines.append(f"   • Vision-enabled Models: {df['Image_Input'].sum()}")
     summary_lines.append(f"   • Text-only Models: {(~df['Image_Input']).sum()}")
-    summary_lines.append(f"   • Ollama Models: {(df['Source_Category'] == 'Ollama').sum()}")
-    summary_lines.append(f"   • Commercial Models: {(df['Source_Category'] == 'Commercial').sum()}")
     summary_lines.append("")
     
     # Top Performers
@@ -874,10 +847,6 @@ def generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
     summary_lines.append(f"   • Hospital 1 Avg F1: {hospital_perf['hospital1']:.2f}")
     summary_lines.append(f"   • Hospital 2 Avg F1: {hospital_perf['hospital2']:.2f}")
     
-    source_perf = df.groupby('Source_Category')['F1score'].mean()
-    summary_lines.append(f"   • Ollama Models Avg F1: {source_perf['Ollama']:.2f}")
-    summary_lines.append(f"   • Commercial Models Avg F1: {source_perf['Commercial']:.2f}")
-    summary_lines.append("")
     
     # Grouped Model Statistics
     summary_lines.append("Grouped Model F1 Score Statistics:")
@@ -911,21 +880,16 @@ def generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
     summary_lines.append(f"   • Models with more FN than FP: {(df['False Negatives'] > df['False Positives']).sum()}")
     summary_lines.append("")
     
-    # Source Category Statistics
-    summary_lines.append("SOURCE CATEGORY DETAILED STATISTICS:")
-    formatted_source_stats = format_source_stats_for_display(source_stats)
-    summary_lines.extend(formatted_source_stats.split('\n'))
-    summary_lines.append("")
     
     # Final separator
     summary_lines.append("="*80)
     
     return '\n'.join(summary_lines)
 
-def create_summary_page(df, grouped_models, stats, source_stats):
+def create_summary_page(df, grouped_models, stats):
     """Create summary page using the same text as the comprehensive summary"""
     # Generate the summary text using the centralized function
-    summary_text = generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
+    summary_text = generate_comprehensive_summary_text(df, stats, grouped_models)
     
     # Calculate text dimensions for optimal figure sizing
     lines = summary_text.split('\n')
@@ -1252,6 +1216,7 @@ def main():
     df = load_and_prepare_data() #function added ignore openRouter models, not enough data
     # Calculate summary statistics
     stats = calculate_summary_statistics(df)
+    # Extract source_stats from the calculated statistics
     
     # Create key visualizations in logical order
     grouped_models = overall_metrics(df)  # F1 score overview
@@ -1265,17 +1230,16 @@ def main():
     create_error_analysis_plots(df)      # Error analysis
     create_hospital_comparison_analysis(df)  # Hospital comparisons
     
-    # Add the comprehensive source F1 comparison
-    source_f1_stats = create_source_f1_comparison(df)  # Comprehensive source F1 analysis
+   
     
     # Add individual model analysis
     create_comprehensive_individual_model_analysis(df)  # Individual model performance analysis
     plot_all_individual_models(df)  # All individual models in one chart
     
-    create_summary_page(df, grouped_models, stats, source_stats)  # Executive summary
+    create_summary_page(df, grouped_models, stats)  # Executive summary
     
     # Print comprehensive summary to console
-    summary_text = generate_comprehensive_summary_text(df, stats, grouped_models, source_stats)
+    summary_text = generate_comprehensive_summary_text(df, stats, grouped_models)
     print(summary_text)
     
     # Combine all plots into a single PDF

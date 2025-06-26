@@ -191,6 +191,14 @@ def normalizeNames(x):
     x = x.lower()
     # remove extra spaces
     x = re.sub(r"\s+", " ", x).strip()
+
+    if "e-" in x or "e+" in x:
+        # Handle scientific notation by converting to float and back to string
+        try:
+            num = float(x)
+            x = str(num)
+        except ValueError:
+            pass
         
     return x
 
@@ -205,25 +213,22 @@ def compare_string(str1, str2, path=""):
     # Normalize strings for comparison
     norm_str1 = normalizeNames(str1.strip()) if str1 else ""
     norm_str2 = normalizeNames(str2.strip()) if str2 else ""
-    
+
     # Perfect match
     if norm_str1 == norm_str2:
         return differences
     
     # Handle scientific notation comparison
-    if ('e-' in str1.lower() or 'e-' in str2.lower()):
-        try:
-            num1 = float(str1)
-            num2 = float(str2)
-            if abs(num1 - num2) < 1e-10:  # Handle floating point precision
-                return differences
-        except ValueError:
-            pass  # If conversion fails, continue with string comparison
+    try:
+        if abs(float(norm_str1) - float(norm_str2)) < 1e-10:  # Handle floating point precision
+            return differences
+    except ValueError:
+        pass  # If conversion fails, continue with string comparison
     
     # Add difference based on comparison with FP/FN labels
-    if not str1 and str2:  # Template empty, but prediction has value
+    if not norm_str1 and norm_str2:  # Template empty, but prediction has value
         differences.append(f"FALSE POSITIVE at {path}: template empty but got '{str2}'")
-    elif str1 and not str2:  # Template has value, but prediction empty
+    elif norm_str1 and  norm_str2:  # Template has value, but prediction empty
         differences.append(f"FALSE NEGATIVE at {path}: expected '{str1}' but got empty")
     #elif str2 in str1 or str1 in str2:  # One string is a substring of the other
         #pass
@@ -359,7 +364,9 @@ def compare_gliner_output(template, data, hospital, source, model_name):
         "F1score": f1score,
         "Accuracy": accuracy,
         "Source": source,
-        "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2"
+        "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2",
+        # GLiNER does not use prompts in the same way, so we set it to
+        "Prompt": "None"
     }
 
 def is_partial_match(template_val, gliner_val):
@@ -560,7 +567,10 @@ def determine_model_name(directory, json_data, filename=""):
     # Handle GLiNER models
     if "gliner" in directory.lower() or "numind" in model_name.lower():
         model_name = "GLiNER:NuNerZero"
-    
+
+    #handle LTNER/GPT-NER prompt inspired trials
+    if "NP" in directory.upper():
+        model_name = model_name +"+LTNER/GPT-NER Prompt"
     # Extract final model name (remove path prefixes)
     model_name = model_name.split("/")[-1]
     
@@ -581,7 +591,7 @@ def main():
     if os.path.exists("Hospital.csv"):
         ovr = pd.read_csv("Hospital.csv") 
     else:
-        ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital"])
+        ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital", "Prompt"])
 
     # Expand to all available folders in outJSON with their corresponding sources
     json_direcs = [
@@ -679,7 +689,8 @@ def main():
                             "F1score": 0,
                             "Accuracy": 0,
                             "Source": source,
-                            "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2"
+                            "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2",
+                            "Prompt": "Normal" if "prompt" not in model_name else "LTNER/GPT-NER"
                         }
                         ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
                         continue
@@ -688,8 +699,11 @@ def main():
                     try:
                         data = dict_to_lowercase(dtemp["data"])
                         # Handle nested report_id structure - flatten it if it exists
-                        if "report_id" in data and isinstance(data["report_id"], dict):
-                            data = data["report_id"]
+                        try:
+                            if isinstance(data, dict) and "report_id" in data:
+                                data = data["report_id"]
+                        except (KeyError, TypeError):
+                            pass
                     except KeyError:
                         data = {}
                     
@@ -710,7 +724,7 @@ def main():
                             fp += 1  # Template empty but extraction has value
                         elif "FALSE NEGATIVE" in diff:
                             fn += 1  # Template has value but extraction empty
-                        elif "Value mismatch" in diff or "Type mismatch" in diff:
+                        elif "Value mismatch" in diff or "Type mismatch" in diff or "length mismatch" in diff:
                             ic += 1 # Wrong value (incorrect extraction)
                     
                     # Calculate correct matches properly - total minus all error types
@@ -741,7 +755,8 @@ def main():
                         "F1score": f1score,
                         "Accuracy": accuracy,
                         "Source": source,
-                        "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2"
+                        "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2", 
+                        "Prompt": "Normal" if "prompt" not in model_name else "LTNER/GPT-NER"
                     }
                     ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
 
