@@ -17,7 +17,7 @@ def textToLLM(prompt, text, model):
         
         # Send request to Ollama
         response = ollama.chat(model=model, messages=[
-            {"role": "user", "content": f"{prompt}\n\nText to analyze:\n{text}"}
+            {"role": "user", "content": f"{prompt}\n\nText:\n{text}"}
         ])
         
         print(f"✓ Success with model: {model}")
@@ -56,7 +56,7 @@ def imageGroupToLLM(prompt, image_group, model):
             messages=[
                 {
                     "role": "user", 
-                    "content": f"{prompt}\n\nPlease analyze all the pages of this medical report:",
+                    "content": f"{prompt}\n\nUse these pages:",
                     "images": images
                 }
             ]
