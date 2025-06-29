@@ -578,8 +578,8 @@ def determine_model_name(directory, json_data, filename=""):
     
     return model_name
 
-def findprompt(model_name):
-    if "prompt" in model_name.lower():
+def findprompt(model_name, direc):
+    if "prompt" in (model_name.lower() or direc.lower()):
         return "LTNER/GPT-NER"
     elif "nuextract" in model_name.lower():
         return "None"
@@ -608,11 +608,13 @@ def main():
         "localout",
         "glinerOut", 
         "OllamaOut",
+        "OllamaOutNP",
         "OllamaVisionOut",
+        "OllamaVisionOutNP",
         "OpenAIOut", 
+        "OpenAIOutNP",
         "OpenAIVisionOut",
-        "OpenRouter",
-        "OpenRouterVisionOut"
+        "OpenAIVisionOutNP"
     ]
     
     hospitals = ["fakeHospital1", "fakeHospital2"]
@@ -631,9 +633,10 @@ def main():
     }
     
     for direc in json_direcs:
+        d = direc
         if "NP" in direc:
-            direc = direc.replace("NP","")
-        source = sources[direc]
+            d = d.replace("NP","")
+        source = sources[d]
         direc_path = "outJSON/" + direc
         
         # Check if directory exists and has files
@@ -687,7 +690,7 @@ def main():
                 else:
                     # Use the determine_model_name function for consistent naming
                     model_name = determine_model_name(direc, dtemp, json_file)
-                    prompt = findprompt(model_name)
+                    prompt = findprompt(model_name, direc)
                     # Check for failed JSON parsing
                     if "error" in dtemp.get("data", {}) and dtemp["data"].get("error") == "Could not parse as JSON":
                         print(f"Model failed to parse JSON - treating as 0% accuracy")
