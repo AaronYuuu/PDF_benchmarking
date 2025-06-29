@@ -1,7 +1,5 @@
-Extract the following fields into this exact JSON format:
-date_collected, date_received, date_verified, report_type, testing_context, ordering_clinic, testing_laboratory, sequencing_scope, tested_genes, num_tested_genes, sample_type, analysis_type, variants, num_variants, reference_genome.
-
-Format:
+Extract into this exact JSON format:
+```json
 {
   "report_id": {
     "date_collected": "",
@@ -89,7 +87,8 @@ MRN:
 Date: 2024-02-23
 Page 4
 
-JSON Output:
+Output:
+```json
 {
  "b85a17d8-41d7-4e74-b772-4984cd31d425": {
  "date_collected": "2024-02-23",
@@ -158,5 +157,3 @@ JSON Output:
 "reference_genome": "GRCh38" 
 } 
 }
-
-Text: 
