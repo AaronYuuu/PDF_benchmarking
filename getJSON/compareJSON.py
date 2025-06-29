@@ -542,7 +542,7 @@ def determine_model_name(directory, json_data, filename=""):
     
     # Specific model mappings
     if "NuExtract-1.5-tiny" in model_name:
-        model_name = "NuExtract:0.5B"
+        model_name = model_name.replace("NuExtract-1.5,tiny", "NuExtract:0.5B") 
     elif "NuExtract-2.0-2B" in model_name:
         model_name = "NuExtract:2B"
     elif "qwen/qwen2.5-vl-72b-instruct" in model_name:
@@ -573,8 +573,6 @@ def determine_model_name(directory, json_data, filename=""):
     #handle LTNER/GPT-NER prompt inspired trials
     if "NP" in directory.upper():
         model_name = model_name +"+LTNER/GPT-NER Prompt"
-    # Extract final model name (remove path prefixes)
-    model_name = model_name.split("/")[-1]
     
     return model_name
 
