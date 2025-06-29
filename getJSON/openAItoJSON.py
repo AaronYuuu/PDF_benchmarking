@@ -163,8 +163,9 @@ def main():
 def main2():
     # List of OpenAI models to try
     OPENAI_MODELS = [
-        "gpt-4o-mini",
+        "gpt-4.1-mini",
         "gpt-4.1-nano", 
+        "gpt-4.1"
         #"gpt-4o" #more expensuive may not be applicable or accessible for use in remote areas
         # Add more OpenAI models as needed
     ]
