@@ -54,6 +54,8 @@ def split_text(text):
     return sections
 
 def main():
+    import os
+    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
     model = GLiNER.from_pretrained("numind/NuNerZero")
     
     labels = [
@@ -86,14 +88,13 @@ def main():
     ]
     
     # Use jsonLLM functions to read text files from output_pdfs/text directory
-    text_directory = "output_pdfs/text/"
+    text_directory = "../output_pdfs/text/"
     text_files = get_text_files_from_directory(text_directory)
     
     print(f"Found {len(text_files)} text files to process")
     
     # Create output directory
-    import os
-    os.makedirs("getJSON/outJSON/glinerOut", exist_ok=True)
+    os.makedirs("outJSON/glinerOut", exist_ok=True)
     
     for text_file in text_files:
         print(f"\nProcessing file: {text_file}")
@@ -131,7 +132,7 @@ def main():
         # Extract clean name from text file (e.g., "fakeHospital1" from "report_fakeHospital1__060f50fd...txt")
         clean_name = text_file.split("_")[1]  # Gets "fakeHospital1" or "fakeHospital2"
         model_name = "numind_NuNerZero"
-        filename = f"getJSON/outJSON/glinerOut/{clean_name}_{model_name}__response.json"
+        filename = f"outJSON/glinerOut/{clean_name}_{model_name}__response.json"
         
         with open(filename, "w") as f:
             import json
