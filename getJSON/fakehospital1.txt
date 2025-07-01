@@ -15,3 +15,4 @@ transcript_id
 exon
 zygosity
 interpretation
+num_variants
