@@ -128,9 +128,9 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
 def main():
     # List of OpenAI models to try
     OPENAI_MODELS = [
-        "gpt-4o-mini",
+        "gpt-4.1-mini",
         "gpt-4.1-nano", 
-        "gpt-4o"
+        "gpt-4.1"
         # Add more OpenAI models as needed
     ]
     
@@ -156,6 +156,13 @@ def main():
         models=OPENAI_MODELS,
         output_dir="OpenAIVisionOut/",
         image_directory="../output_pdfs/images/",
+    )
+    process_text_files_with_models(
+        models=OPENAI_MODELS,
+        output_dir="OpenAIOutNP/", 
+        text_directory="../output_pdfs/text/", 
+        llm_function=textToLLM,
+        prompt_path="NERprompt.txt"
     )
     print("Processing completed.")
 
