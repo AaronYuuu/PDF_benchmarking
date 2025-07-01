@@ -755,7 +755,7 @@ def main():
                     print(f"FP: {fp}, FN: {fn}, IC: {ic}, Correct: {correct_matches}/{total_values}")
                     print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
                     temp_row = {
-                        "LLM": model_name,
+                        "LLM": model_name.split("+")[0],
                         "False Positives": fp,
                         "False Negatives": fn,
                         "Incorrect Extractions": ic,
@@ -774,4 +774,7 @@ def main():
     ovr.to_csv("Hospital.csv")
     #print("Comparison complete. Results saved to Hospital.csv")
 
-main()
+
+if __name__ == "__main__":
+    main()
+    
