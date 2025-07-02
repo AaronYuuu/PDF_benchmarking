@@ -73,7 +73,7 @@ def imageGroupToLLM(prompt, image_group, model):
                     "content": f"{prompt}\n\nImages to analyze:\n{images}"
                 }
             ],
-            "temperature": 0.2
+            "temperature": 0.0
         }
         response = client.chat.completions.create(**payload)
         print(f"Success with model: {model}")
