@@ -18,7 +18,7 @@ def textToLLM(prompt, text, model):
         # Send request to Ollama
         response = ollama.chat(model=model, messages=[
             {"role": "user", "content": f"{prompt}\n\nText:\n{text}"}
-        ])
+        ], options={"temperature": 0.0})
         
         print(f"✓ Success with model: {model}")
         return response['message']['content']
@@ -116,7 +116,7 @@ def main(): #if I ran this on an Ollama server would that
         #"mistral:7b",     # Fast and capable
         #"phi3:mini",      # Very efficient
         #"gemma3:1b",
-        "gemma3:1b-it-qat",
+        "gemma3n:e4b", #optimiazed for laptops
         "gemma3:4b",    # can also do images
         "llama3.2:1b", 
         "llama3.2:3b",
