@@ -29,10 +29,6 @@ if [ -d "getJSON/outJSON" ]; then
 fi
 
 # Remove makeTemplatePDF output folders
-if [ -d "makeTemplatePDF/scripts/out" ]; then
-    echo "Removing makeTemplatePDF/scripts/out/*"
-    rm -rf makeTemplatePDF/scripts/out/*
-fi
 
 if [ -d "makeTemplatePDF/out" ]; then
     echo "Removing makeTemplatePDF/out/*"
