@@ -26,12 +26,10 @@ def get_template(boo):
 
 def main():
     input_dir = "../output_pdfs/text"
-    output_file = "dataset.jsonl"
-    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
-    with open("prompt.txt", "r") as f:
-        base_prompt = f.read()
 
-    with open(output_file, "w") as out_f:
+    output_file = "dataset.jsonl"
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    with open(output_file, "a") as out_f:
         for filename in get_text_files_from_directory(input_dir):
             file_path = os.path.join(input_dir, filename)
             boo = True if "Hospital1" in filename else False
@@ -39,7 +37,7 @@ def main():
                 input_text = tf.read()
 
             # Construct the prompt
-            prompt = base_prompt.strip() + "\ntext to analyze: " + input_text.strip() + "\n\n###\n\n"
+            prompt = input_text.strip() + "\n\n###\n\n"
 
                     # Get structured output (mocked here as a dictionary or list — replace as needed)
             structured_output = get_template(boo)
