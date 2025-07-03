@@ -116,13 +116,14 @@ def main(): #if I ran this on an Ollama server would that
         #"mistral:7b",     # Fast and capable
         #"phi3:mini",      # Very efficient
         #"gemma3:1b",
+        "gemma3:1b-it-qat",  #quantized 1b
         "gemma3n:e4b", #optimiazed for laptops
-        "gemma3:4b",    # can also do images
-        "llama3.2:1b", 
+        #"gemma3:4b",    # can also do images
+        #"llama3.2:1b", 
         "llama3.2:3b",
-        "qwen3:4b", #replaced 1.7b 
+        #"qwen3:4b", #replaced 1.7b 
         "qwen2.5vl:3b", #vision language
-        "granite3.2-vision:latest" #specialized for document tasks (vision model only)
+        "granite3.2-vision:2b" #specialized for document tasks (vision model only)
     ]
     for model in models:
         ensure_model_exists(model)   
@@ -146,8 +147,6 @@ def main(): #if I ran this on an Ollama server would that
         "gemma3:4b",       # Can handle images
         "granite3.2-vision:latest", # Vision model
     ]
-    for model in vision_models:
-        ensure_model_exists(model)
     print(f"Found {len(vision_models)} vision models to process.")
     process_grouped_images_with_models(
         models=vision_models,
@@ -175,5 +174,11 @@ def main_vision():
         models=vision_models,
         output_dir="OllamaVisionOut"
     )
+    process_grouped_images_with_models(
+        models=vision_models,
+        output_dir="OllamaVisionOutNP",
+        image_directory="../output_pdfs/images/",
+        prompt_path="NERprompt.txt"
+    )
 
-main()
+main_vision()
