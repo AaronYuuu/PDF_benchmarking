@@ -170,7 +170,7 @@ def main():
 def main2():
     # List of OpenAI models to try
     OPENAI_MODELS = [
-        "gpt-4.1-mini",
+        #"gpt-4.1-mini",
         "gpt-4.1-nano", 
         "gpt-4.1"
         #"gpt-4o" #more expensuive may not be applicable or accessible for use in remote areas
@@ -192,8 +192,9 @@ def main2():
 def main3():
     # List of OpenAI models to try
     OPENAI_MODELS = [
-        "gpt-4.1-mini",
-        "gpt-4.1-nano"
+        #"gpt-4.1-mini",
+        "gpt-4.1-nano", 
+        "gpt-4.1"
         # Add more OpenAI models as needed
     ]
     process_text_files_with_models(
@@ -204,4 +205,4 @@ def main3():
         prompt_path="NERprompt.txt"
     )
     print("Processing completed.")
-main()
+main3()
