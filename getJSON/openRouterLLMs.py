@@ -54,7 +54,7 @@ def textToLLM(prompt, text, model, max_retries=3):
             if "429" in error_str or "rate limit" in error_str.lower():
                 print(f"Rate limit hit on {model}")
                 if retry < max_retries - 1:
-                    wait_time = 3 ** retry 
+                    wait_time = 8 ** retry 
                     print(f"Waiting {wait_time} seconds before retry...")
                     time.sleep(wait_time)
                     continue
@@ -180,7 +180,7 @@ def process_grouped_images_with_openrouter_models(models, output_dir, image_dire
     
     # Process each group of images
     for source_name, image_paths in grouped_images.items():
-        if source_name == "fakeHospital2": #Trouble shooting why doesn't LLama-4-scout work properly
+        if True: #Trouble shooting why doesn't LLama-4-scout work properly
             print(f"\n{'='*60}")
             print(f"Processing source: {source_name} ({len(image_paths)} pages)")
             print(f"Image files: {[os.path.basename(p) for p in image_paths]}")
@@ -206,9 +206,11 @@ def main_vision():
     # Vision-capable models from OpenRouter
     vision_models = [
         "google/gemini-2.0-flash-exp:free",
-        "qwen/qwen2.5-vl-72b-instruct:free",
-        "meta-llama/llama-4-scout:free",
-        "mistralai/mistral-small-3.1-24b-instruct:free"
+        #"qwen/qwen2.5-vl-72b-instruct:free", #also stopped working with ollama, output is an empty string
+        "meta-llama/llama-3.2-11b-vision-instruct:free"
+
+        #"meta-llama/llama-4-scout:free",
+        #"mistralai/mistral-small-3.1-24b-instruct:free"
     ]
     
     print(f"Found {len(vision_models)} vision models to process.")
@@ -220,10 +222,11 @@ def main_vision():
 def main():
     # List of models to try
     MODELS = [
-        "google/gemini-2.0-flash-exp:free",
-        "qwen/qwen2.5-vl-72b-instruct:free",
-       "meta-llama/llama-4-scout:free",
-        "mistralai/mistral-small-3.1-24b-instruct:free"    
+        "google/gemma-3-27b-it:free",
+        #"qwen/qwen2.5-vl-72b-instruct:free", #also stoped working on ollama, output is just empty string
+        "meta-llama/llama-3.2-11b-vision-instruct:free"
+       #"meta-llama/llama-4-scout:free",
+        #"mistralai/mistral-small-3.1-24b-instruct:free"    
     ]    
     # Use the shared processing function
     process_text_files_with_models(MODELS,output_dir="OpenRouter/", llm_function=textToLLM)
