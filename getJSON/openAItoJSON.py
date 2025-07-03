@@ -189,4 +189,19 @@ def main2():
         prompt_path="NERprompt.txt"
     )
 
+def main3():
+    # List of OpenAI models to try
+    OPENAI_MODELS = [
+        "gpt-4.1-mini",
+        "gpt-4.1-nano"
+        # Add more OpenAI models as needed
+    ]
+    process_text_files_with_models(
+        models=OPENAI_MODELS,
+        output_dir="OpenAIOutNP/", 
+        text_directory="../output_pdfs/text/", 
+        llm_function=textToLLM,
+        prompt_path="NERprompt.txt"
+    )
+    print("Processing completed.")
 main()
