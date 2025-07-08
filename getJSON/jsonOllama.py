@@ -124,7 +124,7 @@ def main(): #if I ran this on an Ollama server would that
         #"llama3.2:1b", 
         #"llama3.2:3b",
        #"llama3.2-vision",
-       # "granite3.2-vision:2b" #specialized for document tasks (vision model only)
+        "granite3.2-vision:2b",#specialized for document tasks (vision model only)
     ]
     for model in models:
         ensure_model_exists(model)   
@@ -146,8 +146,9 @@ def main(): #if I ran this on an Ollama server would that
     vision_models = [
         #"gemma3:12b",       # Can handle images
         "granite3.2-vision:2b",
+        "qwen2.5vl:3b", #vision model
         #"llama3.2-vision", #specialized for document tasks (vision model only)
-       #"gemma3:4b"
+       #"gemma3:4b", 
     ]
     print(f"Found {len(vision_models)} vision models to process.")
     process_grouped_images_with_models(
