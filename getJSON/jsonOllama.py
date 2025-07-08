@@ -111,19 +111,20 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
     print(f"{'='*60}")
 
 def main(): #if I ran this on an Ollama server would that 
-    
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     models = [
         #"mistral:7b",     # Fast and capable
         #"phi3:mini",      # Very efficient
         #"gemma3:1b",
-        "gemma3:1b-it-qat",  #quantized 1b
+        #"gemma3:1b-it-qat",  #quantized 1b
         "gemma3n:e4b", #optimiazed for laptops
-        #"gemma3:4b",    # can also do images
+        "qwen2.5vl:3b", #vision model
+        #"qwen3:4B", #good for laptops
+        #"gemma3:12b",    # can also do images unblock when done this trial
         #"llama3.2:1b", 
-        "llama3.2:3b",
-        #"qwen3:4b", #replaced 1.7b 
-        "qwen2.5vl:3b", #vision language
-        "granite3.2-vision:2b" #specialized for document tasks (vision model only)
+        #"llama3.2:3b",
+       #"llama3.2-vision",
+       # "granite3.2-vision:2b" #specialized for document tasks (vision model only)
     ]
     for model in models:
         ensure_model_exists(model)   
@@ -143,9 +144,10 @@ def main(): #if I ran this on an Ollama server would that
     )
     
     vision_models = [
-        "qwen2.5vl:3b",    # Vision language model
-        "gemma3:4b",       # Can handle images
-        "granite3.2-vision:latest", # Vision model
+        #"gemma3:12b",       # Can handle images
+        "granite3.2-vision:2b",
+        #"llama3.2-vision", #specialized for document tasks (vision model only)
+       #"gemma3:4b"
     ]
     print(f"Found {len(vision_models)} vision models to process.")
     process_grouped_images_with_models(
@@ -159,26 +161,5 @@ def main(): #if I ran this on an Ollama server would that
         image_directory="../output_pdfs/images/",
         prompt_path="NERprompt.txt"
     )
-
-def main_vision():
-    os.makedirs("OllamaVisionOut", exist_ok=True)
-    vision_models = [
-        "qwen2.5vl:3b",    # Vision language model
-        "gemma3:4b",       # Can handle images
-        "granite3.2-vision:latest", # Vision model
-    ]
-    for model in vision_models:
-        ensure_model_exists(model)
-    print(f"Found {len(vision_models)} vision models to process.")
-    process_grouped_images_with_models(
-        models=vision_models,
-        output_dir="OllamaVisionOut"
-    )
-    process_grouped_images_with_models(
-        models=vision_models,
-        output_dir="OllamaVisionOutNP",
-        image_directory="../output_pdfs/images/",
-        prompt_path="NERprompt.txt"
-    )
-
-main_vision()
+if __name__ == "__main__":
+    main()

@@ -207,7 +207,7 @@ def main_vision():
     vision_models = [
         "google/gemini-2.0-flash-exp:free",
         #"qwen/qwen2.5-vl-72b-instruct:free", #also stopped working with ollama, output is an empty string
-        "meta-llama/llama-3.2-11b-vision-instruct:free"
+        #"meta-llama/llama-3.2-11b-vision-instruct:free"
 
         #"meta-llama/llama-4-scout:free",
         #"mistralai/mistral-small-3.1-24b-instruct:free"
@@ -224,11 +224,13 @@ def main():
     MODELS = [
         "google/gemma-3-27b-it:free",
         #"qwen/qwen2.5-vl-72b-instruct:free", #also stoped working on ollama, output is just empty string
-        "meta-llama/llama-3.2-11b-vision-instruct:free"
+       #"meta-llama/llama-3.2-11b-vision-instruct:free"
        #"meta-llama/llama-4-scout:free",
         #"mistralai/mistral-small-3.1-24b-instruct:free"    
     ]    
     # Use the shared processing function
     process_text_files_with_models(MODELS,output_dir="OpenRouter/", llm_function=textToLLM)
+    process_text_files_with_models(MODELS,output_dir="OpenRouter/", llm_function=textToLLM, prompt_path="NERprompt.txt")
+
     main_vision()
 main()

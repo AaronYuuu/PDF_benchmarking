@@ -219,7 +219,10 @@ def process_all_vision_info(messages):
 def main():
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     
-    models = ["numind/NuExtract-2.0-2B", "numind/NuExtract-1.5-tiny","numind/NuExtract-2.0-4B" ]
+    models = [
+        #"numind/NuExtract-2.0-2B", 
+        #"numind/NuExtract-1.5-tiny",
+        "numind/NuExtract-2.0-4B" ]
     print(f"Starting NuExtract processing with models: {models}")
     process_all_text_files(models)
     
