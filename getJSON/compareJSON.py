@@ -703,7 +703,7 @@ def main():
             copy = template_to_string(filter_template(template, hospital))
             copy = dict_to_lowercase(copy)
             print(f"\n--- Processing {hospital} in {direc} ---")
-            pprint.pprint(copy)
+            #pprint.pprint(copy)
             for json_file in json_files:
                 file_path = os.path.join(direc_path, json_file)
                 try:
