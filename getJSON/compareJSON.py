@@ -17,7 +17,8 @@ def filter_template(template, reportName):
     appears in reportName.txt (nested dicts/lists pruned similarly).
     """
     reportName = reportName.lower()
-    
+    if reportName == "fakehospital2":
+        return template
     # Apply filtering to both hospitals based on their respective content files
     report_file = f"{reportName}.txt"
     
@@ -117,9 +118,7 @@ def count_all_template_values(template):
 def compare_dict_keys_and_values(dict1, dict2, path=""):
     """
     Compare two dictionaries by checking key matches and recursively comparing values.
-    - If both values are strings: exact match comparison
-    - If both values are dictionaries: recursive comparison
-    - If types don't match: count as error
+    Enhanced to better handle missing keys, null/None values, and comprehensive error categorization.
     """
     differences = []
     if not (isinstance(dict1, dict) and isinstance(dict2, dict)):
@@ -127,23 +126,69 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
         return differences
     
     # Get all keys from both dictionaries
-    all_keys = set(dict1.keys()) | set(dict2.keys())
+    template_keys = set(dict1.keys())
+    extracted_keys = set(dict2.keys())
+    all_keys = template_keys | extracted_keys
     
-    for key in all_keys:
+    # First, identify missing keys explicitly
+    missing_in_extraction = template_keys - extracted_keys
+    extra_in_extraction = extracted_keys - template_keys
+    
+    # Handle missing keys in extraction (these are always false negatives)
+    for key in missing_in_extraction:
         current_path = f"{path}.{key}" if path else key
+        template_value = dict1[key]
         
-        # Check if key exists in both dictionaries
-        if key not in dict1:
-            differences.append(f"Key missing in template at {current_path}")
-            continue
-        elif key not in dict2:
-            differences.append(f"Key missing in extracted values at {current_path}")
-            continue
+        # Check if the missing key had meaningful content in template
+        # Treat null/None values as empty
+        if isinstance(template_value, str) and template_value.strip():
+            differences.append(f"FALSE NEGATIVE at {current_path}: expected '{template_value}' but key missing in extraction")
+        elif template_value is not None and isinstance(template_value, (dict, list)) and template_value:
+            differences.append(f"FALSE NEGATIVE at {current_path}: expected structure but key missing in extraction")
+        else:
+            # Empty/null template value, missing key should count as a match for empty values
+            differences.append(f"EXACT MATCH at {current_path}: both empty/null (key missing but template empty)")
+    
+    # Handle extra keys in extraction (these are potential false positives)
+    for key in extra_in_extraction:
+        current_path = f"{path}.{key}" if path else key
+        extracted_value = dict2[key]
         
+        # Check if the extra key contains placeholder/template content
+        if isinstance(extracted_value, str) or extracted_value is None:
+            # Handle null values
+            extracted_value = extracted_value if extracted_value is not None else ""
+            
+            # Use our enhanced placeholder detection
+            placeholder_patterns = [
+                "gene1", "gene2", "nm_000123", "g.", "c.", "p.",
+                "example", "sample", "test", "demo", "placeholder"
+            ]
+            is_placeholder = any(pattern in extracted_value.lower() for pattern in placeholder_patterns) if extracted_value else False
+            
+            if is_placeholder:
+                differences.append(f"FALSE POSITIVE at {current_path}: extra key with placeholder value '{extracted_value}'")
+            elif extracted_value.strip():  # Only count as FP if it has meaningful content
+                differences.append(f"FALSE POSITIVE at {current_path}: extra key with value '{extracted_value}'")
+            else:
+                # Extra key with empty/null value - less problematic
+                differences.append(f"FALSE POSITIVE at {current_path}: extra key with empty/null value")
+        else:
+            differences.append(f"FALSE POSITIVE at {current_path}: extra key with structure")
+    
+    # Now compare keys that exist in both dictionaries
+    common_keys = template_keys & extracted_keys
+    
+    for key in common_keys:
+        current_path = f"{path}.{key}" if path else key
         val1 = dict1[key]
         val2 = dict2[key]
         
-        # Both values are strings - exact comparison
+        # Handle null/None values consistently
+        val1 = val1 if val1 is not None else ""
+        val2 = val2 if val2 is not None else ""
+        
+        # Both values are strings (or converted from null) - exact comparison
         if isinstance(val1, str) and isinstance(val2, str):
             differences.extend(compare_string(val1, val2, current_path))
         
@@ -155,9 +200,9 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
         elif isinstance(val1, list) and isinstance(val2, list):
             differences.extend(compare_list_values(val1, val2, current_path))
         
-        # Type mismatch - count as error
+        # Type mismatch - count as incorrect extraction
         else:
-            differences.append(f"Type mismatch at {current_path}: {type(val1).__name__} vs {type(val2).__name__}")
+            differences.append(f"TYPE MISMATCH at {current_path}: expected {type(val1).__name__} but got {type(val2).__name__}")
     
     return differences
 
@@ -205,35 +250,82 @@ def normalizeNames(x):
 
 def compare_string(str1, str2, path=""):
     """
-    Compare two strings for equality, ignoring case and scientific notation.
-    Returns differences list with FP/FN information.
+    Compare two strings for equality with better handling of empty values and placeholders.
+    Treats null/None values as equivalent to empty strings.
     """
     differences = []
+    
+    # Handle null/None values - treat as empty strings
+    str1 = str1 if str1 is not None else ""
+    str2 = str2 if str2 is not None else ""
     
     # Normalize strings for comparison
     norm_str1 = normalizeNames(str1.strip()) if str1 else ""
     norm_str2 = normalizeNames(str2.strip()) if str2 else ""
-
-    # Perfect match
+    
+    # Expanded placeholder patterns that shouldn't count as real extractions
+    placeholder_patterns = [
+        "gene1", "gene2", "gene3", "gene4", "gene5",
+        "g.", "c.", "p.", "m.", "n.",
+        "nm_000123.3", "nm_000123", "nm_", "enst_",
+        "chr1-22", "chr1", "chr2", "chrx", "chry",
+        "variant1", "variant2", "mutation1", "mutation2",
+        "test_id", "sample_id", "patient_id", "report_id", # Generic zygosity without context
+        "pathogenic", "benign", "vus",  # Generic classifications without context
+        "clinvar", "dbsnp", "omim", "cosmic",
+        "transcript", "protein", "cdna", "genomic"
+    ]
+    
+    # Check if values are placeholder patterns
+    is_placeholder1 = any(pattern == norm_str1.lower() for pattern in placeholder_patterns) if norm_str1 else False
+    is_placeholder2 = any(pattern == norm_str2.lower() for pattern in placeholder_patterns) if norm_str2 else False
+    
+    # Check for obvious template/example values
+    template_indicators = ["example", "sample", "test", "demo", "placeholder", "xxx", "yyy", "zzz"]
+    is_template1 = any(indicator in norm_str1.lower() for indicator in template_indicators) if norm_str1 else False
+    is_template2 = any(indicator in norm_str2.lower() for indicator in template_indicators) if norm_str2 else False
+    
+    # Perfect match (including both empty/null)
     if norm_str1 == norm_str2:
+        if not norm_str1 and not norm_str2:
+            differences.append(f"EXACT MATCH at {path}: both empty/null")
+        elif is_placeholder1 and is_placeholder2:
+            differences.append(f"PLACEHOLDER MATCH at {path}: both are placeholder '{str1}'")
+        else:
+            differences.append(f"EXACT MATCH at {path}: both are '{str1}'")
         return differences
     
     # Handle scientific notation comparison
     try:
-        if abs(float(norm_str1) - float(norm_str2)) < 1e-10:  # Handle floating point precision
+        if norm_str1 and norm_str2 and abs(float(norm_str1) - float(norm_str2)) < 1e-10:
+            differences.append(f"EXACT MATCH at {path}: both are '{str1}' (scientific notation match)")
             return differences
     except ValueError:
-        pass  # If conversion fails, continue with string comparison
+        pass
     
-    # Add difference based on comparison with FP/FN labels
-    if not norm_str1 and norm_str2:  # Template empty, but prediction has value
-        differences.append(f"FALSE POSITIVE at {path}: template empty but got '{str2}'")
-    elif norm_str1 and  norm_str2:  # Template has value, but prediction empty
-        differences.append(f"FALSE NEGATIVE at {path}: expected '{str1}' but got empty")
-    #elif str2 in str1 or str1 in str2:  # One string is a substring of the other
-        #pass
-    else:  # Both have values but don't match
-        differences.append(f"Value mismatch at {path}: expected '{str1}' but got '{str2}'")
+    # Categorize mismatches more precisely
+    if not norm_str1 and not norm_str2:
+        # Both empty/null - this is a match
+        differences.append(f"EXACT MATCH at {path}: both empty/null")
+    elif not norm_str1 and norm_str2:
+        # Template empty/null but extraction has value
+        if is_placeholder2 or is_template2:
+            differences.append(f"FALSE POSITIVE at {path}: template empty/null but got placeholder/template '{str2}'")
+        else:
+            differences.append(f"FALSE POSITIVE at {path}: template empty/null but got '{str2}'")
+    elif norm_str1 and not norm_str2:
+        # Template has value but extraction empty/null
+        differences.append(f"FALSE NEGATIVE at {path}: expected '{str1}' but got empty/null")
+    else:
+        # Both have values but don't match
+        if is_placeholder1 and is_placeholder2:
+            differences.append(f"PLACEHOLDER MISMATCH at {path}: expected placeholder '{str1}' but got placeholder '{str2}'")
+        elif is_placeholder2 and not is_placeholder1:
+            differences.append(f"FALSE POSITIVE at {path}: expected real value '{str1}' but got placeholder '{str2}'")
+        elif is_template1 or is_template2:
+            differences.append(f"TEMPLATE MISMATCH at {path}: expected '{str1}' but got template value '{str2}'")
+        else:
+            differences.append(f"VALUE MISMATCH at {path}: expected '{str1}' but got '{str2}'")
     
     return differences
     
@@ -259,6 +351,18 @@ def compare_list_values(list1, list2, path=""):
             differences.extend(compare_dict_keys_and_values(val1, val2, current_path))
         elif isinstance(val1, list) and isinstance(val2, list):
             differences.extend(compare_list_values(val1, val2, current_path))
+        elif isinstance(val1, list) and isinstance(val2, dict):
+            vals = []
+            for k,v in val2.items():
+                if isinstance(v,list):
+                    vals.append(v)
+            differences.extend(compare_list_values(val1, vals, current_path))
+        elif isinstance(val1, dict) and isinstance(val2, list): 
+            vals = []
+            for v in val1.values():
+                if isinstance(v,list):
+                    vals.append(v)
+            differences.extend(compare_list_values(vals, val2, current_path))
         else:
             differences.append(f"Type mismatch at {current_path}: {type(val1).__name__} vs {type(val2).__name__}")
     
@@ -267,24 +371,72 @@ def compare_list_values(list1, list2, path=""):
 def compare_values_with_template(template, data):
     """
     Compare data with template using strict dictionary key matching.
-    Returns count of matching vs mismatching values with type mismatch detection.
-    Uses actual template size instead of hard-coded values.
+    Returns count of matching vs mismatching values with proper categorization.
+    Only EXACT matches count as correct extractions - missing keys are always false negatives.
     """
     differences = compare_dict_keys_and_values(template, data)
     
-    # Calculate actual template values instead of hard-coding
-    total_values = count_all_template_values(template)
+    # Calculate actual template values
+    total_template_values = count_all_template_values(template)
     
-    if not differences:
-        return True, 0, total_values, []
-    else:
-        return False, len(differences), total_values, differences
+    # Properly categorize differences - ONLY exact matches count as correct
+    fp = 0  # False positives: extra fields, placeholder values, or wrong values where template is empty
+    fn = 0  # False negatives: missing fields or empty values where template has content
+    ic = 0  # Incorrect extractions: wrong values where both template and extraction have content
+    correct_matches = 0  # ONLY exact matches of non-empty values
+    
+    for diff in differences:
+        diff_lower = diff.lower()
+        
+        # Only count as correct if it's an exact match of meaningful content
+        if "exact match" in diff_lower:
+            if "both empty" in diff_lower:
+                # Empty fields matching should NOT count as correct extractions
+                # These represent fields that weren't extracted and weren't expected
+                pass  # Don't count as correct
+            elif "placeholder" in diff_lower:
+                # Placeholder matches are incorrect extractions
+                ic += 1
+            else:
+                # Only real value matches count as correct
+                correct_matches += 1
+        elif "placeholder match" in diff_lower:
+            # Placeholder matches are incorrect extractions
+            ic += 1
+        elif "false positive" in diff_lower:
+            fp += 1
+        elif "false negative" in diff_lower:
+            fn += 1
+        elif any(term in diff_lower for term in ["value mismatch", "placeholder mismatch", "template mismatch", "type mismatch"]):
+            ic += 1
+        else:
+            # Any other difference is an error - need to classify based on context
+            if "missing" in diff_lower and "template" in diff_lower:
+                fp += 1  # Extra in extraction
+            elif "missing" in diff_lower and "extraction" in diff_lower:
+                fn += 1  # Missing from extraction
+            else:
+                ic += 1  # Other mismatch
+    
+    # Verify counts make sense
+    total_accounted = correct_matches + fp + fn + ic
+    
+    # Debug information
+    print(f"  Categorization: Correct={correct_matches}, FP={fp}, FN={fn}, IC={ic}")
+    print(f"  Total accounted: {total_accounted}/{total_template_values}")
+    
+    # Any unaccounted template values are missing fields (false negatives)
+    if total_accounted < total_template_values:
+        missing_fields = total_template_values - total_accounted
+        fn += missing_fields
+        print(f"  Added {missing_fields} missing fields as false negatives")
+    
+    return correct_matches, fp, fn, ic, total_template_values, differences
 
 def compare_gliner_output(template, data, hospital, source, model_name):
     """
     Fixed GLiNER comparison function that handles GLiNER's actual output format.
     GLiNER outputs flat key-value pairs with concatenated values.
-    Partial matches count as 0.25 points instead of 1.0.
     """
     # Create flattened template for GLiNER comparison
     flat_template = flatten_template_for_gliner2(template)
@@ -329,16 +481,14 @@ def compare_gliner_output(template, data, hospital, source, model_name):
                 
                 # Check if template value appears anywhere in GLiNER output
                 if template_norm in gliner_text or any(word in gliner_text for word in template_norm.split() if len(word) > 2):
-                    partial_matches += 1
+                    partial_matches += 1/len(gliner_text.split())
                     found_match = True
-                    #print(f"PARTIAL: {template_key} = '{template_val}' found in {gliner_key} = '{gliner_val}'")
                     break
         
         #if not found_match:
             #print(f"MISSING: {template_key} = '{template_val}' not found anywhere")
-    
-    # Calculate metrics with partial matches worth 0.25 points
-    correct_matches = perfect_matches + (partial_matches * 0.25)
+    #partial matches count as proportion with an exact match
+    correct_matches = perfect_matches + partial_matches  # Each partial match counts as 0.05
     fn = max(0, total_values - perfect_matches - partial_matches)  # Missing template fields
     fp = max(0, len(gliner_data) - perfect_matches - partial_matches)  # Extra GLiNER fields
     ic = 0  # For GLiNER, we don't count incorrect extractions separately
@@ -352,7 +502,7 @@ def compare_gliner_output(template, data, hospital, source, model_name):
     f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
     
     print(f"FP: {fp}, FN: {fn}, IC: {ic}, Correct: {correct_matches:.2f}/{total_values}")
-    print(f"Perfect: {perfect_matches}, Partial: {partial_matches} (0.25 each)")
+    print(f"Perfect: {perfect_matches}, Partial: {partial_matches}")
     print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
     
     return {
@@ -390,64 +540,6 @@ def is_partial_match(template_val, gliner_val):
     
     return False
 
-def flatten_template_for_gliner(template):
-    """
-    Recursively flatten the nested template structure to match GLiNER's flat output format.
-    Maps all nested fields to a flat dictionary with meaningful key names.
-    """
-    flattened = {}
-    
-    def flatten_recursive(obj, prefix=""):
-        """Recursively flatten nested dictionaries and lists"""
-        if isinstance(obj, dict):
-            for key, value in obj.items():
-                new_key = f"{prefix}_{key}" if prefix else key
-                
-                if isinstance(value, (dict, list)):
-                    flatten_recursive(value, new_key)
-                else:
-                    # Convert to string and store
-                    flattened[new_key] = str(value) if value is not None else ""
-        
-        elif isinstance(obj, list):
-            for i, item in enumerate(obj):
-                new_prefix = f"{prefix}_{i}" if prefix else str(i)
-                flatten_recursive(item, new_prefix)
-    
-    # Start the recursive flattening
-    flatten_recursive(template)
-    
-    # Also create some simplified mappings that GLiNER might extract
-    # Direct field mappings
-    direct_fields = [
-        "date_collected", "date_received", "date_verified", "report_type",
-        "testing_context", "ordering_clinic", "testing_laboratory", 
-        "sequencing_scope", "num_tested_genes", "sample_type", 
-        "analysis_type", "num_variants", "reference_genome"
-    ]
-    
-    for field in direct_fields:
-        if field in template:
-            flattened[field] = str(template[field]) if template[field] is not None else ""
-    
-    # Extract gene symbols and refseq_mrna from tested_genes
-    if "tested_genes" in template and isinstance(template["tested_genes"], dict):
-        for gene_name, gene_data in template["tested_genes"].items():
-            if isinstance(gene_data, dict):
-                if "gene_symbol" in gene_data:
-                    flattened[f"gene_symbol_{gene_name}"] = str(gene_data["gene_symbol"])
-                if "refseq_mrna" in gene_data:
-                    flattened[f"refseq_mrna_{gene_name}"] = str(gene_data["refseq_mrna"])
-    
-    # Extract variant information
-    if "variants" in template and isinstance(template["variants"], list):
-        for i, variant in enumerate(template["variants"]):
-            if isinstance(variant, dict):
-                for key, value in variant.items():
-                    flattened[f"variant_{i}_{key}"] = str(value) if value is not None else ""
-    
-    return flattened
-
 def flatten_template_for_gliner2(template):
     """
     Recursively flatten the nested template structure
@@ -467,58 +559,6 @@ def flatten_template_for_gliner2(template):
                 recurse(item, f"{prefix}_{i}" if prefix else str(i))
     recurse(template)
     return flattened
-
-def compare_gliner_with_template(template, gliner_data):
-    """
-    Simplified GLiNER comparison - single word matches count as correct.
-    Uses actual template size instead of hard-coded values.
-    """
-    differences = []
-    # Calculate actual template values instead of hard-coding
-    total_template_values = len(template)
-    partial_matches = 0
-    perfect_matches = 0
-    
-    # Check for matches and mismatches
-    all_keys = set(template.keys()) | set(gliner_data.keys())
-    
-    for key in all_keys:
-        if key not in template:
-            if key in gliner_data:
-                differences.append(f"FALSE POSITIVE at {key}: template missing but got '{gliner_data[key]}'")
-        elif key not in gliner_data:
-            if template[key].strip():
-                differences.append(f"FALSE NEGATIVE at {key}: expected '{template[key]}' but missing in extraction")
-        else:
-            # Both have the key, compare values
-            template_val = template[key].strip() if template[key] else ""
-            gliner_val = gliner_data[key].strip() if gliner_data[key] else ""
-            
-            if template_val and not gliner_val:
-                differences.append(f"FALSE NEGATIVE at {key}: expected '{template_val}' but got empty")
-            elif not template_val and gliner_val:
-                differences.append(f"FALSE POSITIVE at {key}: template empty but got '{gliner_val}'")
-            elif template_val and gliner_val:
-                # Normalize and compare
-                norm_template = normalizeNames(template_val)
-                norm_gliner = normalizeNames(gliner_val)
-                
-                if norm_template == norm_gliner:
-                    # Perfect match
-                    perfect_matches += 1
-                    continue
-                elif is_partial_match(norm_template, norm_gliner):
-                    # Single word match - count as correct
-                    partial_matches += 1
-                    differences.append(f"PARTIAL MATCH at {key}: expected '{template_val}' but got '{gliner_val}' (single word match)")
-                else:
-                    # No match
-                    differences.append(f"Value mismatch at {key}: expected '{template_val}' but got '{gliner_val}'")
-    
-    num_differences = len(differences)
-    is_equal = num_differences == 0
-    
-    return is_equal, num_differences, total_template_values, differences, partial_matches, perfect_matches
 
 def determine_model_name(directory, json_data, filename=""):
     """
@@ -542,9 +582,11 @@ def determine_model_name(directory, json_data, filename=""):
     
     # Specific model mappings
     if "NuExtract-1.5-tiny" in model_name:
-        model_name = model_name.replace("NuExtract-1.5,tiny", "NuExtract:0.5B") 
+        model_name =  "NuExtract:0.5B"
     elif "NuExtract-2.0-2B" in model_name:
         model_name = "NuExtract:2B"
+    elif "NuExtract-2.0-4B" in model_name:
+        model_name = "NuExtract:4B"
     elif "qwen/qwen2.5-vl-72b-instruct" in model_name:
         model_name = "qwen2.5:72b"
     elif "meta-llama/llama-4-scout" in model_name:
@@ -561,28 +603,20 @@ def determine_model_name(directory, json_data, filename=""):
         model_name = "llama3.2:1b"
     elif "llama3.2_3b" in model_name:
         model_name = "llama3.2:3b"
+    elif "numind/NuNerZero" in model_name: 
+        model_name = "GliNER"
     
     # Add vision indicator if this is a vision-enabled directory
     if "Vision" in directory:
         model_name = model_name + "*ImageInput*"
     
     # Handle GLiNER models
-    if "gliner" in directory.lower() or "numind" in model_name.lower():
-        model_name = "GLiNER:NuNerZero"
+    if "gliner" in directory.lower() in model_name.lower():
+        model_name = "GLiNER"
 
     #handle LTNER/GPT-NER prompt inspired trials
-    if "NP" in directory.upper():
-        model_name = model_name +"+LTNER/GPT-NER Prompt"
     
     return model_name
-
-def findprompt(model_name, direc):
-    if "prompt" in (model_name.lower() or direc.lower()):
-        return "LTNER/GPT-NER"
-    elif "nuextract" in model_name.lower():
-        return "None"
-    else:
-        return "Normal"
  
 
 def main():
@@ -612,10 +646,14 @@ def main():
         "OpenAIOut", 
         "OpenAIOutNP",
         "OpenAIVisionOut",
-        "OpenAIVisionOutNP"
+        "OpenAIVisionOutNP",
+        #"OpenRouter",
+        #"OpenRouterVisionOut"
     ]
     
-    hospitals = ["fakeHospital1", "fakeHospital2"]
+    hospitals = [
+        #"fakeHospital1", 
+                 "fakeHospital2"]
     
     # Map each directory to its corresponding source
     sources = {
@@ -661,13 +699,11 @@ def main():
             if not json_files:
                 print(f"No matching JSON files found for {hospital} in {direc_path}")
                 continue
-                
             # Filter template for this hospital
             copy = template_to_string(filter_template(template, hospital))
             copy = dict_to_lowercase(copy)
-            
             print(f"\n--- Processing {hospital} in {direc} ---")
-            
+            pprint.pprint(copy)
             for json_file in json_files:
                 file_path = os.path.join(direc_path, json_file)
                 try:
@@ -688,9 +724,9 @@ def main():
                 else:
                     # Use the determine_model_name function for consistent naming
                     model_name = determine_model_name(direc, dtemp, json_file)
-                    prompt = findprompt(model_name, direc)
+                    prompt = "LTNER/GPT-NER" if 'NP' in direc else "Normal"
                     # Check for failed JSON parsing
-                    if "error" in dtemp.get("data", {}) and dtemp["data"].get("error") == "Could not parse as JSON":
+                    if "error" in dtemp.get("data", {}) and dtemp["data"].get("error") == "Could not parse as JSON" or dtemp.get("status") != "success":
                         print(f"Model failed to parse JSON - treating as 0% accuracy")
                         temp_row = {
                             "LLM": model_name,
@@ -711,49 +747,42 @@ def main():
                     
                     # Use simplified comparison for valid extractions
                     try:
+                        print("Opening layers")
+                        print("=========================")
                         data = dict_to_lowercase(dtemp["data"])
                         # Handle nested report_id structure - flatten it if it exists
-                        if isinstance(data, dict) and "report_id" in data and isinstance(data["report_id"], dict):
-                            data = data["report_id"]
+                        if isinstance(data, dict):
+                            for k,v in data.items():
+                                data = v if isinstance(v, dict) else data
+                                break
                     except KeyError:
                         data = {}
-                    
-                    is_equal, num_differences, total_values, differences = compare_values_with_template(copy, data)
-                    
-                    # Properly count each type of difference
-                    fp = 0  # False positives: extra fields in extraction
-                    fn = 0  # False negatives: missing fields from extraction  
-                    ic = 0  # Incorrect extractions: wrong values
-                    correct_matches = 0  # Count actual correct matches
-                    
-                    for diff in differences:
-                        if "Key missing in template" in diff:
-                            fp += 1  # Extra field in extraction
-                        elif "Key missing in extracted values" in diff:
-                            fn += 1  # Missing field from extraction
-                        elif "FALSE POSITIVE" in diff:
-                            fp += 1  # Template empty but extraction has value
-                        elif "FALSE NEGATIVE" in diff:
-                            fn += 1  # Template has value but extraction empty
-                        elif "Value mismatch" in diff or "Type mismatch" in diff or "length mismatch" in diff:
-                            ic += 1 # Wrong value (incorrect extraction)
-                    
-                    # Calculate correct matches properly - total minus all error types
-                    correct_matches = max(0, total_values - fp - fn - ic)
-                    
-                    # Ensure we don't exceed total template values
-                    if fp + fn + ic + correct_matches > total_values:
-                        # If we have overcounting, prioritize errors and adjust correct matches
-                        correct_matches = max(0, total_values - fp - fn - ic)
-                    
+                    correct_matches, fp, fn, ic, total_values, differences = compare_values_with_template(copy, data)
+                    #pprint.pprint(copy)
                     # Calculate metrics using standard formulas
+                    # Precision = TP / (TP + FP) where TP = correct_matches, FP = false_positives
+                    # Recall = TP / (TP + FN) where TP = correct_matches, FN = false_negatives
+                    # F1 = 2 * (Precision * Recall) / (Precision + Recall)
+                    
+                    total_extracted = correct_matches + fp + ic  # Total fields extracted
+                    total_expected = correct_matches + fn  # Total fields that should be extracted
+                    
                     accuracy = (correct_matches / total_values * 100) if total_values > 0 else 0
-                    precision = (correct_matches / (correct_matches + fp + ic) * 100) if (correct_matches + fp + ic) > 0 else 0
-                    recall = (correct_matches / (correct_matches + fn) * 100) if (correct_matches + fn) > 0 else 0
+                    precision = (correct_matches / total_extracted * 100) if total_extracted > 0 else 0
+                    recall = (correct_matches / total_expected * 100) if total_expected > 0 else 0
                     f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
                     
-                    print(f"FP: {fp}, FN: {fn}, IC: {ic}, Correct: {correct_matches}/{total_values}")
+                    print(f"Model: {model_name}")
+                    print(f"Correct: {correct_matches}/{total_values}")
+                    print(f"FP: {fp}, FN: {fn}, IC: {ic}")
                     print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
+                    
+                    # Show some example differences for debugging
+                    if differences:
+                        print("Sample differences:")
+                        for diff in differences:  # Show first 5 differences
+                            print(f"  {diff}")
+                    
                     temp_row = {
                         "LLM": model_name.split("+")[0],
                         "False Positives": fp,
@@ -777,4 +806,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
