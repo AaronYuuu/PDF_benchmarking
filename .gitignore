@@ -3,6 +3,8 @@
 .DS_Store
 api_keys.txt
 
+/makeTemplatePDF/scripts/.DS_Store
+/makeTemplatePDF/out/*
 /makeTemplate/scripts/.DS_store
 /makeTemplate/out/mock_data.json
 /templates
