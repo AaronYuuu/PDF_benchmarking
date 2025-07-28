@@ -43,3 +43,7 @@ generate_reports.sh
 /getJSON/run_models/__pycache__/*
 graphs/vis2.ipynb
 /graphs/visResults.ipynb
+/graphs/graphs.R
+getJSON/run_models/hpc_connect.ipynb
+/graphs/graphs.py  
+/graphs/genGraphs.py
