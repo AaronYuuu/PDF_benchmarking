@@ -20,7 +20,7 @@ def filter_template(template, reportName):
     if reportName == "fakehospital2":
         return template
     # Apply filtering to both hospitals based on their respective content files
-    report_file = f"{reportName}.txt"
+    report_file = f"hospitals/{reportName}.txt"
     
     # Check if the report file exists
     if not os.path.exists(report_file):
@@ -112,7 +112,7 @@ def count_all_template_values(template):
         return count
     
     total = count_recursive(template)
-    print(f"Total template values (including empty): {total}")
+    #print(f"Total template values (including empty): {total}")
     return total
 
 def compare_dict_keys_and_values(dict1, dict2, path=""):
@@ -138,43 +138,15 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
     for key in missing_in_extraction:
         current_path = f"{path}.{key}" if path else key
         template_value = dict1[key]
-        
-        # Check if the missing key had meaningful content in template
-        # Treat null/None values as empty
-        if isinstance(template_value, str) and template_value.strip():
-            differences.append(f"FALSE NEGATIVE at {current_path}: expected '{template_value}' but key missing in extraction")
-        elif template_value is not None and isinstance(template_value, (dict, list)) and template_value:
-            differences.append(f"FALSE NEGATIVE at {current_path}: expected structure but key missing in extraction")
-        else:
-            # Empty/null template value, missing key should count as a match for empty values
-            differences.append(f"EXACT MATCH at {current_path}: both empty/null (key missing but template empty)")
+        differences.append(f"FALSE NEGATIVE at {current_path}: missing key '{key}' with template value '{template_value}'")
     
     # Handle extra keys in extraction (these are potential false positives)
     for key in extra_in_extraction:
+        if key == "report_id":
+            # Skip report_id as it's not a meaningful extraction key
+            continue
         current_path = f"{path}.{key}" if path else key
-        extracted_value = dict2[key]
-        
-        # Check if the extra key contains placeholder/template content
-        if isinstance(extracted_value, str) or extracted_value is None:
-            # Handle null values
-            extracted_value = extracted_value if extracted_value is not None else ""
-            
-            # Use our enhanced placeholder detection
-            placeholder_patterns = [
-                "gene1", "gene2", "nm_000123", "g.", "c.", "p.",
-                "example", "sample", "test", "demo", "placeholder"
-            ]
-            is_placeholder = any(pattern in extracted_value.lower() for pattern in placeholder_patterns) if extracted_value else False
-            
-            if is_placeholder:
-                differences.append(f"FALSE POSITIVE at {current_path}: extra key with placeholder value '{extracted_value}'")
-            elif extracted_value.strip():  # Only count as FP if it has meaningful content
-                differences.append(f"FALSE POSITIVE at {current_path}: extra key with value '{extracted_value}'")
-            else:
-                # Extra key with empty/null value - less problematic
-                differences.append(f"FALSE POSITIVE at {current_path}: extra key with empty/null value")
-        else:
-            differences.append(f"FALSE POSITIVE at {current_path}: extra key with structure")
+        differences.append(f"FALSE POSITIVE at {current_path}: extra key with structure")
     
     # Now compare keys that exist in both dictionaries
     common_keys = template_keys & extracted_keys
@@ -189,20 +161,7 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
         val2 = val2 if val2 is not None else ""
         
         # Both values are strings (or converted from null) - exact comparison
-        if isinstance(val1, str) and isinstance(val2, str):
-            differences.extend(compare_string(val1, val2, current_path))
-        
-        # Both values are dictionaries - recursive comparison
-        elif isinstance(val1, dict) and isinstance(val2, dict):
-            differences.extend(compare_dict_keys_and_values(val1, val2, current_path))
-        
-        # Both values are lists - handle list comparison
-        elif isinstance(val1, list) and isinstance(val2, list):
-            differences.extend(compare_list_values(val1, val2, current_path))
-        
-        # Type mismatch - count as incorrect extraction
-        else:
-            differences.append(f"TYPE MISMATCH at {current_path}: expected {type(val1).__name__} but got {type(val2).__name__}")
+        differences = compare_vals(val1, val2, current_path, differences)
     
     return differences
 
@@ -263,36 +222,9 @@ def compare_string(str1, str2, path=""):
     norm_str1 = normalizeNames(str1.strip()) if str1 else ""
     norm_str2 = normalizeNames(str2.strip()) if str2 else ""
     
-    # Expanded placeholder patterns that shouldn't count as real extractions
-    placeholder_patterns = [
-        "gene1", "gene2", "gene3", "gene4", "gene5",
-        "g.", "c.", "p.", "m.", "n.",
-        "nm_000123.3", "nm_000123", "nm_", "enst_",
-        "chr1-22", "chr1", "chr2", "chrx", "chry",
-        "variant1", "variant2", "mutation1", "mutation2",
-        "test_id", "sample_id", "patient_id", "report_id", # Generic zygosity without context
-        "pathogenic", "benign", "vus",  # Generic classifications without context
-        "clinvar", "dbsnp", "omim", "cosmic",
-        "transcript", "protein", "cdna", "genomic"
-    ]
-    
-    # Check if values are placeholder patterns
-    is_placeholder1 = any(pattern == norm_str1.lower() for pattern in placeholder_patterns) if norm_str1 else False
-    is_placeholder2 = any(pattern == norm_str2.lower() for pattern in placeholder_patterns) if norm_str2 else False
-    
-    # Check for obvious template/example values
-    template_indicators = ["example", "sample", "test", "demo", "placeholder", "xxx", "yyy", "zzz"]
-    is_template1 = any(indicator in norm_str1.lower() for indicator in template_indicators) if norm_str1 else False
-    is_template2 = any(indicator in norm_str2.lower() for indicator in template_indicators) if norm_str2 else False
-    
     # Perfect match (including both empty/null)
     if norm_str1 == norm_str2:
-        if not norm_str1 and not norm_str2:
-            differences.append(f"EXACT MATCH at {path}: both empty/null")
-        elif is_placeholder1 and is_placeholder2:
-            differences.append(f"PLACEHOLDER MATCH at {path}: both are placeholder '{str1}'")
-        else:
-            differences.append(f"EXACT MATCH at {path}: both are '{str1}'")
+        differences.append(f"EXACT MATCH at {path}: both are '{str1}'")
         return differences
     
     # Handle scientific notation comparison
@@ -309,23 +241,14 @@ def compare_string(str1, str2, path=""):
         differences.append(f"EXACT MATCH at {path}: both empty/null")
     elif not norm_str1 and norm_str2:
         # Template empty/null but extraction has value
-        if is_placeholder2 or is_template2:
-            differences.append(f"FALSE POSITIVE at {path}: template empty/null but got placeholder/template '{str2}'")
-        else:
-            differences.append(f"FALSE POSITIVE at {path}: template empty/null but got '{str2}'")
+       differences.append(f"FALSE POSITIVE at {path}: expected empty/null but got '{str2}'")    
     elif norm_str1 and not norm_str2:
         # Template has value but extraction empty/null
         differences.append(f"FALSE NEGATIVE at {path}: expected '{str1}' but got empty/null")
+    elif norm_str1 in norm_str2:
+        differences.append(f"{len(norm_str1)/len(norm_str2):.2f} PARTIAL MATCH at {path}: '{norm_str2}' found in '{norm_str1}'")
     else:
-        # Both have values but don't match
-        if is_placeholder1 and is_placeholder2:
-            differences.append(f"PLACEHOLDER MISMATCH at {path}: expected placeholder '{str1}' but got placeholder '{str2}'")
-        elif is_placeholder2 and not is_placeholder1:
-            differences.append(f"FALSE POSITIVE at {path}: expected real value '{str1}' but got placeholder '{str2}'")
-        elif is_template1 or is_template2:
-            differences.append(f"TEMPLATE MISMATCH at {path}: expected '{str1}' but got template value '{str2}'")
-        else:
-            differences.append(f"VALUE MISMATCH at {path}: expected '{str1}' but got '{str2}'")
+        differences.append(f"VALUE MISMATCH at {path}: expected '{str1}' but got '{str2}'")
     
     return differences
     
@@ -334,9 +257,7 @@ def compare_list_values(list1, list2, path=""):
     Compare two lists by comparing values at corresponding positions.
     """
     differences = []
-    
-    if len(list1) != len(list2):
-        differences.append(f"List length mismatch at {path}: {len(list1)} vs {len(list2)}")
+
     
     # Compare corresponding elements
     min_len = min(len(list1), len(list2))
@@ -344,28 +265,43 @@ def compare_list_values(list1, list2, path=""):
         current_path = f"{path}[{i}]"
         val1 = list1[i]
         val2 = list2[i]
-        
-        if isinstance(val1, str) and isinstance(val2, str):
-            differences.extend(compare_string(val1, val2, current_path))
-        elif isinstance(val1, dict) and isinstance(val2, dict):
-            differences.extend(compare_dict_keys_and_values(val1, val2, current_path))
-        elif isinstance(val1, list) and isinstance(val2, list):
-            differences.extend(compare_list_values(val1, val2, current_path))
-        elif isinstance(val1, list) and isinstance(val2, dict):
-            vals = []
-            for k,v in val2.items():
-                if isinstance(v,list):
-                    vals.append(v)
-            differences.extend(compare_list_values(val1, vals, current_path))
-        elif isinstance(val1, dict) and isinstance(val2, list): 
-            vals = []
-            for v in val1.values():
-                if isinstance(v,list):
-                    vals.append(v)
-            differences.extend(compare_list_values(vals, val2, current_path))
-        else:
-            differences.append(f"Type mismatch at {current_path}: {type(val1).__name__} vs {type(val2).__name__}")
+        differences = compare_vals(val1, val2, current_path, differences)
     
+    return differences
+
+def compare_vals(val1, val2, current_path, differences):
+    if isinstance(val1, (str,int,float)) and isinstance(val2, (str, int, float)):
+        val1 = str(val1).strip() if val1 is not None else ""
+        val2 = str(val2).strip() if val2 is not None else ""
+        differences.extend(compare_string(val1, val2, current_path))
+    elif isinstance(val1, dict) and isinstance(val2, dict):
+        differences.extend(compare_dict_keys_and_values(val1, val2, current_path))
+    elif isinstance(val1, list) and isinstance(val2, list):
+        differences.extend(compare_list_values(val1, val2, current_path))
+    elif isinstance(val1, list) and isinstance(val2, dict):
+        vals = []
+        for k,v in val2.items():
+            if isinstance(v,dict):
+                vals.append(v)
+            differences.extend(compare_list_values(val1, vals, current_path))
+    elif isinstance(val1, dict) and isinstance(val2, list): 
+        vals = []
+        for k,v in val1.values():
+            if isinstance(v,dict):
+                vals.append(v)
+            differences.extend(compare_list_values(vals, val2, current_path))
+    elif isinstance(val1, (str, int, float)) and isinstance(val2, list):
+        if len(val2) == 1 and isinstance(val2[0], (str, int, float)):
+            # If list has one item, compare directly
+            differences.extend(compare_string(str(val1), str(val2[0]), current_path))
+        elif len(val2) > 1:
+            if val1 in val2:
+                temp = 1/len(val2)
+                differences.append(f"{temp} PARTIAL MATCH at {current_path}: '{val1}' found in list")
+            else:
+                differences.append(f"VALUE MISMATCH at {current_path}: expected '{val1}' but got list containing {val2}")
+    else:
+        differences.append(f"Type mismatch at {current_path}: {type(val1).__name__} vs {type(val2).__name__}")
     return differences
 
 def compare_values_with_template(template, data):
@@ -384,56 +320,44 @@ def compare_values_with_template(template, data):
     fn = 0  # False negatives: missing fields or empty values where template has content
     ic = 0  # Incorrect extractions: wrong values where both template and extraction have content
     correct_matches = 0  # ONLY exact matches of non-empty values
-    
+    count = 0
     for diff in differences:
         diff_lower = diff.lower()
         
         # Only count as correct if it's an exact match of meaningful content
         if "exact match" in diff_lower:
-            if "both empty" in diff_lower:
-                # Empty fields matching should NOT count as correct extractions
-                # These represent fields that weren't extracted and weren't expected
-                pass  # Don't count as correct
-            elif "placeholder" in diff_lower:
-                # Placeholder matches are incorrect extractions
-                ic += 1
-            else:
-                # Only real value matches count as correct
-                correct_matches += 1
-        elif "placeholder match" in diff_lower:
-            # Placeholder matches are incorrect extractions
-            ic += 1
+            correct_matches += 1
+            count += 1
         elif "false positive" in diff_lower:
             fp += 1
         elif "false negative" in diff_lower:
             fn += 1
-        elif any(term in diff_lower for term in ["value mismatch", "placeholder mismatch", "template mismatch", "type mismatch"]):
+            count += 1
+        elif any(term in diff_lower for term in ["value mismatch", "type mismatch"]):
             ic += 1
-        else:
-            # Any other difference is an error - need to classify based on context
-            if "missing" in diff_lower and "template" in diff_lower:
-                fp += 1  # Extra in extraction
-            elif "missing" in diff_lower and "extraction" in diff_lower:
-                fn += 1  # Missing from extraction
-            else:
-                ic += 1  # Other mismatch
-    
+            count += 1
+        elif "partial match" in diff_lower:
+            #print(diff_lower)
+            #print(diff.lower().split(" "))
+            temp = float(diff_lower.split(" ")[0])
+            correct_matches += temp
+            ic += 1 - temp
+            count += 1
     # Verify counts make sense
-    total_accounted = correct_matches + fp + fn + ic
     
     # Debug information
-    print(f"  Categorization: Correct={correct_matches}, FP={fp}, FN={fn}, IC={ic}")
-    print(f"  Total accounted: {total_accounted}/{total_template_values}")
+    #print(f"  Categorization: Correct={correct_matches}, FP={fp}, FN={fn}, IC={ic}")
+    #print(f"  Total accounted: {count}/{total_template_values}")
     
     # Any unaccounted template values are missing fields (false negatives)
-    if total_accounted < total_template_values:
-        missing_fields = total_template_values - total_accounted
+    if count < total_template_values:
+        missing_fields = total_template_values - count
         fn += missing_fields
-        print(f"  Added {missing_fields} missing fields as false negatives")
+        #print(f"  Added {missing_fields} missing fields as false negatives")
     
     return correct_matches, fp, fn, ic, total_template_values, differences
 
-def compare_gliner_output(template, data, hospital, source, model_name):
+def compare_gliner_output(template, data, hospital, source, model_name, json_file):
     """
     Fixed GLiNER comparison function that handles GLiNER's actual output format.
     GLiNER outputs flat key-value pairs with concatenated values.
@@ -488,7 +412,7 @@ def compare_gliner_output(template, data, hospital, source, model_name):
         #if not found_match:
             #print(f"MISSING: {template_key} = '{template_val}' not found anywhere")
     #partial matches count as proportion with an exact match
-    correct_matches = perfect_matches + partial_matches  # Each partial match counts as 0.05
+    correct_matches = perfect_matches + partial_matches  # Each partial match is porportional to its length
     fn = max(0, total_values - perfect_matches - partial_matches)  # Missing template fields
     fp = max(0, len(gliner_data) - perfect_matches - partial_matches)  # Extra GLiNER fields
     ic = 0  # For GLiNER, we don't count incorrect extractions separately
@@ -501,9 +425,9 @@ def compare_gliner_output(template, data, hospital, source, model_name):
     recall = (correct_matches / total_values * 100) if total_values > 0 else 0
     f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
     
-    print(f"FP: {fp}, FN: {fn}, IC: {ic}, Correct: {correct_matches:.2f}/{total_values}")
-    print(f"Perfect: {perfect_matches}, Partial: {partial_matches}")
-    print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
+    #print(f"FP: {fp}, FN: {fn}, IC: {ic}, Correct: {correct_matches:.2f}/{total_values}")
+    #print(f"Perfect: {perfect_matches}, Partial: {partial_matches}")
+    #print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
     
     return {
         "LLM": model_name,
@@ -515,10 +439,12 @@ def compare_gliner_output(template, data, hospital, source, model_name):
         "Recall": recall,
         "F1score": f1score,
         "Accuracy": accuracy,
-        "Source": source,
-        "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2",
+        "Parsed": None,
+        "Hospital": hospital,
         # GLiNER does not use prompts in the same way, so we set it to
-        "Prompt": "None"
+        "Prompt": "None",
+        "Distressed": True if "distressed" in json_file.lower() else False
+
     }
 
 def is_partial_match(template_val, gliner_val):
@@ -593,10 +519,8 @@ def determine_model_name(directory, json_data, filename=""):
         model_name = "llama-4:17B"
     elif "google/gemini-2.0-flash-exp" in model_name:
         model_name = "gemini-2.0"
-    elif "devstral-small" in model_name:
-        model_name = "mistral-3.1-24b"
-    elif "mistral-small-3.1-24b-instruct" in model_name:
-        model_name = "mistral-3.1-24b"
+    elif "mistral-small3.1" in model_name:
+        model_name = "mistral(24b)"
     elif "granite3.2-vision" in model_name:
         model_name = "granite3.2"
     elif "llama3.2_1b" in model_name:
@@ -605,7 +529,12 @@ def determine_model_name(directory, json_data, filename=""):
         model_name = "llama3.2:3b"
     elif "numind/NuNerZero" in model_name: 
         model_name = "GliNER"
-    
+    elif "llava-llama-3.2-vision" in model_name:
+        model_name = "llava-llama3.2:8b"
+    elif "mistral_latest" in model_name:
+        model_name = "mistral:7b"
+    elif "qwen2.5-vl-7b" in model_name:
+        model_name = "qwen2.5:7b"
     # Add vision indicator if this is a vision-enabled directory
     if "Vision" in directory:
         model_name = model_name + "*ImageInput*"
@@ -620,20 +549,20 @@ def determine_model_name(directory, json_data, filename=""):
  
 
 def main():
-    import pandas as pd
+    import numpy as np  # Ensure numpy is imported with alias 'np'
     import os
     os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
     with open("../makeTemplatePDF/out/mock_data.json", "r") as f:
         temp = json.load(f)
     k = list(temp.keys())[0]
     template = temp[k]
-    print("Template loaded successfully.")
+    #print("Template loaded successfully.")
     template = template_to_string(template)  
 
-    if os.path.exists("Hospital.csv"):
-        ovr = pd.read_csv("Hospital.csv") 
+    if os.path.exists("../graphs/Hospital.csv"):
+        ovr = pd.read_csv("../graphs/Hospital.csv") 
     else:
-        ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Source","Hospital", "Prompt"])
+        ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Parsed","Hospital", "Prompt", "Distressed"])
 
     # Expand to all available folders in outJSON with their corresponding sources
     json_direcs = [
@@ -646,14 +575,22 @@ def main():
         "OpenAIOut", 
         "OpenAIOutNP",
         "OpenAIVisionOut",
-        "OpenAIVisionOutNP",
-        #"OpenRouter",
-        #"OpenRouterVisionOut"
+        "OpenAIVisionOutNP"
     ]
     
     hospitals = [
-        #"fakeHospital1", 
-                 "fakeHospital2"]
+                "fakeHospital1", 
+                "fakeHospital2",
+                "CHEO",
+                "Hamilton",
+                "Kingston",
+                "LHSC",
+                "MtSinai",
+                "NYGH",
+                "SickKids",
+                "Trillium",
+                "UHN"
+                 ]
     
     # Map each directory to its corresponding source
     sources = {
@@ -702,7 +639,7 @@ def main():
             # Filter template for this hospital
             copy = template_to_string(filter_template(template, hospital))
             copy = dict_to_lowercase(copy)
-            print(f"\n--- Processing {hospital} in {direc} ---")
+            #print(f"\n--- Processing {hospital} in {direc} ---")
             #pprint.pprint(copy)
             for json_file in json_files:
                 file_path = os.path.join(direc_path, json_file)
@@ -710,45 +647,53 @@ def main():
                     with open(file_path, "r") as f:
                         dtemp = json.load(f)
                 except (json.JSONDecodeError, FileNotFoundError) as e:
-                    print(f"Error reading {json_file}: {e}")
+                    #print(f"Error reading {json_file}: {e}")
                     continue
                     
-                print(f"\n--- {json_file} ---")
-                
+                #print(f"\n--- {json_file} ---")
+                temp_num = dtemp["source_file"].split("_distressed.txt")[-1]
+                temp_num = temp_num.split("_") if "_" in temp_num else [temp_num]
+                temp_num = temp_num[-1]
+                temp_num = temp_num[-1].replace(".txt","")  
+                template = template[temp_num] if isinstance(template, dict) and temp_num in template else template
+                copy = template_to_string(filter_template(template, hospital))
+                copy = dict_to_lowercase(copy)
                 # Handle different file structures based on source
                 if direc == "glinerOut":
                     # GLiNER has different structure - use the GLiNER comparison function
                     model_name = determine_model_name(direc, dtemp, json_file)
-                    result = compare_gliner_output(copy, dtemp, hospital, source, model_name)
+                    result = compare_gliner_output(copy, dtemp, hospital, source, model_name, json_file)
                     ovr = pd.concat([ovr, pd.DataFrame([result])], ignore_index=True)
                 else:
                     # Use the determine_model_name function for consistent naming
                     model_name = determine_model_name(direc, dtemp, json_file)
                     prompt = "LTNER/GPT-NER" if 'NP' in direc else "Normal"
+                    prompt = "None" if "localout" == direc else prompt
                     # Check for failed JSON parsing
-                    if "error" in dtemp.get("data", {}) and dtemp["data"].get("error") == "Could not parse as JSON" or dtemp.get("status") != "success":
+                    if dtemp.get("status") != "success":
                         print(f"Model failed to parse JSON - treating as 0% accuracy")
                         temp_row = {
                             "LLM": model_name,
-                            "False Positives": 0,
-                            "False Negatives": count_all_template_values(copy),
-                            "Incorrect Extractions": 0,
-                            "Correct Matches": 0,
-                            "Precision": 0,
-                            "Recall": 0,
-                            "F1score": 0,
-                            "Accuracy": 0,
-                            "Source": source,
-                            "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2",
-                            "Prompt": prompt
+                            "False Positives": np.nan,
+                            "False Negatives": np.nan,
+                            "Incorrect Extractions": np.nan,
+                            "Correct Matches": np.nan,
+                            "Precision": np.nan,
+                            "Recall": np.nan,
+                            "F1score": np.nan,
+                            "Accuracy": np.nan,
+                            "Parsed": False,
+                            "Hospital": hospital,
+                            "Prompt": prompt, 
+                            "Distressed": True if "distressed" in json_file.lower() else False
                         }
                         ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
                         continue
                     
                     # Use simplified comparison for valid extractions
                     try:
-                        print("Opening layers")
-                        print("=========================")
+                        #print("Opening layers")
+                        #print("=========================")
                         data = dict_to_lowercase(dtemp["data"])
                         # Handle nested report_id structure - flatten it if it exists
                         if isinstance(data, dict):
@@ -772,16 +717,16 @@ def main():
                     recall = (correct_matches / total_expected * 100) if total_expected > 0 else 0
                     f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
                     
-                    print(f"Model: {model_name}")
-                    print(f"Correct: {correct_matches}/{total_values}")
-                    print(f"FP: {fp}, FN: {fn}, IC: {ic}")
-                    print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
+                  #  print(f"Model: {model_name}")
+                  #  print(f"Correct: {correct_matches}/{total_values}")
+                  #  print(f"FP: {fp}, FN: {fn}, IC: {ic}")
+                  #  print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
                     
                     # Show some example differences for debugging
-                    if differences:
-                        print("Sample differences:")
-                        for diff in differences:  # Show first 5 differences
-                            print(f"  {diff}")
+                #    if differences:
+                #        print("Sample differences:")
+                       # for diff in differences:  # Show differences
+                           # print(f"  {diff}")
                     
                     temp_row = {
                         "LLM": model_name.split("+")[0],
@@ -793,14 +738,15 @@ def main():
                         "Recall": recall,
                         "F1score": f1score,
                         "Accuracy": accuracy,
-                        "Source": source,
-                        "Hospital": "hospital1" if hospital == "fakeHospital1" else "hospital2", 
-                        "Prompt": prompt
+                        "Parsed": True,
+                        "Hospital": hospital, 
+                        "Prompt": prompt,
+                        "Distressed": True if "distressed" in json_file.lower() else False
                     }
                     ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
 
     # Save results
-    ovr.to_csv("Hospital.csv")
+    #ovr.to_csv("../graphs/Hospital.csv")
     #print("Comparison complete. Results saved to Hospital.csv")
 
 
