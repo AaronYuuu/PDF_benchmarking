@@ -72,5 +72,5 @@ echo "============================================"
 #python3 genGraphs.py
 #echo "Visualization report generated successfully!"
 #echo "============================================"
-
+cd /Users/ayu/PDF_benchmarking
 
