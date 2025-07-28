@@ -39,3 +39,5 @@ test.ipynb
 
 run_all_llms.sh
 generate_reports.sh
+
+/getJSON/run_models/__pycache__/*
