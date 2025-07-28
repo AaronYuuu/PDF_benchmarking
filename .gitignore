@@ -41,3 +41,5 @@ run_all_llms.sh
 generate_reports.sh
 
 /getJSON/run_models/__pycache__/*
+graphs/vis2.ipynb
+/graphs/visResults.ipynb
