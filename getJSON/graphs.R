@@ -1,1 +1,0 @@
-data <- read.csv("Hospital.csv", header = TRUE, sep = ",")
