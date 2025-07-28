@@ -1,0 +1,327 @@
+\documentclass[8pt,letterpaper]{extarticle}
+
+\usepackage[T1]{fontenc}
+\usepackage{tgheros} %% Tex Gyre Heros Sans Serif font
+\renewcommand*\familydefault{\sfdefault} %% Set base font of the document
+\usepackage[lmargin=2cm,rmargin=2cm,tmargin=4cm,bmargin=2cm,headheight=6em]{geometry} %showframe
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{draftwatermark}
+\SetWatermarkText{Mock specimen}
+\SetWatermarkScale{.5}
+
+% \setlength{\headheight}{6em}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\setlength{\fboxrule}{1pt} 
+\renewcommand{\headrulewidth}{0pt} % header line width
+\renewcommand{\arraystretch}{1.2}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhfoffset[L]{0cm} % left extra length
+\fancyhfoffset[R]{0cm} % right extra length
+\lhead{\parbox[b][][t]{5cm}{{\Huge SickKids} \\
+{\small The Hospital for Sick Children \\
+555 University Avenue \\
+TORONTO ON M5G 1X8}}}
+\rhead{\parbox[b][][t]{6cm}{\small \flushleft {\bf Division of Genome Diagnostics} \\
+{\bf Department of Paediatric Laboratory Medicine} \\
+Phone: (416) 813-7200 x1 \hspace{1em}Fax: (416) 813-7732 \\
+CLIA ID: 99D1014032 \\
+www.sickkids.ca/genome-diagnostics}}
+\lfoot{\small Note: For clinical use only. Results not generated in a forensically accredited laboratory}
+\rfoot{\small Page \thepage}
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+%delete cached plugin data from previous interpolations
+\data{plugin:reset}
+
+\begin{document}
+
+\colorbox{gray}{\makebox(\textwidth,1.8in){}}
+
+\begin{center}
+\bf COMPREHENSIVE CANCER TEST REPORT
+\end{center}
+
+\hspace{-1ex}
+\begin{tabular}{p{.3\textwidth} p{.3\textwidth} p{.3\textwidth} }
+{\bf Primary Tumour Type:} & {\bf Tumour Cellularity:} & {\bf Reason for Referral:} \\
+Hemangiosarcoma &  - & Tumour and Germline testing\\
+\end{tabular}
+
+{\bf Family History}: No known family history of cancer 
+
+{\bf Previous Testing}: -
+
+{\bf Other case details}: -
+
+{\bf SUMMARY OF SOMATIC AND GERMLINE FINDINGS:}\\
+\fbox{\parbox{\textwidth}{
+\data{plugin:findings_tables}
+% {\bf Somatic Findings:}
+
+% \vspace{1em}
+% \begin{tabular}{p{8cm} p{2cm} p{7cm}}
+% Tumour Mutation Burden: & Not actionable & 1.328 mutations/Mb\\
+%  & & \\
+% {\bf SNV/indels and copy number changes} & Gene Name & Variant \\
+% Clinically actionable variants in patient's tumour type & ATRX & c.612del (p.Tyr204*)\\
+% Clinically actionable variants in a different tumour type & - & -\\
+% Clinically actionable variants detected at low VAF & - & -\\
+% Oncogenic variants with uncertain clinical actionability & PLCG1 & c.2120G>A (p.Arg707Gln)\\
+%                                                          & TP53 & 17p focal loss\\
+% Variants of uncertain clinical significance & - & -\\
+% \end{tabular}
+
+% \vspace{1em}
+% {\bf Germline Findings:}
+
+% \vspace{1em}
+% \begin{tabular}{p{8cm} p{2cm} p{7cm}}
+% {\bf SNV/indels and copy number changes} & Gene Name & Variant \\
+% Pathogenic/Likely Pathogenic variants & TP53 & c.1016\_1017insTCATTCA (p.Glu339Aspfs*10) \\
+% Variants of uncertain significance & TP53 & c.1020\_1022del (p.Met340\_Phe341delinsIle)\\
+% \end{tabular}
+
+% \vspace{1em}
+% Tumour DNA: A clinically actionable variant in the ATRX gene was identified, which is associated with poor prognosis in angiosarcomas: An oncogenic variant with uncertain clinical actionability in the PLCG1 gene was also identified. A complex copy number profile was detected, including a focal loss on 17p encompassing the TP53 gene. Tumour mutation burden is not actionable.
+
+
+% \vspace{1em}
+% Germline DNA: A likely pathogenic variant in the TP53 gene was found in the germline of this patient. In addition, a variant of uncertain significance (VUS) in the TP53 gene was found in cis to the likely pathogenic variant: The results suggest that these variants are mosaic (\textasciitilde 39\%) in the peripheral blood of this patient.
+}}
+
+\newpage
+
+\colorbox{gray}{\makebox(\textwidth,1.8in){}}
+
+{\bf \large RESULTS:}
+
+\fbox{\parbox{\textwidth}{
+{\bf SOMATIC SEQUENCE Results:} 
+Variants listed below were acquired in the patient tumour and detected at a VAF **at or above** the sensitivity for clinical testing: 
+\begin{itemize}
+  \setlength\itemsep{1pt}
+  \item Fresh frozen samples >5\% for SNVs; >10\% for indels 
+  \item FFPE samples >10\% for SNVs and Indels
+\end{itemize}
+}}
+
+{\bf Tumour Mutation Burden:}\hspace{2em} Not actionable \hspace{2em} \data{plugin:get_tmb} mutations/Mb
+
+{\bf Tumour Mutation Burden (TMB):}\\
+TMB was determined to be \data{plugin:get_tmb} mutations/Mb and therefore is not clinically actionable. 
+
+Tumours with high TMB may benefit from checkpoint inhibitor immunotherapy and are considered clinically actionable if they meet the eligibility criteria for open clinical trials (PMID: 27001570, 29658845). Refer to the Test Information section at the end of this report for details on TMB calculation.
+
+{\small
+\begin{tabular}{p{3cm} p{3cm} p{3cm} p{3cm} p{3.5cm}}
+\bf Gene Name/Transcript ID & \bf Sequence variant \newline (Effect on Protein) & \bf Genomic Location & \bf Variant Allele Fraction (\%) & \bf Clinical Actionability${}^\ast$\\
+\data{plugin:somatic_table}
+% PLCGI  & c.2120G>A  & Chr2O(GRCh37): & 21.54 & VUS V1\\
+% NM\_002660.2 & (p.Arg707Gln)& g.39795235 & &\\
+% ATRX  &  c.612del   & ChrX(GRCh37): & 48.40 & Class 3: prognostic Class  \\
+% NM\_000489.4 & (p.Tyr204*) & g.76940481-76940481 & & Class 3B: therapeutic \\
+\end{tabular}
+
+${}^\ast$See `Test Information' section of the report
+}
+
+{\bf \large SOMATIC VARIANT INTERPRETATION:}
+
+\data{plugin:somatic_blurb}
+% {\bf Clinically actionable:} Variants with known therapeutic; prognostic or diagnostic actionability in the patients tumour type or in a different tumour type
+
+% % Variant: c.612del (p. Tyr204*) in the ATRX gene \\
+% Variant type: stopgain SNV \\
+% Variant Allele Fraction: 48.40\% \\
+% The c.612del variant located in exon 8 of the ATRX gene has been reported twice in other tumour types (Cosmic 1x, cBioPortal Ix). 
+% ATRX is a chromatin regulator that functions as a member of the SWIISNF helicase family:  Loss of ATRX activity results in aberrant DNA methylation, histone composition and transcription. Loss-of-function mutations or reduced ATRX expression is strongly correlated with an alternate lengthening of telomeres (ALT) phenotyvpe in tumours, including angiosarcomas (Heaphy et al. (2011)  PMID: 21719641, Liau et al (2015) PMID: 26190196). Loss of ATRX has been associated with poor prognosis in angiosarcomas (Panse et al. (2018) PMID: 28796347). ATRX loss may be eligible for clinical trials in other tumour types (mycancergenome.org); In addition, preclinical evidence has shown efficacy of PARP inhibitors in ATRX mutant neuroblastomas and gliomas (George et al: (2020) PMID: 32846370, Garbarino et al. (2021) PMID: 34118569).
+
+% {\bf Variants of Uncertain Clinical Significance (VUS)}: Variants of uncertain association with therapeutic, prognostic or diagnostic actionability.
+
+% Variant: c.2120G>A (p.Arg7O7GIn) in the PLCG1 gene \\
+% Variant type: nonsynonymous SNV \\
+% Variant Allele Fraction: 21.54\% \\
+% The c.2120G>A variant is located within exon 18 of the PLCG1 gene in the SH2 domain: This variant is recurrent in angiosarcomas and has been reported in 9-30\% of cases (Cosmic 8x, Kunze et al. (2014) PMID: 25252913, Behjati et al. (2014) PMID: 24633157). PLCG1 encodes a tyrosine kinase signal transducer within the phosphoinositide signalling pathway: This activating variant has been shown to lead to activation of the MAPK pathway (Kunze et al. (2014) PMID: 25252913, Liu et al. (2020) PMID: 31918402). However; clinical actionability of this variant remains uncertain at this time.
+
+\fbox{\parbox{\textwidth}{
+{\bf SOMATIC COPY NUMBER Results}: Copy number gain/loss variants listed below were acquired in the patients tumour
+}}
+
+No variants to report
+% \begin{tabular}{p{2.5cm} p{2.5cm} p{2.5cm} p{2.5cm} p{2.5cm} p{2.5cm}}
+% \bf Gene Name & \bf Chromosome\newline Region & \bf  Variant Type & \bf  Size (Kbp) & \bf CN State & \bf Clinical Actionability${}^*$\\
+% TP53 & 17p13.1 & CN Loss & 922 & 1 & VUS\\
+% \end{tabular}
+
+% {\bf SOMATIC COPY NUMBER VARIANT INTERPRETATION:}
+
+% {\bf Variants of Uncertain Clinical Significance (VUS)}: Variants of uncertain association with therapeutic, prognostic or diagnostic actionability. 
+
+% A focal 922 Kb loss on chromosome 17p13.1, which includes the TP53 gene, was identified. This results in LOH of the two germline variants in the TP53 gene (see germline results below).
+
+% {\bf GENOME VIEW:} Segmental regions (>5 Mb) and whole chromosome changes that are recurrent in patient's tumour type or include genes that are clinically relevant. 
+
+% {\bf Summary:} An extremely complex copy number profile was detected, which has been reported in angiosarcomas (Guillou et al. (2010) PMID: 20217954, Verbeke et al. (2015) PMID: 25231439). These changes were observed at levels suggestive of subclonal events.
+
+% {\bf Whole chromosome aberrations:}\\
+% Loss of 16
+
+% {\bf Segmental chromosome aberrations}:\\
+% Loss of 3q, proximal 6p, 8q, 7q, 8p, 9p (does not include CDKNZA); 14q, distal 17p (includes TP53), proximal 179, 19p 
+% Gain of 1pter, 4pter, 8q, distal 11p, distal 11p, distal 13q, distal 21q
+
+
+\fbox{\parbox{\textwidth}{
+{\bf GERMLINE SEQUENCE Results:} Variants listed below were found in the germline of this patient
+}}
+
+{\small
+\begin{tabular}{p{2cm} p{3cm} p{2.5cm} p{3cm} p{1.2cm} p{1.2cm} p{1.5cm}}
+\bf Gene Name\newline Transcript ID & \bf Sequence variant\newline (Effect on Protein) & \bf Genomic Location & \bf Population Frequency\newline (gnomAD all MAF\%) & \bf Zygosity & \bf Inheritance\newline pattern & \bf Interpretation\\
+\data{plugin:germline_table}
+% TP53 & c.1016\_1017insTCATTCA & Chr17(GRCh37): & Not observed & Mosaic & AD & Likely Pathogenic\\
+% NM\_000546.5 & (p.Glu339Aspfs*10) & g.7574010-7574017 & & & & \\
+% TP53  & c.1020\_1022del & Chr17(GRCh37): & Not observed & Mosaic & AD & VUS\\
+% NM\_000546.5 & (p.Met340\_Phe341delinslle) & g.7574004-7574004 & & & & \\
+\end{tabular}
+}
+
+{\bf \large GERMLINE VARIANT INTERPRETATION: }
+
+% {\bf Pathogenic/Likely Pathogenic}: Variants associated with cancer predisposition or therapeutic actionability in the patients tumour type or in a different tumour type.
+
+% Variant: c.1016\_1017insTCATTCA (p.Glu339Aspfs*10) in the TP53 gene \\
+% Mode of Inheritance: AD \\
+% Avg frequency data (gnomAD): Not observed \\
+% In silico Programs (Sift, PolyPhen, Mutation Taster): Not assessed
+
+% Comment: See combined interpretation below
+
+% \vspace{1em}
+% {\bf Variants of Uncertain Significance (VUS)}: Variants of uncertain association with cancer predisposition or therapeutic actionability.
+
+% Variant: c.1020\_1022del (p.Met340\_Phe341delinslle) in the TP53 gene \\
+% Mode of Inheritance: AD \\
+% Avg frequency data (gnomAD): Not observed \\
+% In silico Programs (Sift, PolyPhen, MutationTaster): Not assessed 
+
+% Comment: The likely pathogenic, c.1016\_1017insTCATTCA p.(Glu339Aspfs*10), variant inserts 7 nucleotides in exon 10 while the variant of uncertain significance c.1020\_1022del (p.Met340\_Phe341delinslle) deletes 3 nucleotides in exon 10. These two variants, separated by 3 nucleotides, were detected in cis in the TP53 gene The net effect on the protein sequence is predicted to be a frameshift. This is expected to result in an absent or disrupted protein product in a gene where loss-of-function is a known mechanism of disease. To the best of our knowledge, these variants have not been previously reported in the scientific literature as a benign variant or a disease-causing change. However, its absence from population controls (gnomAD) is evidence that these variants may not be benign. Pathogenic variants in the TP53 gene are associated with autosomal dominant Li-Fraumeni syndrome (LFS OMIM: 151623) and susceptibility to various tumour types, including glioma, colorectal cancer; basal cell carcinoma, adrenocortical carcinoma, and choroid plexus papilloma (OMIM: 191170). These variants should be interpreted in the context of clinical findings, family history, and other experimental data. 
+
+% Sequencing results suggest that the TP53 variants are mosaic (\textasciitilde 39\%) in the peripheral blood of this patient  Although germline mosaicism of TP53 mutations is uncommon; several have been reported in patients with tumours typical of Li-Fraumeni Syndrome, often with a negative family history of cancer (Prochazkova et al. (2009) PMID: 19012332, Behjati et al. (2014) PMID: 24810334, Trubicka et al. (2017) PMID: 29025599, Renaux-Petel et al. (2018) PMID: 29070807).
+
+% Recommendations: Due to suspicion of mosaicism, testing in other tissues may be considered at the discretion of the clinician. Targeted testing in the patient's biological parents (if available) is recommended. Targeted analysis of this variant in other family members is available to determine segregation with disease state. This patient and/or guardian should receive genetic counselling to discuss the implications of this result.
+
+\vspace{1em}
+\fbox{\parbox{\textwidth}{
+{\bf GERMLINE COPY NUMBER Results}: Copy number gain/loss variants listed below were found in the germline of this patient.
+}}
+
+No variants to report 
+
+\vspace{2em}
+{\small
+{\bf TEST INFORMATION}
+
+{\bf METHODS:}
+
+The Comprehensive Cancer Panel uses Next-Generation sequencing (NGS) to analyze \data{num_tested_genes} genes associated with a wide spectrum of pediatric cancer and/or an increased risk for cancer predisposition: The complete list of genes o the panel is provided at the end of this report in Appendix 1. Genetic variants (SNVs and indels) from the coding sequences and intronlexon boundaries ($\pm 10$ base pairs of intronic sequence), as well as copy number (CN) variants, were investigated for the Cancer Panel.
+
+This test is perfomed by Next-Generation sequencing using Agilent SureSelect capture followed by paired-end sequencing of the coding and splice site regions using the Illumina sequencing platform. Germline variant calls are generated using Genomic Analysis Tool Kit (GATK) after read alignment with the Burows-Wheeler Aligner (BWA) to genome build CRCh37/UCSC hg19 with decoy. Somatic substitution and indel calling were performed on matched tumour-normal samples using Mutect and MuTect2, respectively. CN calling was performed using the NxClinical software (v6.0, BioDiscovery)- Custom filtering was developed to prioritize variants. 
+
+Tumour Mutation Burden (TMB) is measured as the number of somatic variants (only SNVs) within exonic coding regions per Megabase (Mb) of DNA (VAF >10\%, within $\pm 10$ base pairs of intron-exon junctions): TMB is considered `high' when measured to be at least 10 mutationsIMb ad can be associated with exposure to mutagens such as UV light, microsatellite instability or abnormal activity in DNA damage and repair pathways such as gemline or somatic variants in mismatch repair genes or in the proofreading domains of the POLE and POLDI replication repair genes (PMID: 28420421, 29056344) Tumours with high TMB may benefit from checkpoint inhibitor immunotherapy and are considered clinically actionable if they meet the criteria for open clinical trials (PMID: 27001570, 29658845). These criteria may evolve depending on the tumour type and expected median TMB reported in the scientific literature.
+
+CN changes that are focal gains/losses (25 Mb) in clinically significant genes covered by this panel will be reported. CN state is defined as: gain (23 copies), loss (\textasciitilde 1 copy), amplification (25-10 copies, dependent on clinical actionability of the gene) and homozygouslbi-allelic loss (<1 copy). Sufficient genome-wide coverage allows for detection of larger segmental (>5 Mb), chromosome ar level and whole chromosome gains/losses, as well as regions with copy neutral LOH (>10 Mb)  However, exact breakpoints will require additional confirmation when located within off-target regions.
+
+This analysis is based on current knowledge of the molecular genetics of the tumour type indicated on the requisition; Test results should only be used in conjunction with the patients clinical history, personal/family history of cancer and any previous analysis of appropriate family members Unless specifically siated, it is assumed that family relationships are 3s indicated and that the affected status of individuals is correct. It is recommended that these test results be communicated t0 the patlent in a setting that includes appropriate counselling.
+
+{\bf LIMITATIONS AND OTHER TEST NOTES:}
+
+{\bf Abbreviations:}
+
+AD - Autosomal Dominant \\
+AR - Autosomal Recessive \\
+CN - Copy Number \\
+FF - Fresh Frozen \\
+FFPE - Fomalin-fixed paraffin-embedded \\
+HET - Heterozygous \\
+HEMI - Hemizygous \\
+HOM - Homozygous \\
+LOH - Loss of Heterozygosity\\
+MAF - Minor Allele Frequency \\
+TMB - Tumour Mutation Burden \\
+VAF - Variant Allele Fraction \\
+VUS - Variant of Uncertain Significance \\
+UTR - Untranslated region \\
+XL - X-linked
+
+Clinical actionability refers to the clinical utility and validity of the variant in the context of diagnosis, prognosis or therapeutic response (sensitivity or resistance).
+
+Germline variants are classified using the criteria outined by the American College of Medical Genetics (ACMG) guidelines (Richards et al: (2015) PMID: 25741868). Somatic variants are classified using the criteria outlined below: 
+
+{\bf Therapeutic}: variant is therapeutically actionable 
+\begin{itemize}
+  \setlength\itemsep{1pt}
+  \item Class 1: FDA-approved therapies show response in this (A) or another (B) tumour type 
+  \item Class 2: well-powered clinical trials show response or resistance in this (A) or another (B) tumour type 
+  \item Class 3: a small series, case reports show response or resistance in this (A) or another (B) tumour type; or the variant meets the inclusion criteria for a clinical trial in this (A) or another (B) tumour type 
+\end{itemize}
+
+{\bf Diagnostic}: variant is diagnostic of the patient's tumour type 
+{\bf Prognostic}: variant is prognostic in the patient"s tumour type 
+{\bf Variants of Uncertain Significance (VUS)}: clinical actionability of this variant is currently uncertain; however; the variant may be biologically relevant in the patient"s tumour type. There are four categories of VUSs: 
+\begin{itemize}
+  \setlength\itemsep{1pt}
+  \item V1: well-characterized oncogenic variant (gain-of-function or loss-of-function) based on experimental or clinical evidence 
+  \item V2: inferred oncogenic variant (loss-of-function) based on mutation type (i.e. stop gain or frameshift) or recurrence in cancer samples (e.g hotspot mutations that have not been formally characterized) 
+  \item V3: potentially oncogenic variant based on the gene that it is affecting andlor predicted impact on protein function (e.g- mutation that affects functional domain, causes aberrant gene expression, protein loss, pathway dysregulation or results in a mutational signature or hypermutation) 
+  \item VUS: there is currently insufficient published data to determine the significance of this variant, but it is in a gene where there is evidence that other variants are clinically actionable 
+\end{itemize}
+
+Only clinically actionable somatic variants ad VUSs that are biologically relevant are reported: A complete list of variants is available upon request Germline VUSs are reported only for 54 well-established cancer predisposition genes or those with sufficient clinical evidence for an association with paediatric cancer and are marked with an utn in Appendix 1, Variant classification, particularly for VUSs, may change as more infommation becomes available or as inheritance and allelic infomation is obtained by familial segregation studies. When parental segregation studies are performed, accurate assignment of family relationships is critical to the interpretation of test results; therefore, a separate test to confim the family relationships may be performed. The mode of inheritance for each gene is obtained from OMIM; when available. If not available in OMIM; the mode of inheritance is obtained from the scientific literature and references are included in the report.
+
+Variants classified as benign or Iikely benign are not reported  Synonymous variants, 3' and 5' UTR variants and intronic variants (beyond +10 base pairs) are not reported unless known to be pathogenic or predicted to disrupt splicing as indicated by the following in silico programs SpliceSiteFinder, MaxEntScan, NNSPLICE , GeneSplice or predicted to disrupt translation initiation.
+
+Genetic variants not related to the primary reason for referral, also described by the American College of Medical Genetics guidelines (Miller et al (2021) PMID: 34012068) , may be identified by this assay. Variants in these genes that are identified in germline samples are included on this report if they have clinical utility in the context of an increased heritable risk of cancer Pathogenic germline variants in non-cancer disorders are considered incidental findings and will not be included in the oncology report; unless consented to by the patient VUSs in non-cancer disorders will not be reported.
+
+{\bf ANALYTICAL AND CLINICAL SENSITIVITY:}
+
+Next-Generation sequencing may not detect all sequence variants associated with the patient's cancer. For gemline samples, this test is >95\% sensitive for detecting substitution variants, >90\% sensitive for detecting small insertions or deletions and >95\% sensitive for detecting CN changes For tumour samples , this test is >90\% sensitive for detecting substitution variants and >80\% sensitive for detecting small insertions or deletions. The threshold for reporting clinically actionable variants from fresh-frozen samples is a VAF of 5\% for SNVs and a VAF of 10\% for small insertions and deletions. For FFPE samples, the threshold for reporting clinically actionable variants is a VAF of 1\% for SNVs and small insertions and deletions. Clinically actionable variants detected below these VAFs may also be included o this report; however; they are below the validated thresholds for this test and are not verified by an orthogonal method For fresh-frozen samples, this test is >90\% sensitive for detecting focal (<5 Mb) on-target copy number variants and >95\% sensitive for detecting large segmental (>5 Mb), whole chromosome arm, whole chromosome CN variants and regions of copy neutral LOH (710 Mb): The limit-of- detection for CN variants by this test is 300-400 bp in size for gains/losses encompassing on-target regions. Tumour samples with at least 25\% tumour cellularity are required for reliable detection of CN changes.  Somatic variants that occur at low levels in the tumour tissue because of tumour heterogeneity or low tumour cellularity may not be detected Results must be interpreted in the context of tumour cellularity when available. Complex small insertions deletions or CN changes in clinically actionable genes detected by the NGS assay may be further verified by Sanger sequencing or QPCR.
+
+Regions beyond +10 base pairs of the splice junction are not consistently covered as such, this test does not provide information about non-coding regions of the gene (e g regulatory 5' and 3' UTR domains or deep intronic regions) unless specifically indicated The failure to detect a causative genotype by this assay does not exclude the possibility of another molecular basis for the patient's cancer NGS technologies capture techniques and associated bioinformatics analysis have limitations ad may result in failure to detect some sequence variants  Highly homologous and pseudogene sequences, as well as GC-rich and repetitive regions, may interfere with accurate detection of variants in sequencing analyses. A subset of exons is not included in this analysis due to technical liritations of this assay. This list is available upon request.   Certain types of genomic alterations known to cause disease will not be detected by this NGS assay including, but not limited to, structural rearrangements (e.g balanced translocations, inversions and repeat expansions) of the targeted exons.
+
+This test was developed and its performance characteristics determined by the SickKids Genome Diagnostics Laboratory as required by IQMH and CLIA '88 regulations This laboratory has established and verified the test's accuracy and precision The test has not been cleared or approved by Health Canada or the US Food and Drug Administration (FDA) Health Canada and the FDA have determined that such clearance or approval is not necessary.
+}
+
+Appendix 1: \data{num_tested_genes} genes included on the Comprehensive Cancer Panel. 
+
+{\tiny
+\begin{dataiter}{tested_genes}\data{gene_symbol} \end{dataiter}
+% ABCB1 ABCB11 ABI1 ABL1 ACKR3 ACSL3 ACSL6 ACVR1 ACVR1B ACVR2A ADAMTS20 AFF1 AFF3 AFF4 AJUBA AKAP9 AKT1 AKT2 AKT3 ALDH2 ALK ALPK2 AMER1 APAF1 APC ARAF ARHGAP26 ARHGAP35 ARHGEF12 ARID1A ARID1B ARID2 ARID5B ARNT ARTN ASPSCR1 ASTN1 ASXL1 ASXL2 ATF1 ATF7IP ATIC ATM ATP10A ATP1A1 ATP2B3 ATRX AURKA AURKAIP1 AURKB
+% AXIN1 AXIN2 B2M BAP1 BARD1 BAZ2A BCL10 BCL11A BCL11B BCL2 BCL2L1 BCL3 BCL6 BCL7A BCL9 BCL9L BCLAF1 BCOR BCR BHMT2 BIRC3 BLM BMPR1A BRAF BRCA1 BRCA2 BRD3 BRD4 BRIP1 BRWD3 BTG1 BTK BUB1B C15orf65 C2orf44 CACNA1D CALCR CALR CAMTA1 CANT1 CARD11 CARS CASC5 CASP8 CBFA2T3 CBFB CBL CBLB CBLC CCDC6 CCNB1IP1
+% CCND1 CCND2 CCND3 CCNE1 CD274 CD70 CD74 CD79A CD79B CDC6 CDC73 CDH1 CDH10 CDH11 CDH20 CDK12 CDK4 CDK6 CDK8 CDKN1B CDKN2A CDKN2B CDKN2C CDX2 CEBPA CENPF CHCHD7 CHD1 CHD3 CHD4 CHD6 CHD7 CHD8 CHEK1 CHEK2 CHIC2 CHN1 CIC CIITA CLP1 CLSTN1 CLSTN2 CLTC CLTCL1 CNBP CNOT3 CNTN5 CNTRL COL11A1 COL19A1 COL11A1
+% COL2A1 COL5A1 COL7A1 COLEC12 COX6C CREB1 CREB3L1 CREB3L2 CREBBP CRLF2 CRTC1 CRTC3 CSF1R CSF2RA CSF3R CSMD3 CTCF CTNNA1 CTNNA2 CTNNB1 CTNND1 CTTN CUL3 CUL4B CUX1 CYLD CYP1A1 CYP21A2 DAB2IP DACH2 DAXX DCC DDB2 DDIT3 DDX10 DDX3X DDX5 DDX6 DDX60 DEK DEPDC5 DICER1 DIS3 DIS3L2 DKC1 DNAH14 DNM2 DNMT3A DOCK2 DPP10 DPYD
+% DSCAM DST DYNC1H1 EBF1 ECT2L EED EGFR EGR3 EIF4A2 ELF3 ELF4 ELK4 ELL ELN EML4 EP300 EP400 EPB41L3 EPCAM EPHA2 EPHA3 EPHA6 EPHA7 EPHB1 EPHB4 EPHB6 EPPK1 EPS15 ERBB2 ERBB3 ERBB4 ERC1 ERC2 ERCC1 ERCC2 ERCC3 ERCC4 ERCC5 ERCC6 ERG ESR1 ETS1 ETV1 ETV4 ETV5 ETV6 EWSR1 EXT1 EXT2 EZH2 EZR
+% FAM46C FANCA FANCC FANCD2 FANCE FANCF FANCG FAP FAS FASN FAT1 FBN2 FBXO11 FBXW7 FCGR2B FCRL2 FCRL4 FES FEV FGFR1 FGFR1OP FGFR2 FGFR3 FGFR4 FH FHIT FIP1L1 FLCN FLG FLI1 FLNA FLT1 FLT3 FLT4 FMN2 FN1 FNBP1 FOSL2 FOXA1 FOXA2 FOXL2 FOXO1 FOXO3 FOXO4 FOXP1 FOXQ1 FSCB FSHR FSTL3 FUBP1 FUS
+% GABRG1 GALNT12 GALNT15 GAS7 GATA1 GATA2 GATA3 GAN1 GFI1B GMPS GNA11 GNA13 GNAQ GNAS GOLGA5 GOPC GPAM GPC3 GPHN GPS2 GREM1 GRM3 GRM8 GUCY1A2 H2AFY H3F3A H3F3B H3F3C HDAC6 HDAC9 HERPUD1 HEY1 HFE HIP1 HIST1H1B HIST1H1C HIST1H1E HIST1H2BD HIST1H4A HIST1H4B HIST1H4C HIST1H4D HIST1H4E HIST1H4F HIST1H4H HIST1H4I HIST1H4J HIST1H4K HIST1H4L HIST2H4A HIST2H4B
+% HIST4H4 HLA-A HLA-B HLF HMGA1 HMGA2 HNF1A HNRNPA2B1 HNRNPR HOOK3 HOXA11 HOXA13 HOXA9 HOXC11 HOXC13 HOXD11 HOXD13 HRAS HSP90AA1 HSP90AB1 HSPB8 HUWE1 ICK IDH1 IDH2 IFIT3 IGF1R IGF2 IGF2R IKBKB IKZF1 IL2 IL21R IL3 IL6ST IL7R ING1 ING4 INTS1 IRF4 IRS2 IRX2 ITK ITPKB JAK1 JAK2 JAK3 JAZF1 JMJD1C JUN KALRN
+% KAT6A KAT6B KCNJ5 KDM3B KDM4C KDM5A KDM5C KDM6A KDR KDSR KEAP1 KIAA1549 KIF5B KIF7 KIT KLF4 KLF6 KLK2 KMT2A KMT2C KMT2D KRAS KTN1 LASP1 LCK LCP1 LEPROT LHFP LIFR LIN28B LMO1 LMO2 LPP LRFN5 LRIG3 LRP1B LRP2 LRRC7 LRRK1 LRRK2 LRRTM4 LTK LYL1 LYN MAF MAFB MALT1 MAML2 MAP1B MAP2K1 MAP2K2
+% MAP2K4 MAP3K1 MAP3K7 MAPK1 MAPK8 MAPK8IP1 MARK1 MARK4 MAST4 MATK MAX MBD1 MCL1 MDC1 MDM2 MDM4 MECOM MED12 MED13 MEN1 MET MGA MGMT MITF MKL1 MLF1 MLH1 MLLT1 MLLT10 MLLT11 MLLT3 MLLT4 MLLT6 MMP2 MN1 MNX1 MPL MPO MRE11A MSH2 MSH6 MSI2 MSN MTAP MTCP1 MTOR MUC1 MUC16 MUC17 MUC4 MUTYH
+% MXRA5 MYB MYC MYCL MYCN MYD88 MYH1 MYH11 MYH2 MYH8 NACA NAV1 NAV3 NBN NCAPD3 NCKIPSD NCOA1 NCOA2 NCOA3 NCOA4 NCOR1 NCOR2 NDRG1 NEDD4L NEK8 NF1 NF2 NFE2 NFE2L2 NFIB NFKB1 NFKB2 NIN NKX2-1 NLRP5 NONO NOTCH1 NOTCH2 NOTCH4 NPAP1 NPM1 NR4A3 NRAS NRP1 NSD1 NT5C2 NTRK1 NTRK3 NUMA1 NUP214 NUP98
+% NUTM1 ODC1 OLIG2 OMD OR4A16 OTOF OTX2 P2RY8 PAFAH1B2 PAK3 PALB2 PARK2 PARP2 PATZ1 PAX3 PAX5 PAX7 PAX8 PBRM1 PBX1 PCBP1 PCDH11X PCDH15 PCDHGB3 PCM1 PCSK7 PDCD1LG2 PDE4DIP PDGFB PDGFRA PDGFRB PER1 PFKP PHF20 PHF6 PHIP PHOX2B PICALM PIK3CA PIK3R1 PIK3R2 PIM1 PKHD1 PLAG1 PLCG1 PLCG2 PML PMS1 PMS2
+% POLD1 POLE POLQ POT1 POTEF POU2AF1 POU2F2 POU5F1 PPARG PPM1D PPP1R3A PPP2R1A PPP6C PRCC PRDM1 PRDM16 PRDM2 PRDM9 PREX2 PRF1 PRKAG2 PRKAR1A PRKCD PRKDC PRLR PRRC2A PRRX1 PRSS58 PRX PSIP1 PTCH1 PTEN PTGS2 PTPN11 PTPN13 PTPRC PTPRD PTPRT QKI RAB11FIP1 RABEP1 RAC1 RAD21 RAD50 RAD51B RAD51C RAD51D RAF1 RAG1 RALGDS
+% RANBP17 RANBP2 RAP1GDS1 RARA RB1 RBL1 RBM10 RBM15 RECQL4 REL RELA RELN RET RHBDF2 RHEB RHOA RHOH RIMS2 RMI2 RNASEL RNF213 RNF217 RNF43 ROS1 RPL10 RPL22 RPL5 RPN1 RPS15 RPS2 RPS6KA2 RRM1 RSPO2 RSRC1 RUNX1 RUNX1T1 RXRA SAMD8 SBDS SDC4 SDHA SDHAF2 SDHB SDHC SDHD SEPT5 SEPT6 SEPT9 SERPINE1 SET SETBP1
+% SETD2 SETDB1 SF3B1 SFPQ SGK1 SH2B3 SH2D1A SH3GL1 SIN3A SLC26A3 SLC34A2 SLC45A3 SMAD2 SMAD4 SMARCA4 SMARCB1 SMARCE1 SMC1A SMC3 SOCS1 SOS1 SOX17 SOX2 SOX9 SPECC1 SPOP SPTAN1 SRC SRCAP SRGAP3 SRSF2 SRSF3 SS18 SS18L1 SSX1 STAG2 STAT3 STAT5B STIL STK11 STK19 STK36 STK4 SUFU SUZ12 SYK SYNE1 SYNGAP1 TAF1
+% TAF15 TAF1L TAL1 TAL2 TBL1XR1 TBX18 TBX22 TBX3 TCEA1 TCEB1 TCF12 TCF3 TCF7 TCF7L2 TCL1A TERT TET1 TET2 TFE3 TFEB TFG TFPT TFRC TGFBR2 THBS1 THRAP3 TLR4 TLX1 TLX3 TMEM127 TMPRSS2 TNF TNFAIP3 TNFRSF14 TNFRSF17 TNK2 TNN TNR TOP1 TP53 TP53BP1 TPM3 TPM4 TPO TPR TRAF3 TRAF7 TRAT1 TRIM24 TRIM27 TRIM33
+% TRIP11 TRRAP TSC1 TSC2 TSHR TSHZ3 TTL U2AF1 UBR5 UHRF2 UNC13C USP6 USP7 USP9X VANGL1 VHL VTI1A WAS WDFY3 WDFY4 WHSC1 WHSC1L1 WIF1 WRN WT1 WWTR1 XIRP2 XPA XPC XPO1 XRCC2 YWHAE YY1 ZBTB16 ZEB2 ZFHX3 ZFP36L1 ZFP36L2 ZHX2 ZMYM2 ZMYM3 ZMYM4 ZMYND8 ZNF331 ZNF384 ZNF521 ZNF91 ZRSR2
+}
+
+\end{document}

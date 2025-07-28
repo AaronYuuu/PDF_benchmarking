@@ -1,0 +1,116 @@
+\documentclass[10pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{mathpazo}
+\usepackage{domitian}
+\usepackage[lmargin=2.5cm,rmargin=2.5cm,tmargin=5cm,bmargin=2.5cm,headheight=7em]{geometry} %showframe
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{draftwatermark}
+\SetWatermarkText{Mock specimen}
+\SetWatermarkScale{.5}
+
+% \setlength{\headheight}{6em}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\setlength{\fboxrule}{0.5mm} 
+\renewcommand{\headrulewidth}{0pt} % header line width
+\renewcommand{\arraystretch}{1.2}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhfoffset[L]{1cm} % left extra length
+\fancyhfoffset[R]{1cm} % right extra length
+\rhead{\parbox[b][][t]{3cm}{\scriptsize \flushleft Molecular Genetics Laboratory \\
+3rd Floor, South East Wing \\
+4001 Leslie Street Toronto, \\
+ON M2K 1E1 \\
+T 416.756.6791 \\
+F 416.756.6792 \\
+nygh.on.ca}}
+\lhead{\parbox[b][][t]{3cm}{\LARGE \bf NORTH\\ YORK\\ GENERAL}}
+\rfoot{}
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+\begin{document}
+\begin{center}
+\large \bf MOLECULAR GENETICS REPORT
+\end{center}
+
+\parbox{.45\textwidth}{
+Dr. REDACTED \\
+\data{ordering_clinic}\\
+Address Redacted \\
+Address Redacted
+}\hfill
+\parbox{.45\textwidth}{
+\begin{tabular}{r l}
+{\bf Last name}:& Redacted\\
+{\bf First name}: & Redacted\\
+{\bf DOB}: & Redacted\\
+{\bf Sex}: & REDACTED \\
+{\bf HC\#}: & Redacted\\
+\end{tabular}
+}
+
+\rule{\textwidth}{1pt}
+
+\begin{tabular}{l l l}
+{\bf Lab \#}: JL2O07143B & {\bf Date Received}: \data{date_received} & {\bf Reason for referral}:\\
+{\bf Sample Type}: \data{sample_type} & {\bf Date Requested}: \data{date_collected} & Hereditary Breast \& Ovarian Cancer Testing \\
+{\bf Genetic Clinic \#}: - & {\bf Date of Report}: \data{date_verified} & {\bf Test Requested}: \data{sequencing_scope}
+\end{tabular}
+
+\rule{\textwidth}{1pt}
+
+{\bf Summary:}
+
+\vspace{-24pt}
+\begin{tabular}{>{\centering\arraybackslash}p{5cm} >{\centering\arraybackslash}p{6cm} >{\centering\arraybackslash}p{4cm}}
+\underline{\bf Gene} & \underline{\bf Variant} & \underline{\bf Clinical Significance} \\
+\begin{dataiter}{variants}\data{gene_symbol} & \data{hgvsc} (\data{hgvsc}) & \data{interpretation} \\
+\end{dataiter}
+\end{tabular}
+ 
+\rule{\textwidth}{1pt}
+
+{\bf Interpretation:}
+
+\data{plugin:long_blurb}
+% A variant of uncertain significance in exon 13 of the PALB2 gene was detected in this individual. This variant, c.3538A>G, p.(Ile1180Val), is predicted to result in the substitution of valine for the isoleucine at codon 1180. This variant has been reported in ClinVar by multiple submissions as a variant of uncertain significance. It does not appear to have been discussed in the literature: The allele frequency is 1/236920 in the Genome Aggregation Database (v2.1.l, non-cancer). In silico analyses (Align GVGD, MutationTaster; POLYPHEN-2 and SIFT) were consistent in predicting this variant to be benign. This nucleotide is weakly conserved (phyloP = 0.69). This variant would be classified as a variant of uncertain significance. 
+
+% In addition, a variant of uncertain significance in exon 9 of the RAD51D gene was detected. This variant, c.868C>T, p.(Arg290Trp): is predicted to result in the substitution of tryptophan for the arginine at codon 290. This variant has been reported in ClinVar by multiple submissions as a variant of uncertain significance.  It does not appear to have been discussed in the literature; The allele frequency is 8/268292 in the Genome Aggregation Database (v2.1.1, non-cancer). In silico analyses (Align GVGD; MutationTaster POLYPHEN-2 and SIFT) were consistent in predicting this variant to be benign.  This nucleotide is not conserved (phyloP = -0.04). This variant would be classified as a variant of uncertain significance. 
+
+% No conclusions as to the pathogenicity of these variants can be made from this analysis and thus it cannot be used to modify the clinically determined risk of breast or ovarian cancer. 
+Family studies may be helpful in further elucidating the significance of these variants with respect to familial breast/ovarian cancer: Genetic counseling and clinical follow-up are recommended.
+
+{\bf Analysis:}
+
+{\small
+Genes analyzed (\data{num_tested_genes} genes): \begin{dataiter}{tested_genes}\data{gene_symbol} (\data{refseq_mrna}), \end{dataiter}
+
+Genomic DNA was enriched for the coding regions of genes listed above by a hybridization-based capture method using TruSight Rapid Capture/Canadian Consortia Inherited Cancer Panel kit (Illumina). The enriched libraries were sequenced the NextSeq 500 System (Illumina) then aligned tp the entire \data{reference_genome} human reference genome and variants were called and annotated using NextGENe (v2.4.2.3) and Geneticist Assistant (v1.4.2) softwares (Softgenetics). The description of the genetic variants observed follows the HGVS guidelines on nomenclature [Hum Mutat (2016) 37.564-569] and the American College of Medical Genetics recommendations for standards for interpretation of sequence Variations [Genet Med (2015) 17.405-424; Am J Hum Genet (2016) 98.801-817]. Only variants found in the coding regions and 15 nucleotides into the introns, as well as into the 5'- and 3'-UTR regions of these genes, are reported. With the exception of the 5' end of MLH1 exon 12 where intronic basepairs are analyzed. All sequence variants interpreted as pathogenic, likely pathogenic or uncertain significance were re-analyzed using Sanger sequencing when internal laboratory quality metrics were not met. Low coverage regions containing at least one nucleotide with a read depth lower than 20 were re-analyzed using Sanger sequencing. Pathogenic, likely pathogenic and uncertain variants in PMS2 and CHEK2 (exons 11-15) were confirmed by long range PCR of the PMS2 and CHEK2 genes, respectively, to exclude the possibility of the variants being present in the pseudogenes of PMS2 and CHEK2. Exonic copy number changes were analyzed by the RPKM rcad counting method (reads per kilobase per million mapped reads) using NextGENe software [Bioinformatics (2012) 28.2747-2754]. All deletions/duplications detected were confirmed by MLPA analysis (MRC-Holland). Variants are listed as heterozygous unless otherwise indicated.  Benign and likely benign variants are not listed but are available upon request.* For EPCAM, only copy number analysis is performed.
+
+Limitations: This test does not detect low level mosaicism, large duplications and deletions or structural rearrangements: Variants in PMS2 may not be detected due to interference with the presence of pseudogenes. Sequence variants in exon 15 of PMS2 are not analyzed unless immunohistochemistry indicated negative for PMS2. Variants in regions containing long stretches of homopolymers may not be detected.
+
+Test sensitivity: \textasciitilde 99\%, Test specificity: \textasciitilde 100\%
+
+Disclaimers:  This test is based on our current understanding of the molecular knowledge of hereditary breast/ovarian cancer. There is a possibility that clinically significant changes in variant classification will occur through new discovery, enhanced clinical correlation and functional or epidemiologic studies. This test was developed and its performance characteristics were determined by the Molecular Genetics Laboratory at North York General, which is accredited under the Institute for Quality Management in Healthcare (IQMH).
+}
+
+\vspace{4em}
+\hfill \parbox{7cm}{
+\rule{7cm}{1pt}
+\small
+Signed: Redacted \\
+Laboratory Geneticist
+}
+
+
+
+\end{document}

@@ -1,0 +1,106 @@
+\documentclass[10pt]{extarticle}
+
+\usepackage{tgheros} %% Tex Gyre Heros Sans Serif font
+\renewcommand*\familydefault{\sfdefault} %% Set base font of the document
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.1cm]{geometry}
+\usepackage{array}
+\usepackage{dashrule}
+\usepackage{draftwatermark}
+\SetWatermarkText{Mock specimen}
+\SetWatermarkScale{.5}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{.5em}
+\setlength{\fboxrule}{0.5mm} 
+\setlength{\arrayrulewidth}{0.3mm}
+\renewcommand{\arraystretch}{1.2}
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+\begin{document}
+\parbox[t][][]{.38\textwidth}{
+{\large \bf Sinai Health | Mount Sinai Hospital}\\
+Joseph \& Wolf Lebovic Health Complex
+}
+\hfill
+\parbox[t][][]{.55\textwidth}{
+{\large \bf Pathology \& Laboratory Medicine }\\
+{\scriptsize 600 University Ave. Suite 6-500, Toronto, ON, Canada, MSG 1X5 \\
+t: 416-586-4800 x4457 f: 416-586-8628}
+}
+
+\begin{tabular}{l l l l}
+Clinic ID: &  & Medical Record \#:& Redacted \\
+Clinic Name: & \data{ordering_clinic} & Last Name:& Redacted \\
+Physician: & Redacted & First, Middle:& Redacted\\
+Procedure Date: & \data{date_collected}& DOB/Sex: & Redacted/Redacted \\
+Accession Date: & \data{date_received} & Health Card \#:&  Redacted \\
+Report Date: & \data{date_verified} & Visit \#:&  Redacted \\
+\end{tabular}
+
+\vspace{1em}
+\rule{\textwidth}{1pt}
+
+{\Large \bf FINAL LABORATORY GENETICS REPORT: \hfill GEN-24-XXXX}
+\rule{\textwidth}{1pt}
+
+
+Copies to: REDACTED \hfill {\bf Molecular Lab\#}: M24-XXXX
+
+{\bf SPECIMEN}: Blood
+
+{\bf TEST DESCRIPTION}: \data{sequencing_scope} %todo: add custom function to generate this field
+
+{\bf TEST INDICATION}: Personal history of VHL; Positive family history
+
+{\bf RESULT}: POSITIVE
+
+{\bf DNA FINDING}:\\ 
+\begin{tabular}{ | l | l | l | l | }
+\hline
+{\bf Gene, Transcript} & {\bf Variant, Prediction} & {\bf Zygosity} & {\bf Interpretation} \\ \hline
+\begin{dataiter}{variants}{\it \data{gene_symbol}}, \data{transcript_id} & \data{hgvsc}, \data{hgvsp} & \data{zygosity} & \data{interpretation} \\ \hline
+\end{dataiter}
+\end{tabular}
+
+\paragraph{INTERPRETATION:} \data{plugin:summary_blurb}
+%{\bf Positive}. Sequencing of the VHL gene identified likely pathogenic variant described above.
+% The result is consistent with the clinical history. This individual is at increased lifetime risk for VHL-associated tumour susceptibility due to the above likely variant.
+
+\paragraph{RECOMMENDATION:} Genetic counselling is recommended for this individual and the family. Targeted variant testing is available for other family members. Clinical management strategies may be recommended according to established guidelines. To check on the status of a variant or for assistance in locating nearby genetic counselling services please contact Advanced Molecular Diagnostics by email at Redacted.
+
+{\bf VARIANT INFORMATION:}\\
+\data{plugin:long_blurb}
+% \hdashrule[0.5ex]{\textwidth}{1pt}{1mm}
+
+% \vspace{-1ex}
+% VHL, EXON03, c.499C>T, p.(Arg167Trp), Heterozygous, Likely Pathogenic
+
+% \vspace{-1ex}
+% \hdashrule[0.5ex]{\textwidth}{1pt}{1mm}
+
+% The VHL c.499C>T, p.(Arg167Trp) variant was identified in 56 individuals or families with Von-Hippel Lindau syndrome (VHL; Sivaskandarajah 2018, Wang 2018, Chew 2017, Pandit 2016, Zhang 2015, Bachurska 2014, Fishbein 2013 , Dandanell 2012, Leonardi 2011, Erlic 2010, Ciotti 2009, Barontini 2006, Gallou 2004, Ruiz-Llorente 2004, Neumann 2002 , Olschwang 1998, Zbar 1996, Stolle 1998, Crossey 1995). The variant was also identified in ClinVar (classified as pathogenic by GeneDx, Ambry Genetics, and 12 other submitters; and as likely pathogenic by 2 submitters). The variant was identified in controls in 1 of 1,613,998 chromosomes at a frequency of 0.0000006 (Genome Aggregation Database Nov 1 2023 v4.0.0). The variant has been found in the literature to segregate with disease in multiple VHL families (Zhang 2015, Barontini 2006, Olschwang 1998, Stolle 1998). Furthermore, in functional studies, the variant is demonstrated to disrupt protein stability and function (Leonardi 2011, Zhou 2004, Schoenfeld 2000). The p.Arg167 residue is conserved across mammals and other organisms, and computational analyses (PolyPhen-2, SIFT, AlignGVGD, MutationTaster) suggest that the variant may impact the protein. The variant occurs outside of the splicing consensus sequence and in silico or computational prediction software programs (SpliceSiteFinder, MaxEntScan, NNSPLICE, GeneSplicer) do not predict a difference in splicing: In summary, based on the above information the clinical significance of this variant cannot be determined with certainty at this time although we would lean towards a more pathogenic role for this variant. This variant is classified as likely  pathogenic.
+% {\bf Assessment Date}: 2024/05/13 | {\bf References (PMIDs)}: 12000816, 15300849, 17102069, 19464396, 20660572, 21463266, 22799452, 23512077, 25119015, 25563310, 27539324, 28944243, 29616089, 30042107
+{\bf Assessment Date}: \data{date_verified}
+
+\hdashrule[0.5ex]{\textwidth}{1pt}{1mm}
+
+\paragraph{BACKGROUND INFORMATION}: The VHL gene is associated with the autosomal dominant cancer syndrome von Hippel Lindau disease, which is characterized by retinal hemangiomas, cerebellar and spinal hemangioblastomas, renal cell carcinoma and pheochromocytomas. VHL is often separated into VHL type 1, which has low risk for pheochromocytomas, and VHL type 2, which has a high risk for pheochromocytomas. In general, penetrance is high and age-dependent, with nearly complete penetrance by age 65. Autosomal dominant conditions have a 50\% chance of transmission between first degree relatives: Not all cases will have a variant detectable by this test; therefore, a negative result does not rule out von Hippel Lindau disease in a family. The classification of DNA variants may change over time as new information becomes available. The significance of a DNA alteration should always be interpreted in the context of the individuals clinical manifestations.
+
+\paragraph{TESTING METHODOLOGIES}: Gene sequencing and exon-level copy number variant (CNV) detection were performed by Next-Generation Sequencing (NGS) on an Illumina NovaSeq 6000 or NextSeq 550 instrument. Following enrichment using the Illumina DNA Prep with Enrichment for the full coding regions and splice sites (+ or - 15 base pairs from the exon boundaries) as well as targeted non-coding variants (list available upon request), with a minimum coverage of 20x for the genes listed in the Test Description (reference sequences can be found at: https://www.mountsinai.on.ca/care/pathology/laboratory-forms-and-requisitions/reference-sequence/ , version 2023.01). Regions with coverage less than 20x are covered by Sanger sequencing: In addition, the DNA was analyzed for the presence of the targeted variant: NM\_000551.3(VHL):R167W. DNA variant positions are provided using HGVS nomenclature. Low confidence variants (e.g. low alternate allele frequencies, pseudogene regions, and high GC content) and copy number variants are confirmed by Sanger sequencing (with long-range PCR for certain pseudogene regions) and/or multiplex ligation-dependent probe amplification (MLPA) analysis on a 3730xl DNA Analyzer following an independent isolation of DNA from blood, if available. Variants outside the regions of interest may not be detected or analyzed. Benign or likely benign variants are not included on this report, but are available upon request. Sequencing may not detect all variant types including variants in coding or non-coding regions; including but not limited to variants that could affect gene expression or splicing, deletions, duplications, insertions, indels, chromosomal aberrations or rearrangements. This test has an analytical sensitivity and specificity of >99\% for DNA substitutions and small deletions or duplications (up to 5bp) as well as exon-level or full gene deletions or duplications.
+
+The detection of single nucleotide variations was performed following the Best Practices for Variant Calling with the Genome Analysis Toolkit (GATK 4.1.0) published by the Broad Institute. DNA sequence mapping is performed using the GRCh37/hg19 assembly as the genome reference build. Detection of exon-level copy number variations uses the published and internally validated tool ExomeDepth 1.1.0.
+
+These test results presuppose that the sample received by the Advanced Molecular Diagnostics Laboratory for testing was in fact from this patient and was not contaminated nor subject to sample mix-Up. Results do not include the possibility of sample mix-Up or laboratory error, which is reported to be <1\%. Rare diagnostic errors can result from incorrectly assigned family relationships (e.g. non-paternity) or DNA alterations (e.g. DNA variant under a primer or probe binding site; the presence of pseudogene artifacts). DNA variants or alterations outside the region of analysis will not be detected: This test was not designed to detect somatic variant alterations. These tests were developed and their performance characteristics determined by Mount Sinai Hospital, Department of Pathology and Laboratory Medicine This laboratory is accredited to ISO 15189 Plus by Accreditation Canada Diagnostics. These tests were validated according to accepted practice guidelines for clinical molecular genetic testing by the ACMG and CCMG.
+
+\vspace{2em}
+\hfill \parbox{10cm}{
+Report Electronically Signed by: \\
+Redacted \\
+Laboratory Director
+}
+
+\end{document}

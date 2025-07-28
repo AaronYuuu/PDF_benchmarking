@@ -1,0 +1,108 @@
+\documentclass[9pt]{extarticle}
+
+\usepackage{tgheros} %% Tex Gyre Heros Sans Serif
+\renewcommand*\familydefault{\sfdefault} %% Set base font of the document
+\usepackage[T1]{fontenc}
+\usepackage[margin=1cm]{geometry}
+\usepackage{array}
+\usepackage{draftwatermark}
+\SetWatermarkText{Mock specimen}
+\SetWatermarkScale{.5}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{.5em}
+\setlength{\fboxrule}{0.5mm} 
+\setlength{\arrayrulewidth}{0.3mm}
+\renewcommand{\arraystretch}{1.2}
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+\begin{document}
+\parbox[b][][]{.42\textwidth}{
+\centering
+London Health Sciences Centre\\
+ST JOSEPHS HEALTH CARE LONDON \\
+\vspace{1em}
+{\bf Pathology and Laboratory Medicine}\\ 
+\vspace{1em}
+800 Commissioners Rd E London; Ontario Canada NGA 5W9 \\
+Tel: 519 685-8500 Ext 56495 Fax: 519 667-6705
+}
+\hfill
+\parbox{.55\textwidth}{
+\large
+\begin{tabular}{r l}
+Name: & {\bf Redacted}\\
+Client:  & \data{ordering_clinic}\\
+& \\
+PIN/MRN:  & {\bf Redacted} \\
+Ref \#: &  Redacted \\
+Visit \#: &  Redacted \\
+Location: &  -\\
+Sex: & Male \\
+DOB:  & Redacted \hspace{1ex} Age:\hspace{1ex} Redacted \\
+& \\
+Ordering Dr:  & Redacted \\
+Attending Dr:  & Redacted\\
+\end{tabular}
+}
+
+\fbox{\parbox{\textwidth}{
+\centering \large \bf Molecular Genetics
+}}
+
+\vspace{1ex}
+\begin{center}
+\Large \bf
+Familial Adenomatous Polyposis (FAP)\\
+Extra-Intestinal Manifestations (CHRPE, CMV Thyroid, Desmoid) Screen Report
+\end{center}
+\vspace{1ex}
+
+%TODO: sample type needs some kind of transformation function ("amplified DNA" -> "DNA")
+{\bf Sample ID}: MD-24-0004213 / PAO0123456 \hspace{2em} {\bf Specimen}: \data{sample_type} \hspace{2em} {\bf Received}: \data{date_received}\\
+\begin{tabular}{ | >{\centering\arraybackslash}p{9cm} | >{\centering\arraybackslash}p{9cm} | }
+\hline
+{\large \bf Variant*} & {\large \bf Classification} \\ \hline
+\begin{dataiter}{variants} \data{gene_symbol}:\data{hgvsc} , \data{hgvsp} + & \data{interpretation} \\ \hline
+\end{dataiter}
+\end{tabular}
+
+\subsection*{Interpretation:}
+\vspace{-1em}
+\data{plugin:long_blurb} 
+\newline
+Genetic counseling and clinical following are recommended.
+
+\paragraph{Disease Characteristics:} Familial Adenomatous Polyposis (FAP) is a colon cancer predisposition syndrome associated with development of thousands of adenomatous colonic polyps in early years of life. Extracolonic manifestations associated with this syndrome are variably present and include: polyps of the gastric fundus and duodenum, osteomas, dental anomalies, congenital hypertrophy of the retinal pigment epithelium (CHRPE), soft tissue tumors, desmoid tumors, and associated cancers (PMID: 18612695). Germline mutations in APC gene have been associated with autosomal dominant form of FAP and germline mutations in MUTYH gene have been linked with autosomal recessive form of this disease. This genetic test may confirm a diagnosis and help guide treatment and management decisions.
+
+\paragraph{Methodology:} All coding exons, 20 bp of flanking intronic sequence and the regions listed below the Genes Tested table are enriched using an LHSC custom targeted hybridization protocol (Roche Nimblegen), followed by high throughput sequencing (Illumina). Sequence variants and copy number changes are assessed and interpreted using clinically validated algorithms and commercial software (SoftGenetics: Nextgene, Geneticist Assistant; Mutation Surveyor; and Alamut Visual). All exons have >300x mean read depth coverage, with a minimum 100x coverage at a single nucleotide resolution: This assay meets the sensitivity and specificity of combined Sanger sequencing and MLPA copy number analysis. Variants interpreted as either ACMG category 1, 2 or 3 (pathogenic, likely pathogenic, VUS; PMID: 25741868) are confirmed using Sanger sequencing, MLPA, or other assays when necessary. ACMG category 4 and 5 variants (likely benign, benign) are not reported, but are available upon request. This assay has been validated at a level of sensitivity equivalent to the Sanger sequencing and standard copy number analysis (>99\%; PMID: 27376475, 28818680). Sample fidelity is assessed by matching sequencing results with the Exome QC genotyping assay (Agena).
+
+\paragraph{Disclaimer:} This test was developed and its performance determined by this laboratory, which is accredited by Accreditation Canada. Utilization of the reported results for clinical purposes remains the full responsibility of the practitioner. Testing is highly accurate, however, rare diagnostic errors can arise from specimen mishandling or misinterpretation, and it has been reported that as much as 0.5\% error rate may occur in any of the pre-analytical/analytical or post analytical phases of the test (PMID:11978595).
+
+\paragraph{Genes Tested} (hg19;HGVS nomenclature): \\
+\begin{dataiter}{tested_genes}\data{gene_symbol}, \end{dataiter}
+
+\paragraph{Intronic Regions Tested} (in addition to 20bp flanking coding exons): \\
+NM\_001127511.2(APC):c.-192A>G
+NM\_001127511.2(APC):c-191T>C
+NM\_001127511.2(APC):c.-190G>A
+NM\_001128425.1(MUTYH):c.504+19\_504+31del
+\vspace{1em}
+
+(Electronically signed by) \\
+Redacted \\
+\data{date_verified} \\
+
+\vspace{1em}
+\hrule
+\vspace{1pt}
+\hrule
+\vspace{1em}
+
+Printed: \data{date_verified}\\
+Request ID: Redacted
+
+\end{document}

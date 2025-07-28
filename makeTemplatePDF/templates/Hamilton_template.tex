@@ -1,0 +1,165 @@
+\documentclass[10pt]{article}
+
+\usepackage[T1]{fontenc}
+% \usepackage{anyfontsize}
+% \renewcommand*\ttdefault{lcmtt}
+\usepackage{courierten}
+\renewcommand*\familydefault{\ttdefault} 
+% \usepackage[margin=1cm]{geometry}
+\usepackage[lmargin=1cm,rmargin=1cm,tmargin=4cm,bmargin=3cm,headheight=6em]{geometry} %showframe
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{draftwatermark}
+\SetWatermarkText{Mock specimen}
+\SetWatermarkScale{.5}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\setlength{\fboxrule}{0.5mm} 
+\renewcommand{\headrulewidth}{0pt} % header line width
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhfoffset[L]{0cm} % left extra length
+\fancyhfoffset[R]{0cm} % right extra length
+\lhead{\parbox{\textwidth}{
+\begin{center}{\LARGE \bf Hamilton Regional Laboratory Medicine Program}\end{center}
+\vspace{-2.2em}\begin{center}{\Large Regional Genetics Services of Hamilton}\end{center}
+
+\begin{tabular}{p{12cm} p{7.5cm}}
+Department of Laboratory Medicine & Tel: REDACTED\\
+ADDRESS REDACTED & Fax No.: REDACTED
+\end{tabular}
+}}
+\lfoot{\fbox{\parbox{\textwidth}{
+\begin{center}
+  ** CONTINUED ON NEXT PAGE **\\
+  {\bf FAMILIAL CANCER - GENETICS REPORT}\\
+  {\bf Date fields on this report in the format DD/MM/YY}
+\end{center}
+}}}
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+\begin{document}
+
+\begin{center}{\LARGE Hereditary Cancer Report} \end{center}
+\vspace{-1.2em}
+\fbox{\parbox{\textwidth}{
+\begin{tabular}{p{10cm} p{9.5cm}}
+{\bf Name}: {\Large REDACTED} & {\bf Hospital ID No.}: Redacted \\
+ & {\bf Health Care No.}: - \\
+ {\bf Sex}: M \hspace{2ex} {\bf Age}: Red. \hspace{2ex} {\bf D.O.B}: Redacted & {\bf Account No}.: Redacted \\
+ & {\bf Location}: Redacted \\
+ {\bf Specimen No.}: {\Large 21:M09519} & {\bf Specimen Date}: \data{date_collected} \hspace{2ex} {\bf Status}: SOUT\\
+ {\bf Requesting Physician}: Redacted & {\bf Received Date}: \data{date_received}  \\
+ {\bf Location}: & \\
+ {\bf Specimen}: \data{sample_type}& {\bf Printed On}: \data{date_verified}\\
+\end{tabular}
+}}
+
+{\bf SPECIMEN COMMENTS}: \\
+\hspace*{2ex} EMQN case 3
+
+{\bf HCT LAB \#} : \\
+\hspace*{2ex} HH21-0898
+
+{\bf PROVISIONAL DIAGNOSIS }\\
+\hspace*{2ex} Query hereditary cancer syndrome - personal history of cancer\\
+\hspace*{2ex} Prostate cancer
+
+{\bf MOLECULAR TESTING REQUESTED }\\
+\hspace*{2ex} Hereditary Breast/Ovarian/Prostate Cancer
+
+\setlength{\fboxrule}{0.1mm} 
+\fcolorbox{black}{lightgray}{{\bf \large MOLECULAR ONCOLOGY RESULTS }}\\
+
+\vspace{-1em}
+\hfill \parbox{19cm}{
+  {\bf These findings should be discussed in the context of this individual's family and clinical history in the setting of genetic counselling.}
+
+  \vspace{1em}
+  {\bf Summary}: This is an abnormal result. A pathogenic variant was detected in the gene.
+
+  \vspace{1em}
+  Sequence variant(s) identified:\\
+}
+\begin{dataiter}{variants}
+\vspace{-1em}
+\hfill \parbox{19cm}{
+  Gene (Transcript): \data{gene_symbol} (\data{transcript_id}) \\
+  \vspace{1em}
+  HGVS: \data{hgvsc}, \data{hgvsp} \\
+  Location: exon \data{exon} \\
+  Zygosity: \data{zygosity} \\
+  Variant type: \data{type} \\
+  ACMG classification: \data{interpretation} (category \#1)
+}
+\end{dataiter}
+
+
+\fcolorbox{black}{lightgray}{{\bf \large INTERPRETATION }}\\
+
+\vspace{-1em}
+\hfill \parbox{19cm}{
+  Pathogenic variants in the BRCA2 gene are associated with increased risk of breast, ovarian and several other cancers [1].
+
+  \vspace{1em}
+  Genetic counselling and clinical follow up are recommended.
+
+  \vspace{1em}
+  Variant(s) summary:
+  \vspace{1em}
+  
+  \data{plugin:long_blurb}
+  % This individual is heterozygous for a rare sequence variant in the BRCA2 gene. This variant is a deletion of two nucleotides c.5722\_5723delCT and is predicted to result in the frameshift of the open reading frame creating a premature stop codon p.(Leu1908ArgfsTer2) This variant is predicted to cause loss or disruption of the normal protein function through nonsense-mediated RNA decay or protein truncation. Based on the currently available evidence this variant is classified as pathogenic mutation (ACMG category 1)
+}
+
+{\bf TEST SUMMARY AND REFERENCES}
+
+% \vspace{-1em}
+\hfill \parbox{19cm}{
+\underline{Background}: Hereditary Breast and Ovarian Cancer (HBOC) is an autosomal dominant cancer predisposition syndrome most commonly associated with loss-of-function mutations involving the BRCA1 and BRCA2 genes (OMIM 612535, 604370) [1]. In addition to BRCA1 and BRCA2, there are several other genes associated with increased risks for breast and/or ovarian cancer [1,2] The current test panel allows simultaneous analysis of \data{num_tested_genes} genes.
+
+\vspace{1em}
+\underline{Testing Methods}: A \data{num_tested_genes}-gene panel is analyzed using a custom designed next-generation sequencing (NGS) protocol based on target enrichment of selected gene regions using KAPA HyperChoice chemistry (Roche Sequencing solutions). Next Generation Sequencing (NGS) is performed using MiSeq v2 Reagent Kit on MiSeq instrument (Illumina). Sequence variants and copy number changes are assessed using clinically validated algorithms and commercial software [4]. Sequence alignment and variant calling are performed using NextGENe software (Softgenetics). Sequence variants are annotated using the Geneticist Assistant software, (Softgenetics) Exon level copy number variants (CNVs) are analyzed using the batch CNV tool, NextGENe software (Softgenetics).
+Genes analyzed: \begin{dataiter}{tested_genes}\data{gene_symbol}(\data{refseq_mrna}), \end{dataiter}
+}
+
+\hfill \parbox{19cm}{
+\underline{Gene specific notes}: all coding exons and 20bp of flanking intronic regions are investigated with the exception of: 1) Only the clinically significant sequence variant HOXB13 (NM\_006361.5):c.251G>A, p.(Gly84Glu) will be reported; 2) Only copy number variants are reported for the EPCAM (NM\_002354.2) gene. The following non-coding variants that are outside of the 20 bp of flanking intronic regions are also covered by the current panel: ATM (NM\_000051.3):c.2639-384A>G, c.2839-579\_2839-576del, c.5763-1050A>G; BRCA1 (NM\_007294.3):c.442-22\_442-13del, c.5333-36\_5333-22del; BRCA2 (NM\_000059.3):c.-39-1\_-39del; MLH1 (NM\_000249.3):c.-42C>T, c.-27C>A; MSH2 (NM\_000251.2):c.212-478T>G, c.-82G>C, PMS2 (NM\_000535.6):c.23+21\_23+28del
+
+\vspace{1em}
+\underline{Variant classification and reporting}: Variants are interpreted and classified using ACMG guidelines [5] Variants that are classified as Pathogenic (ACMG 1) Likely Pathogenic (ACMG 2) or Variants of Uncertain Significance (ACMG 3) are reported for all coding exons and 20 bp of flanking intronic regions. Only variants that are classified as Pathogenic (ACMG 1) and Likely Pathogenic (ACMG 2) are reported in additional non-coding regions. Variants classified as Likely Benign (ACMG 4) or Benign (ACMG 5) in all gene regions and variants classified as uncertain clinical significance (ACMG 3) in non-coding regions are not reported but are available upon request.
+
+\vspace{1em}
+\underline{Depth of coverage}: The mean depth of coverage across the targeted regions was 595x. The depth of coverage was suboptimal (below 50x) for none of the targeted regions.
+}
+
+\hfill \parbox{19cm}{
+\underline{Limitations}: The analysis is limited to regions specified above. Regions of certain genes have inherent sequence properties that yield suboptimal data, potentially impairing accuracy of the results. In particular, copy number of the PMS2 and CHEK2 genes may be compromised by the presence of pseudogenes. Copy number variants in the exons 11-15 of the PMS2 gene are not assessed due to high frequency of gene conversions with its pseudogene PMS2CL. Structural variants such as MSH2 exons 1-7 inversion are not detected by this methodology. Complex variants indels larger than 21 bp and single exon copy number variants may be not detected. This test was not validated to detect mosaicism. The classification and interpretation of all variants identified by this assay reflects the current state of scientific understanding at the time this report was issued. In some instances, the classification and interpretation of variants may change as new scientific information becomes available. It is recomended that individuals contact the ordering genetic counsellor or clinician when there is a change in their personal or family history of cancer, or every 1-2 years, in order to receive updated information on genetic test results.
+}
+
+% \begin{verbatim}
+\hfill \parbox{19cm}{
+\underline{References}: [1] GeneReviews 2016 (PMID 20301425), [2] J Mol Diagn 2015; 17: 533-544 (PMID 26207792), [3] N Engl J Med 2012 ; 366 (2) :141-9 (PMID 22236224), [4] J Mol Diagn 2016; 18 :657-667 (PMID 27376475), [5] Genet Med 2015; 17:405-424 (PMID 25741868)
+}
+% \end{verbatim}
+
+\vfill
+
+{\bf Final Electronically Signed} \hfill 12/11/21
+
+% \fbox{
+% \begin{center}
+% \parbox{\textwidth}{
+% \centering
+% ** END OF REPORT ** \hspace{2em} {\bf FAMILIAL CANCER GENETICS REPORT}
+% }
+% \end{center}
+% }
+
+\end{document}

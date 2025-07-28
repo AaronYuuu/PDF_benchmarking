@@ -1,0 +1,148 @@
+\documentclass[10pt,letterpaper]{extarticle}
+
+\usepackage[T1]{fontenc}
+\usepackage{tgheros} %% Tex Gyre Heros Sans Serif font
+\renewcommand*\familydefault{\sfdefault} %% Set base font of the document
+\usepackage[lmargin=1cm,rmargin=1cm,tmargin=4cm,bmargin=4cm,headheight=6em]{geometry} %showframe
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+\usepackage{draftwatermark}
+\SetWatermarkText{Mock specimen}
+\SetWatermarkScale{.5}
+
+% \setlength{\headheight}{6em}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\setlength{\fboxrule}{1pt} 
+\renewcommand{\headrulewidth}{0pt} % header line width
+\renewcommand{\arraystretch}{1.2}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhfoffset[L]{0cm} % left extra length
+\fancyhfoffset[R]{0cm} % right extra length
+\lhead{
+\Large Trillium\\Health Partners\\Better Together\\
+\rule{\textwidth}{2pt}
+}
+\rhead{}
+\lfoot{
+{\scriptsize Patient: Redacted, MRN: -} \hfill Page \thepage \hfill {\scriptsize Pt Location: Trillium Health Partners}
+
+\rule{\textwidth}{1pt}
+
+\parbox{4cm}{\small Credit Valley Hospital, \\2200 Eglinton Avenue West, \\Mississauga, ON LSM 2N1, \\T: (905) 813-2200}
+\hfill
+\parbox{4cm}{\small Mississauga Hospital, \\100 Queensway West, \\Mississauga, ON LSB 1B8, \\T: (905) 848-7100}
+\hfill
+\parbox{4cm}{\small Queensway Health Centre, \\150 Sherway Drive, \\Toronto, ON MIC 1AS, \\T: (416) 259-6671}
+}
+\rfoot{}
+
+%new command to draw a double horizontal rule
+\newcommand{\doublerule}{\rule{\textwidth}{1pt}
+
+\vspace{-2em}%the empty line above is necessary :$
+\rule{\textwidth}{1pt}}
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+\begin{document}
+
+\colorbox[gray]{0.8}{\parbox{\textwidth}{
+  \begin{tabular}{p{.2\textwidth} p{.3\textwidth} p{.2\textwidth} p{.3\textwidth}}
+    {\bf Patient}: & {\Large \bf Redacted} & & \\
+    {\bf D.O.B.}: & Redacted & {\bf Legal Sex}: & Redacted \\
+    {\bf MRN}: & Redacted & {\bf Family Doctor}: & Redacted\\
+    {\bf Account \#}: & Redacted & {\bf Registration Date}: & Redacted\\
+    {\bf Health Card \#}: & Redacted & {\bf Specimen \#}: & 24C-101GMOO14\\
+  \end{tabular}
+}}
+
+{\bf Specimen Details}\\
+\doublerule
+
+\vspace{-1em}
+\begin{tabular}{ p{3.2cm} p{3.2cm} p{3.2cm} p{3.2cm} p{3.2cm} }
+              & \bf Collected: & \bf Received: & \bf Type: & \bf Source: \\ \hline
+\bf 24C-101GMOO14 &  \data{date_collected} & \data{date_received} & \data{} & \data{sample_type}, \data{analysis_type} \\
+\end{tabular}
+
+
+{\bf Hereditary Cancer Panel} (Final result) \\
+\doublerule
+
+{\bf \large Referring Diagnosis:}\\
+Hereditary Breast/Ovarian/Prostate Cancer
+
+{\bf \large Test Summary}
+
+\begin{tabular}{ p{.25\textwidth} p{.25\textwidth} p{.25\textwidth} p{.25\textwidth} }
+\bf Panel & \bf Platform & \bf Software & \bf Genome Build \\
+SOPHiA Custom Hereditary\newline Cancer Solution (CHCS\_AA\_VI) & Illumina NextSeq 550 & Illumina LRM v.2.4,\newline SOPHiA DDM v.5.10 & GRCh37\\
+\end{tabular}
+
+
+{\bf \large Interpretation}
+
+{\bf RESULT: } \data{plugin:summary_blurb}
+% {\bf No pathogenic germline variants were detected:} However, a variant of uncertain significance (VUS) was detected in the PALB2 gene (see below for explanation)
+
+\begin{tabular}{ l l l }
+\bf Classification & \bf Accession(Gene):cDNA,Protein & \bf Zygosity\\
+\begin{dataiter}{variants}\data{interpretation} & \data{transcript_id}(\data{gene_symbol}):\data{hgvsc}, \data{hgvsp} & \data{zygosity}
+\end{dataiter}
+% VUS & NM\_024675.3(PALB2):c.21O6A>G, p.(Ile702Met) & Heterozygous\\
+\end{tabular}
+
+{\bf Interpretation}: \data{plugin:long_blurb}
+%No pathogenic variants were detected in any of the genes targeted by massively parallel sequencing and deletion/duplication analysis. Although this result decreases the likelihood of hereditary cancer; it does not exclude a diagnosis of a hereditary cancer syndrome
+
+% A VUS, c.2106A>6, p.(Ile702Met), was detected in the PALB2 gene. This missense variant is predicted to result in amino acid substitution of isoleucine at codon 702 with methionine. This variant is present at a low frequency in the general population in the Genome Aggregation Database (gnomAD ALL: 0.0011\%, dbSNP: rs730881886; ACMGG PM2), as well as in unaffected individuals [PMID: 33471991]. Although the majority of pathogenic variants in PALB2 are truncating (ACMGG BP1), this variant has been reported in individuals with breast cancer or ovarian cancer [PMID: 35610400; 33471991; 26283626; 29522266] (ACMGG PS4\_Supporting). This variant has also been reported in one individual with colorectal cancer [PMID: 33309985]. In silico analyses are concordant regarding the likely benign effect this variant may have on protein structure and function (ACMGG BP4), however; functional analyses have not been performed to verify these predictions. ClinVar contains an entry for this variant (Variation ID: 182764) where it is classified as uncertain by the majority of submitting laboratories. Given the available evidence, our laboratory currently classifies this a VUS (ACMGG: PS4\_Supporting; PMZ, BPI, BPA) 
+
+{\bf Recommendations}: Medical screening and management should rely on clinical findings and family history. An explanation of these results is available through consultation with the local Genetics clinic.
+
+{\bf Please note}: Variants determined to be benign or likely benign are not included on this report; but are available upon request.
+
+{\bf HBOP1 Genes examined}: \begin{dataiter}{tested_genes}\data{gene_symbol}, \end{dataiter}
+%ATM, BARD1, BRCA1, BRCA2, BRIP1, CDH1, CHEK2, EPCAM (3' copy number assessment only), HOXB13 (exon 1 only), MLH1, MSH2, MSH6, PALB2, PMS2, PTEN, RAD51C, RAD51D, STK11, TP53 
+
+{\bf Methodology}: Massively parallel sequencing of coding exons and exon-intron junctions (+/-20 bp) of the above genes was performed with the Sophia CHCS\_AA\_v1 panel; sequence variant analysis and duplication/deletion analysis using sequence depth assessment was performed on the Sophia DDM software: Confirmation of copy number variants with an alternate method (MLPA or microarray) was performed when necessary and possible. 
+
+{\bf Variant Classification Rules}: ACMG Guidelines. Richards et al, Genet Med. 17:405-424 
+
+{\bf Nomenclature Guidelines}: HGVS Guidelines, varnomen.hgvs.org, Version 20.05. 
+
+{\bf Limitations}: The following may not be detected: low-level mosaics (< 20\% allele frequency), regulatory and deep intronic regions; breakpoints of large deletions or duplications. Diagnostic errors may occur due to rare sequence variants, inaccurate family histories or sample mixup.
+
+{\bf \large Signed By}\\
+Redacted on \data{date_verified}
+
+\vspace{2em}
+\rule{\textwidth}{1pt}\\
+{\small Blood specimen 24C-101GMO014 from Blood, Venous Unspecified. Ordered by Redacted. Authorized by Redacted. Collected: \data{date_collected}, Received: \data{date_received}. Verified: \data{date_verified}. Resulted by Credit Valley Hospital Laboratory Molecular Diagnostics.}
+
+\vspace{2em}
+{\bf \large Resulting Labs}\\
+\doublerule
+
+\begin{tabular}{p{5cm} p{15cm}}
+\bf \small Credit Valley Hospital Laboratory - Molecular Diagnostics & \small C LAB MOLECULAR DIAGNOSTICS, 2200 Eglinton Avenue West; Mississauga ON LSM 2N1
+\end{tabular}
+
+{\bf Lab Section}: Genetics
+
+\begin{center}
+\bf ** END OF REPORT **
+\end{center}
+
+\begin{center}
+\scriptsize
+If you have received this report in error, please return by Fax to Health Information Management at Trillium Health Partners at 905-848-7677. If you don't have access to fax, or have other questions, please call 905-848-7580 ext. 2172
+\end{center}
+
+\end{document}

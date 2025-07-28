@@ -1,0 +1,98 @@
+\documentclass[10pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{mathpazo}
+\usepackage{domitian}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{draftwatermark}
+\SetWatermarkText{Mock specimen}
+\SetWatermarkScale{.5}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\setlength{\fboxrule}{0.5mm} 
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+\begin{document}
+\begin{tabular}{p{3cm} >{\centering\arraybackslash}p{12.5cm} p{3cm}}
+{\Huge \bf KGH} & {\Large \bf DIVISION OF CLINICAL LABORATORIES} \newline
+Molecular Genetics Laboratory \newline
+Douglas 4, Room 8-415 \newline
+76 Stuart Street, Kingston, Ontario, K7L 2V7 \newline
+Phone: 613-549-6666 ext: 4892 FAX: 613-548-1356 \newline \\
+\end{tabular}
+
+\fbox{\parbox{\textwidth}{
+\begin{tabular}{l l l l}
+{\large \bf Patient Name}: Redacted& & {\large \bf DoB:} Redacted& {\large \bf Sex}: Redacted \\[1em]
+{\large \bf HC\#}: Redacted & {\large \bf Location}: Redacted & {\large \bf Alt: Hosp\#}: Redacted& {\large \bf CR\#}: Redacted\\[1em]
+\end{tabular}
+}}
+
+\begin{tabular}{p{4cm} p{5cm} p{4cm} p{5cm}}
+{\bf Accession \#}: & Redacted & {\bf Referring Physician}: & Redacted\\
+{\bf Collection Date/Time} & \data{date_collected} & & \\
+{\bf Arrival Date/Time}: & \data{date_received} & & \\
+{\bf Report Print Date}: & \data{date_verified} & {\bf cc}: & - \\
+\end{tabular}
+
+\rule{\textwidth}{0.5mm}
+
+Reason for Referral: \data{testing_context}\hfill Sample Type: \data{sample_type} \\
+
+\rule{\textwidth}{0.5mm}
+\vspace{-2.8em}
+\begin{center}{\large \bf RESULT}\end{center}
+\vspace{-2.3em}
+\rule{\textwidth}{0.5mm}
+
+TEST DONE: Hereditary Breast/Ovarian Prostate Cancer Panel, \data{num_tested_genes} genes (\begin{dataiter}{tested_genes}\data{gene_symbol}, \end{dataiter})
+
+RESULTS: \data{plugin:summary_blurb}
+
+\begin{dataiter}{variants}
+  % \data{transcript_id}(\data{gene_symbol}):c.\data{hgvsc}(\data{hgvsp})\newline
+  \data{mega_hgvs}\newline
+\end{dataiter}
+% NM\_007294.3(BRCA1):c.[4065\_4068del(p.Asn1355Lysfs*10)];[=]
+
+INTERPRETATION: \\
+\data{plugin:long_blurb}
+% This frameshift variant in the BRCA1 gene results in a deletion of four nucleotides (TCAA), which modifies the reading frame to produce an alternate stop codon, resulting in a prematurely truncated protein. This truncated protein, with legacy nomenclature BRCA1 4181del4, is presumed to be non-functional. The variant has been reported multiple times in ClinVar, with consensus for a pathogenic classification. Loss of one BRCA1 allele is consistent with an increased risk of developing breast/ovarian cancer (PMID: 31897316). This variant has also been identified in multiple independent families with hereditary breast and ovarian cancer (PMID: 23683081; 20104584; 21559243; 11802209). This is classified as a pathogenic variant.
+
+Interpretation of these findings must be made in light of the clinical history and evaluation of this individual. Genetic counselling and appropriate clinical follow up are recommended for this individual.
+
+DISEASE INFORMATION: \\
+Hereditary cancer syndromes are associated with predisposition for a variety of cancers. The gene panel used in this analysis interrogates the coding regions of the genes specified above that have been associated with an increased risk for this syndrome. The finding of pathogenic or likely pathogenic variants in these genes can impact clinical management of individuals, and may support mutation-specific testing for at risk family members.
+
+METHOD: \\
+Testing was performed by massively parallel sequencing using a custom Roche KAPA HyperCap panel with target enrichment probes specific to 75 genes (listed below) with filtered analysis specific to the genes listed above. A library was generated from genomic DNA that included all coding regions of the panel genes indicated, including 20 bases past each intron/exon boundary, with the exception of certain genes where either copy number only (EPCAM, GREM1) or hotspot examination only (EGFR, HOXB13 , MITF) was done: The library was sequenced to an average minimum depth of 500 fold per amplicon, with a minimum required depth of 20 fold per nucleotide. Massively parallel sequencing has an analytic sensitivity and specificity of \textasciitilde 98\% for the detection of nucleotide base alterations and small deletions and insertions. Large deletions or insertions were detected by comparative analysis of library sequencing read depths. The analytic sensitivity for the detection of these larger changes is estimated at 95\%, and specificity at \textasciitilde 98\%.
+
+Pathogenic, likely pathogenic and variants of uncertain significance are reported when they occur in coding regions, variants of unknown significance are not reported when they occur in non-coding regions. Benign and likely benign variants are not reported, but can be provided upon request.
+
+As required, pathogenic, likely pathogenic, and unclassified variants may have been confirmed by bidirectional Sanger sequencing or quantitative PCR with an analytic sensitivity and specificity of >99\% for confirmation analyses. Copy number variants affecting the following genes may be masked due to the presence of multiple pseudogenes: ATM, BMPR1A, CHEK2, FH, NFI, PMS2, PTEN, RPS20, SDHC, SDHD, SMARCE1 .
+
+If analysis of these regions is specifically required, please inform the lab so that additional studies can be discussed.
+
+The nomenclature used is based on the Human Genetic Variation Society (HGVS) guidelines using the GRCh37/hg19 build and NCBI reference sequence database accession numbers as follows: AIP (NM\_003977.3); APC (NM 001127510.2); ATM (NM\_000051.3); AXIN2 (NM\_004655.3); BAP1 (NM\_004656.3); BARD1 (NM\_000465.4); BMPR1A (NM\_004329.2); BRCA1 (NM\_007294.3); BRCA2 (NM\_00005933); BRIP1 (NM\_032043.3); CDC73 (NM\_024529.4); CDHI (NM 004360.4); CDKA (NM\_000075.3); CDKN1B (NM\_004064.4); CDKNZA (NM\_000077.4); CHEKZ (NM\_007194.4); CTNNA1 (NM\_001903.5); DICER1 (NM\_177438.2); EGFR (NM\_005228.3); EGLN1 (NM\_022051.2); EPCAM (NM\_002354.2)-CNV analysis only; EXT1 (NM\_000127.2); EXT2 (NM\_001178083.1); FLCN (NM\_144997.7); FH (NM\_000143.3); GALNT12 (NM\_024642.5): GREM1 (NM\_013372.6)-CNV analysis only; HOXB13 (NM\_006361.5); KIT (NM\_000222.2); LZTR1 (NM\_006767.4); MAX (NM 002382.4); MEN1 (NM\_000244.3); MET (NM 001127500.2); MITF (NM\_198159.2); MLH1 (NM\_000249.3); MSH2 (NM\_000251.2); MSHH (NM\_002439.5); MSH6 (NM\_000179.2); MUTYH (NM 001128425.1); NBN (NM\_002485.4); NF1 (NM\_001042492.2): NF2 (NM\_000268.3); NTHL1 (NM\_002528.7); PALB2 (NM\_024675.3); PDGFRA (NM\_006206.5); PMS2 (NM\_000535.6); POLD1 (NM\_001256849.1); POLE (NM\_006231.3); POT1 (NM\_015450.3); PRKAR1A (NM\_212471.2); PTCH1 (NM\_000264.4); PTEN (NM\_000314.8); RAD51C (NM\_058216.3); RAD51D (NM\_002878.3); RBI (NM\_000321.2); RECQL (NM\_002907.4); RET (NM\_020975.5); RNF43 (NM\_017763.5); RPS20 (NM\_002952.3); SDHA (NM\_004168.4); SDHAF2 (NM\_017841.2); SDHB (NM\_003000.3); SDHC (NM\_003001.3); SDHD (NM\_003002.4); SMAD4 (NM\_005359.5); SMARCA4 (NM\_ 001128849.1); SMARCB1 (NM\_003073.4); SMARCE1 (NM\_003079.4); STK11 (NM\_000455.4); SUFU (NM\_016169.3); TMEM127 (NM\_017849.3); TP53 (NM\_000546.5); TSC1 (NM\_000368.5); TSC2 (NM\_000548.3); VHL (NM\_000551.3)
+
+DISCLAIMER: \\
+Library construction, sequencing, data analysis and confirmatory testing was performed within the Molecular Genetics Laboratory at Kingston Health Sciences Centre, which is accredited and validated to perform such high complexity testing.
+
+\hfill \parbox{12cm}{
+Reported by:\\
+\underline{Redacted }\\
+Director, Molecular Genetics Laboratory \\
+
+\vspace{1em}
+Electronically signed by: \\
+\underline{Redacted}\\
+Date Authorized: -
+}
+\end{document}

@@ -85,33 +85,23 @@ done
 
 eval set -- "$PARAMS"
 
-# Handle template selection
-if [ -n "$TEMPLATES" ]; then
-  # Convert comma-separated templates to array
-  IFS=',' read -ra TEMPLATE_ARRAY <<< "$TEMPLATES"
-elif [ $# -gt 0 ]; then
-  # Single template for backwards compatibility
-  TEMPLATE_ARRAY=("$1")
-else
-  # Default templates - both hospital templates
-  TEMPLATE_ARRAY=("../templates/fakeHospital1.tex" "../templates/fakeHospital2.tex")
-fi
+# Dynamically discover all .tex files in the templates directory
+TEMPLATE_ARRAY=()
+while IFS= read -r -d '' template; do
+    TEMPLATE_ARRAY+=("$template")
+done < <(find ../templates -name "*.tex" -print0)
 
 echo "Output directory: $OUTDIR"
-echo "Templates to process: ${TEMPLATE_ARRAY[*]}"
+echo "Found ${#TEMPLATE_ARRAY[@]} templates to process"
 DATA="$OUTDIR/mock_data.json"
 
 # Generate mock data using the AMOUNT variable (only once)
 echo "Generating mock data files..."
 Rscript generate_mock_data.R --amount "$AMOUNT" --outfile "$DATA"
 
-# For each template, run interpolate with the same JSON data
-echo "Interpolating JSON files with templates..."
-for TEMPLATE in "${TEMPLATE_ARRAY[@]}"; do
-  echo "Processing template: $TEMPLATE"
-  TEMPLATE_NAME=$(basename "$TEMPLATE" .tex)
-  Rscript interpolate.R "$TEMPLATE" "$DATA" --outprefix "$OUTDIR/report_${TEMPLATE_NAME}_"
-done
+# Process all templates with the same JSON data using the --all_templates flag
+echo "Interpolating JSON files with all templates..."
+Rscript interpolate.R "$DATA" --all_templates --outprefix "$OUTDIR/report_"
 
 cd "$OUTDIR"
 # Compile all generated .tex files into PDFs and clean up
@@ -121,6 +111,9 @@ for TEXFILE in report_*.tex; do
   pdflatex -halt-on-error -interaction batchmode "$TEXFILE" && \
   rm "${TEXFILE%.tex}.aux" "${TEXFILE%.tex}.log" "${TEXFILE%.tex}.tex"
 done
-cd -
-
+cd ../scripts
+for PDF in "$OUTDIR"/report_*.pdf; do
+  echo "Distressing $PDF"
+  ./simulate_copier.sh "$PDF"
+done
 echo "All done."

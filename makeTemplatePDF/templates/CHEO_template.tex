@@ -1,0 +1,91 @@
+% chktex-file 44  (disable linter rule #44)
+\documentclass[9pt]{extarticle}
+
+\usepackage{tgheros} %% Tex Gyre Heros Sans Serif font
+\renewcommand*\familydefault{\sfdefault} %% Set base font of the document
+\usepackage[T1]{fontenc}
+\usepackage[margin=3cm]{geometry}
+\usepackage{array}
+\usepackage{draftwatermark}
+\SetWatermarkText{Mock specimen}
+\SetWatermarkScale{.5}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{.5em}
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+\begin{document}
+
+\begin{center}{\large Draft--- Do not use for patient care decisions}\hrule\end{center}
+
+
+\begin{tabular}{p{2cm} >{\centering\arraybackslash}p{11.59cm} p{2cm}}
+{\Huge \bf CHEO} & {\bf Genetics Diagnostic Laboratory} \newline
+401 Smyth Rd, Ottawa, Ontario K1H 8L1 \newline
+(Phone) 613-737-7600 ext. 3796 $\cdot$ (Fax) 613-738-4814 
+& \\
+\end{tabular}
+
+\begin{tabular}{p{2cm} p{5.75cm} p{2cm} p{5.75cm}}
+{\bf Patient:} & Redacted & {\bf Location:} & Redacted \\
+{\bf DOB/Sex:} & Redacted & {\bf Pedigree:} & Redacted\\
+{\bf CHEO MRN:} & Redacted & & \\
+\end{tabular}
+
+Hereditary Breast/Ovarian/Prostate Cancer Panel (In process) 
+\hrule
+\begin{tabular}{p{2cm} p{5.75cm} p{2cm} p{5.75cm}}
+Authorized by: & Redacted & Collected: & \data{date_collected} \\
+Ordered by: & \data{ordering_clinic} & Received: & \data{date_received} \\
+ID: & Redacted & Verified On: & \data{date_verified} \\
+\end{tabular}
+
+\section*{Specimens}
+{\bf A} -  Hereditary Breast/Ovarian/Prostate Cancer Panel, Genetics Blood, edta x2
+
+\section*{Reason for Referral}
+(GD1) > or = 5\% likelihood of Pathogenic/Likely Pathogenic variant in affected or unaffected individual
+
+\section*{MOLECULAR GENETIC RESULT}
+Summary of Results: {\bf \data{plugin:summary_blurb}}
+
+Finding(s): 
+
+\begin{tabular}{ | p{2cm} | p{2cm} | p{2cm} | p{3.8cm} | p{3.8cm} | }
+\hline
+{\bf Gene} & {\bf Variant (c.)} & {\bf Amino acid change (p.)} & {\bf Zygosity} & {\bf Interpretation}
+\\ \hline
+\begin{dataiter}{variants}\data{gene_symbol} & \data{hgvsc} & \data{hgvsp} & \data{zygosity} & \data{interpretation}\\ \hline
+\end{dataiter}
+\end{tabular}
+
+\section*{INTERPRETATION}
+\data{plugin:long_blurb}
+
+Please refer to the ClinVar database for further infomation about this variant(s). If a formal variant re-evaluation is required, please contact our laboratory.
+
+No other clinically relevant sequence variants or large deletions or duplications were detected in the genes tested (see the Test Details section). Although no other pathogenic variants have been found, as the analytical sensitivity of this analysis is based on results of validation studies performed by our laboratory is $\sim 99\%$, it is possible that a pathogenic variant not detectable by these assays is present in one of these genes. In addition; as this test does not detect all clinically significant variants associated with this disorder, it is also possible that a pathogenic variant in another gene not tested is present in this individual.
+
+Genes included in this panel are associated with an increased risk for certain types of hereditary cancers. While the majority of cancers occur sporadically, a proportion may be due to inherited pathogenic variants in genes associated with cancer. Pathogenic variants in these genes are associated with an increased susceptibility to certain malignancies, autosomal recessive conditions, and may cause other non-cancer related symptoms. It is important to note that not all individuals with a pathogenic variant will develop cancer. Genetic testing of at-risk first degree relatives should be considered once identification of a variant has occurred in a proband. The reproductive implications of being a carrier of a pathodenic variant should be discussed with an appropriate health care professional. Genetic counselling is recommended concerning the implications of these results to this individual and this individual's family.
+
+This assay is based on the current state of knowledge of the genetic basis of this disorder and designed to identify constitutional genetic changes in the tested gene/loci (see Test Details). The possibility of null alleles due to rare family specific variants in the primer/probe binding sites cannot be completely ruled out. Family relationships are assumed as stated and no attempt has been made to verify these relationships. Laboratory results are subject to approximately 0.5\% error in any of the pre-analytical, analytical or post-analytical phases of the test [Clin. Chem 48(5).691-698]. 
+
+\section*{Methodology Used}
+Next Generation Sequencing 
+HEREDITARY BREAST AND OVARIAN CANCER \data{num_tested_genes} gene panel, HOXB13 c.251G>A (p.Gly84Glu) variant sequencing, and MLPA for a subset of genes 
+\begin{flushright}
+Electronically signed by [Not yet signed] on [Date] at [Time]
+\end{flushright}
+
+\section*{Test Details}
+Genes analyzed: \begin{dataiter}{tested_genes}\data{gene_symbol}, \end{dataiter}
+
+Genomic DNA is enriched for targeted regions using custom designed capture probes (KAPA HyperChoice) and a hybridization-based protocol (KAPA HyperPlus Custom Library, KAPA Biosystems-Roche) followed by next generation sequencing (NGS) on a NextSeq platform (Illumina). Read alignment and single nucleotide variants (SNV) and small insertion/deletions (indels) calling are performed using NextGENe software (SNP/INDEL analysis, SoftGenetics) SNVs and indels within coding exons and 20 bps flanking regions are analyzed. Certain known likely pathogenic or pathogenic variants outside these reqions are also included in the analysis (for a complete list please contact our laboratory). Exonic deletions and duplications in all targeted genes (except PMS2) are called using an in-house copy number variant (CNV) analysis algorithm (PMID 27376475).  Multiplex ligation-dependent probe amplification (MLPA) is performed for CNV analysis for PMS2. Note that some MLPA kits used as part of this test may contain probes for genes or variants that are not included in our test panels, which could result in incidental findings. All reported variants are confirmed by a second technology including Sanger sequencing; MLPA, long range PCR, or qPCR. Based on validation study results, this assay achieves 99\% analytical sensitivity and specificity for SNV, indels <10bp in length and exonic deletions and duplications; however, sensitivity for indels larger than 10bp but smaller than a full exon may be reduced. This assay is not designed and validated for detection of mosaicism. The following genes and corresponding exons are prone to misalignment due to presence of highly homologous regions in the genome and therefore, are at increased risk of false results: ATM exon 28, CHEK2 exons 11-15, PTEN exon 9 and PMS2 exons 1-5, 9, 11-15 (PMID 27228465). Variant nomenclature is based on the Human Genome Variation Society guidelines. Variant interpretation and classification is based on published guidelines (PMID 25741868). Only pathogenic, likely pathogenic, and variants of uncertain clinical significance are reported.
+
+The following transcripts are used in this analysis: \begin{dataiter}{tested_genes} \data{gene_symbol} (\data{refseq_mrna}),\end{dataiter}
+
+*CNV analysis only; \^{}single variant c.251G>A, p.(Gly84Glu) only
+\end{document}

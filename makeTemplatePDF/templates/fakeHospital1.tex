@@ -53,7 +53,7 @@
 
 
 \begin{center}
-{\Huge \bf LABORATORY RESULTS}
+{\Huge \bf CLINICAL LABORATORY RESULTS}
 \end{center}
 \noindent Report electronically signed by:
 \noindent\hrulefill
@@ -63,7 +63,7 @@
 
 
 
-\parbox[b]{0.60\textwidth}{
+\parbox[t]{10cm}{
   \textbf{\Large Patient Info.} \\[0.5em]
   First Name: Redacted \\
   Last Name: \\
@@ -71,19 +71,18 @@
   Sex: \\
   Health Card: \\
   Medical Record \#: \\
-  Sample tested: \data{sample_type} \\
-  Type of analysis: \data{analysis_type} \\
-  Referral Reason: \data{testing_context} \\
+  Sample tested: \data{sample_type} \data{analysis_type}
+  Referral Reason: \data{testing_context}
   Referring Physician:
 }
 
-\parbox[b]{0.3\textwidth}{
+\parbox[t]{6cm}{
   \textbf{\Large Dates} \\[0.5em]
   Collected – \data{date_collected} \\
   Assessed – \data{date_received} \\
   Reported – \data{date_verified} \\[1em]
   \textbf{\Large Results:} \\[0.5em]
-  \data{summary_blurb} \\
+  \data{plugin:summary_blurb}
 }
 
 
@@ -117,7 +116,7 @@
 \newline
 
 {\Large \bf Findings: }\newline
-\data{blurb} \newline
+\data{plugin:long_blurb} \newline
 \newline
 
 
@@ -126,7 +125,7 @@ We recommend a precision oncology approach. These variants are associated with c
 \newline 
 \newline
 {\Large \bf Methodology} \newline
-Genomic DNA was extracted and analyzed using a custom-designed targeted sequencing panel encompassing all coding exons and at least 20 base pairs of flanking intronic regions for the specified genes. Target enrichment was performed using hybrid capture technology (Twist Bioscience), followed by paired-end sequencing on the Illumina NextSeq platform. Sequencing reads were aligned to \data{reference_genome} human genome reference using BWA-MEM, and variant calling was performed using GATK (Broad Institute). Annotation and interpretation of variants were conducted using VarSeq (Golden Helix), incorporating population frequency databases, in silico prediction tools, and ClinVar. Exon-level copy number variations were evaluated using CNVkit and confirmed by MLPA (MRC Holland) when applicable. Regions with known pseudogene interference, such as PMS2, were validated with long-range PCR and Sanger sequencing. The average read depth across all targeted regions exceeded 300x, with a minimum depth threshold of 50x. The analytical sensitivity for single nucleotide variants and small indels is >99\%, and for exon-level CNVs, >95\%. {\bf Only variants classified as pathogenic, likely pathogenic, or variants of uncertain significance (VUS) are reported}, according to ACMG/AMP guidelines (PMID: 25741868).
+Genomic DNA was extracted and analyzed using a custom-designed targeted sequencing panel encompassing all coding exons and at least 20 base pairs of flanking intronic regions for the specified genes. Target enrichment was performed using hybrid capture technology (Twist Bioscience), followed by paired-end sequencing on the Illumina NextSeq platform. Sequencing reads were aligned to the GRCh37/hg19 human genome reference using BWA-MEM, and variant calling was performed using GATK (Broad Institute). Annotation and interpretation of variants were conducted using VarSeq (Golden Helix), incorporating population frequency databases, in silico prediction tools, and ClinVar. Exon-level copy number variations were evaluated using CNVkit and confirmed by MLPA (MRC Holland) when applicable. Regions with known pseudogene interference, such as PMS2, were validated with long-range PCR and Sanger sequencing. The average read depth across all targeted regions exceeded 300x, with a minimum depth threshold of 50x. The analytical sensitivity for single nucleotide variants and small indels is >99\%, and for exon-level CNVs, >95\%. {\bf Only variants classified as pathogenic, likely pathogenic, or variants of uncertain significance (VUS) are reported}, according to ACMG/AMP guidelines (PMID: 25741868).
 
 
 {\large \bf Limitations \newline}

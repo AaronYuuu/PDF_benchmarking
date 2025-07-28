@@ -1,0 +1,134 @@
+\documentclass[9pt]{extarticle}
+
+\usepackage{tgheros} %%set font to be TexGyre Heros Sans Serif
+\renewcommand*\familydefault{\sfdefault} %% Set base font to be sans serif
+\usepackage[T1]{fontenc}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{array}
+\usepackage{draftwatermark}
+\SetWatermarkText{Mock specimen}
+\SetWatermarkScale{.5}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{.5em}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} 
+
+\fancyhead[C]{\textbf{Blood and Bone Marrow Consultation Report}}
+\fancyhead[R]{\textbf{B22-6528}}
+
+\fancyfoot[C]{\textbf{PM-1 Gynecological Oncology Clinic}}
+\fancyfoot[R]{\textbf{Page \thepage\ of \pageref{LastPage}}}
+
+\renewcommand{\footrulewidth}{0.4pt}
+
+\usepackage{lastpage}
+
+%Define fake commands for values to be replaced by the pre-processor
+\newcommand{\data}[1]{}
+\newenvironment{dataiter}[1]{}{}
+
+\begin{document}
+\begin{center}{\LARGE \bf LABORATORY MEDICINE PROGRAM }\end{center}
+\begin{tabular}{p{4cm} >{\centering \arraybackslash}p{11.59cm} p{10cm}}
+{\Huge \bf University \newline Health \newline Network} & {\bf DEPARTMENT OF LABORATORY HEMATOLOGY} \newline
+200 Elizabeth Street \newline Toronto, Ontario, M5G 2C4 \newline
+TEL: 416-430-5353 \newline FAX: 416-586-9901\newline
+\end{tabular}
+\begin{center}{\Large \bf Blood and Bone Marrow Consultation Report  \hrule }\end{center}
+\begin{tabular}{p{2.5cm} p{3.75cm} p{2.5cm} p{3.75cm} p{2.5cm} p{3.75cm}}
+Patient Name: & Redacted & & & Accession \#: & {\bf B22-6528} \\
+MRN: & Redacted & Service: & Redacted & Collected: & \data{date_collected}\\
+DOB: & Redacted & Visit \#: & Redacted & Received: &  \data{date_received} \\
+& & & & & \\
+Gender: & Redacted & Location & Redacted & Reported: & \data{date_verified} \\
+HCN: & Redacted & Facility: & Redacted & & \\
+Ordering MD: & Redacted & & & & \\
+Copy To: & Redacted &&&&\\
+& & & & & \\
+\end{tabular}
+\hrule
+\begin{raggedright} {\bf \underline {Material Received}} \newline
+1. \data{sample_type} for \data{analysis_type} analysis \newline
+\newline
+{\bf \underline {Other Case Numbers}}\\
+M22-08058 \newline
+\hrule
+\end{raggedright}
+\hrule
+
+{\Large \underline{\bf Diagnosis}}\\
+\begin{tabular}{p{5cm} p{3cm} p{2cm} p{5.75cm}}
+See Genetics Report(s) Below. \newline & & & \\
+&  & & {\bf Electronically Verified By:} \\
+zu6/2/2022
+\end{tabular}
+\hrule
+\hrule
+
+\begin{raggedright}{\bf \underline{Clinical History}}\\
+HBOP Panel \\
+Comment: COPY
+\end{raggedright}
+
+\begin{tabular}{p{10 cm} p{4.5cm}}
+{\bf \underline{Molecular Diagnostics}} & {\bf Status:} Signed Out \\
+& {\bf Date Reported:} \data{date_verified}
+\end{tabular}
+\newline
+\begin{tabular}{p{4cm} p{4 cm}}
+\underline{\bf Interpretation} & \\
+Molecular Number: & M\#22.08058 \\
+{\bf \underline {RESULTS}} & \\
+Results: & Variant(s) detected
+\end {tabular}
+
+\begin{tabular}{p{0cm} p{2cm} p{10cm}}\\
+\begin{dataiter}{variants}
+& {\bf \underline{- - Variant \data{iter_counter}}} & \\
+& Variant: & \data{gene_symbol} (\data{transcript_id}):\data{hgvsc} (\data{hgvsp}) \\
+& Zygosity: & \data{zygosity} \\
+& Classification: & \data{interpretation}\\
+\end{dataiter}
+\end{tabular}
+
+\begin{flushleft}
+Comments \\
+\data{plugin:summary_blurb} 
+\end{flushleft}
+
+\thispagestyle{empty} % No header/footer on the first page
+\pagestyle{fancy}
+
+\begin{flushleft}
+{\bf Specimen tested: } Peripheral blood
+\end{flushleft}
+
+
+\data{plugin:long_blurb}
+\newline
+
+\begin{flushleft}
+{\bf Genes(s)/Panel Tested:}
+
+{\bf Hereditary Breast/Ovarian/Prostate Cancer:}
+
+\begin{dataiter}{tested_genes}
+  \data{gene_symbol} (\data{refseq_mrna}),\end{dataiter}
+
+{\bf Methodology: } Genomic DNA was analyzed using UHN Hereditary Panel version 4.0 to examine the exonic coding regions (+/- 10bp of the intron) of the listed genes, using the Illumina DNA Prep with enrichment hybrid capture followed by paired-end sequencing with the Illumina sequencing platform. Variant calls are generated using the UHN Clinical Laboratory Genetics custom bioinformatics pipeline with alignment to the reference genome sequence build \data{reference_genome}, and variants assessed using Alissa Interpret. For panels that include the EPCAM or GREM1 genes, only copy number variants are evaluated. Long-range PCR and Sanger sequencing were performed for confirmation of variants identified in PMS2 due to regions of high homology. Minimum acceptable coverage for all reported genomic regions is >25x. Exon level deletions or duplications were analyzed using DECON [PMID: 28459104] or using multiplex ligation-dependent probe amplification (MLPA) assays by MRC Holland. The reportable range is 20\%-100\% variant allele frequency. Test sensitivity for this assay is >98\%. Current methodology may not detect all variants or CNV changes present in the tested genes
+
+{\bf Variant Class Reported: } Variants were classified as pathogenic, likely pathogenic, uncertain, likely benign or benign according to 2015 ACMG guidelines (Richards et al 2015, PMID 25741868). Variants classified as likely benign or benign are not reported but are available upon request. 
+
+{\bf Regions with less than 25X read depth: \\}
+None. 
+\newline
+\newline
+A negative finding does not rule out the possibility of a hereditary predisposition to cancer. We recommend that patients be referred to genetic counseling to understand the implications of this result. Molecular testing is available for the patient's family once a mutation is identified in the proband. 
+\newline
+\newline
+The performance characteristics of this test were determined and verified by the Genome Diagnostics Laboratory at the University Health Network. This test has not been cleared or approved by the US FDA. FDA does not require this test to go through premarket FDA review. This test is used for clinical purposes; it should not be regarded as investigational or for research. This laboratory is certified under the Clinical Laboratory Improvement Amendments (CLIA) as qualified to perform high complexity clinical laboratory testing
+\end{flushleft}
+\end{document}

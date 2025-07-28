@@ -50,7 +50,7 @@
 
 \hrule
 \begin{center}
-{\Huge \bf Draft \uppercase {\data{report_type} LABORATORY RESULTS}}
+{\Huge \bf Draft {\uppercase{\data{report_type}} LABORATORY RESULTS}}
 \end{center}
 \hrule
 
@@ -83,8 +83,8 @@ Procedure Date & Accession Date & Report Date \\
 
 {\bf \Large Report Details}
 \\ \\
-Genome Reference - \data{reference_genome} \\
-Sequencing Range - \data{sequencing_scope}, \data{analysis_type}\\ \\
+Genome Reference - \data{reference_genome} \\ \\
+Sequencing information - \data{sequencing_scope}, \data{analysis_type}\\ \\
 Referral Reason - \data{testing_context}\\ \\
 Analysis Location - \data{testing_laboratory}
 
@@ -99,7 +99,7 @@ Analysis Location - \data{testing_laboratory}
 {\bf \large Gene} & {\bf \large Information} & {\bf \large Interpretation} \\
 \hline
 \begin{dataiter}{variants}
-\data{gene_symbol} & \data{exon} \data{hgvsc} \data{hgvsp} \data{zygosity} & \data{interpretation} \\ 
+\data{gene_symbol} & \data{exon} \data{hgvsc} \data{hgvsp} \data{zygosity} & \data{interpretation}, \data{type} \\ 
  \end{dataiter}
 %BRCA1 & 11 c.123A>T p.Lys41* Heterozygous & Pathogenic \\  %test compile
 && \\
@@ -109,27 +109,31 @@ Analysis Location - \data{testing_laboratory}
 \newcolumntype{S}{>{\hsize=0.15\hsize}X}
 
 \begin{tabularx}{\textwidth}{S X}
-{\bf \large Summary: } & \data{summary_blurb}. The details regarding the specific mutations are included below. 
+{\bf \large Summary: } & \data{plugin:summary_blurb}. The details regarding the specific mutations are included below. 
 \end{tabularx}
 
 \newpage
 \vspace{2em}
 {\Huge \bf Variant Interpretation: } 
 \newline
-\data{blurb}
+\newline
+\data{plugin:long_blurb}
 
 
 {\huge \bf \underline{Test Details:}} \newline
 \newline
-{\bf \Large Genes Analyzed and mRNA sequence (NM\_): } \begin{dataiter}{tested_genes}\data{gene_symbol} and \data{refseq_mrna}. \end{dataiter} 
-\data{num_tested_genes} total genes tested. \newline \newline
+{\bf \Large Genes Analyzed: } \begin{dataiter}{tested_genes}\data{gene_symbol}. \end{dataiter} 
+\data{num_tested_genes} total genes tested. 
+
+{\bf \large mRNA ref sequences tested NM\_:}
+\begin{dataiter}{tested_genes}\data{refseq_mrna} \end{dataiter}\newline \newline
 
 {\Large \bf Recommendations \newline}
 A precision oncology approach is advised. These mutations are known oncogenic drivers, linked to constitutive pathway activation. Targeted therapies, including hormone-correcting agents, may be considered, guided by clinical judgment. PI3K inhibitors could be explored in trials for PIK3CA-mutated cases. Germline testing is not indicated, as all mutations are consistent with somatic events. A multidisciplinary tumour board review is recommended to integrate findings into care. Additional testing may be pursued at the physician’s discretion. 
 \newline 
 \newline
 {\Large \bf Methodology \newline}
-\data{sample_type} was sequenced with \data{sequencing_scope} and was analyzed using \data{analysis_type} covering all coding exons and adjacent intronic regions. Target enrichment was performed with hybrid capture (Twist Bioscience), followed by Illumina NextSeq sequencing. Reads were aligned to \data{reference_genome} using BWA-MEM, and variants called with GATK. Annotation was performed in VarSeq using population databases, predictive algorithms, and ClinVar. CNVs were assessed with CNVkit and confirmed by MLPA when applicable. Regions with pseudogene interference, such as PMS2, were validated using long-range PCR and Sanger sequencing. Mean read depth exceeded 300x, with a minimum threshold of 50x. Analytical sensitivity is >99\% for SNVs/indels and >95\% for exon-level CNVs. {\bf Only variants classified as pathogenic, likely pathogenic, or variants of uncertain significance (VUS) are reported}, per ACMG/AMP guidelines (PMID: 25741868).
+\data{sample_type} was sequenced with \data{sequencing_scope} and was analyzed using \data{analysis_type} covering all coding exons and adjacent intronic regions. Target enrichment was performed with hybrid capture (Twist Bioscience), followed by Illumina NextSeq sequencing. Reads were aligned to GRCh37 using BWA-MEM, and variants called with GATK. Annotation was performed in VarSeq using population databases, predictive algorithms, and ClinVar. CNVs were assessed with CNVkit and confirmed by MLPA when applicable. Regions with pseudogene interference, such as PMS2, were validated using long-range PCR and Sanger sequencing. Mean read depth exceeded 300x, with a minimum threshold of 50x. Analytical sensitivity is >99\% for SNVs/indels and >95\% for exon-level CNVs. {\bf Only variants classified as pathogenic, likely pathogenic, or variants of uncertain significance (VUS) are reported}, per ACMG/AMP guidelines (PMID: 25741868).
 
 {\Large \bf Limitations \newline}
 This test was developed and validated in a certified clinical laboratory. Limitations include reduced sensitivity in pseudogene regions (e.g., PMS2, CHEK2), and inability to detect certain structural variants (e.g., MSH2 inversions), deep intronic changes, or low-level mosaicism. PMS2 exons 11–15 are not analyzed. Interpretations reflect current knowledge and may be updated as new evidence emerges.
