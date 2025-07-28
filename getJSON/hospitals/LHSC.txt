@@ -1,0 +1,12 @@
+date_received
+date_verified
+sample_type
+num_tested_genes
+num_variants
+gene_symbol
+hgvsc
+hgvsp
+exon
+interpretation
+mafaf
+type

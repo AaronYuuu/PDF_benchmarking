@@ -1,0 +1,16 @@
+date_collected
+date_received
+date_verified
+testing_context
+ordering_clinic
+num_variants
+gene_symbol
+hgvsc
+hgvsp
+transcript_id
+exon
+zygosity
+interpretation
+mafac
+mafan
+mafaf

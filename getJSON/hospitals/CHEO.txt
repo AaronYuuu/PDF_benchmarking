@@ -1,0 +1,13 @@
+date_collected
+date_received
+date_verified
+ordering_clinic
+num_tested_genes
+num_variants
+gene_symbol
+refseq_mrna
+hgvsc
+hgvsp
+zygosity
+interpretation
+type

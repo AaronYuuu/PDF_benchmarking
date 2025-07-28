@@ -1,0 +1,16 @@
+date_collected
+date_received
+date_verified
+testing_context
+sample_type
+num_tested_genes
+refseq_mrna
+num_variants
+gene_symbol
+hgvsc
+hgvsp
+transcript_id
+interpretation
+mafaf
+mega_hgvs
+type

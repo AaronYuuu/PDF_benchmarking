@@ -1,0 +1,15 @@
+date_collected
+date_received
+date_verified
+sample_type
+analysis_type
+num_tested_genes
+num_variants
+gene_symbol
+hgvsc
+hgvsp
+transcript_id
+zygosity
+interpretation
+mafaf
+type
