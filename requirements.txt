@@ -17,12 +17,8 @@ accelerate
 sentencepiece
 flash-attn
 
-#for biogpt
-sacremoses
-protobuf
-
-
-deepdiff
 
 #ollama
 ollama
+
+timm
