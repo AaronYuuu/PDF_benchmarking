@@ -139,7 +139,7 @@ def main(): #if I ran this on an Ollama server would that
 
 
     ]
-    '''for model in models:
+    for model in models:
         ensure_model_exists(model)   
     print(f"Found {len(models)} models to process.")
     process_text_files_with_models(
@@ -155,7 +155,7 @@ def main(): #if I ran this on an Ollama server would that
         models=models, 
         output_dir="OllamaOutNP",
         llm_function=textToLLM
-    )'''
+    )
     
     
     vision_models = [
