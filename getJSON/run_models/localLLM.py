@@ -81,40 +81,6 @@ def load_model(model_name):
     print(f"✓ Successfully loaded {model_name}")
     return result
 
-def process_with_nuextract(text, model_name):
-    """Process text with NuExtract using official template format."""
-    model, tokenizer = load_model(model_name)
-    
-    # Format prompt with official NuExtract structure
-    template = json.dumps(EXTRACTION_TEMPLATE, indent=4)
-    prompt = f"""<|input|>\n### Template:\n{template}\n### Text:\n{text}\n\n<|output|>"""
-    
-    try:
-        # Tokenize and generate
-        inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=10000).to(model.device)
-        
-        with torch.no_grad():
-            outputs = model.generate(
-                **inputs, 
-                max_new_tokens=4000,
-                pad_token_id=tokenizer.eos_token_id,
-                eos_token_id=tokenizer.eos_token_id
-            )
-        
-        # Decode and extract response
-        output = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        response = output.split("<|output|>")[1].strip() if "<|output|>" in output else output.strip()
-        
-        # Validate JSON
-        try:
-            parsed_json = json.loads(response)
-            return json.dumps(parsed_json, indent=2)
-        except json.JSONDecodeError:
-            return json.dumps({"raw_response": response, "error": "Could not parse as JSON"}, indent=2)
-            
-    except Exception as e:
-        return json.dumps({"error": f"Model processing failed: {str(e)}"}, indent=2)
-
 def process_with_nuextract_2_0_text(text, model_name):
     """Process text with NuExtract 2.0 using the specific chat template."""
     model, processor = load_model(model_name)
@@ -192,30 +158,11 @@ def process_all_text_files(models, output_dir="localout/", text_directory="../ou
         for model in models:
             print(f"  Using model: {model}")
             filename = text_file.replace('.txt', '')
-            if model == "numind/NuExtract-2.0-2B" or model == "numind/NuExtract-2.0-4B":
-                response = process_with_nuextract_2_0_text(text_content, model)
-                save_model_response(model, response, filename, full_output_dir)
-            else:
-                response = process_with_nuextract(text_content, model)
-                save_model_response(model, response, filename, full_output_dir)
+            response = process_with_nuextract_2_0_text(text_content, model)
+            save_model_response(model, response, filename, full_output_dir)
+            
     
     print(f"\nCompleted! Results saved to {full_output_dir}")
-
-def process_all_vision_info(messages):
-    """Extract image data from messages for vision processing."""
-    images = []
-    for message in messages:
-        if isinstance(message.get("content"), list):
-            for content in message["content"]:
-                if content.get("type") == "image" and "image" in content:
-                    image_path = content["image"].replace("file://", "")
-                    try:
-                        image = Image.open(image_path).convert("RGB")
-                        images.append(image)
-                    except Exception as e:
-                        print(f"Error loading image {image_path}: {e}")
-    return images
-
 
   
 def main():

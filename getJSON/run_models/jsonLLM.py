@@ -38,6 +38,8 @@ def group_images_by_source(directory="output_pdfs/images/"):
                 parts = image_file.split("_")
                 if len(parts) >= 2:
                     source_name = parts[1]
+                    if "distressed" in image_file:
+                        source_name += "_distressed"
                     grouped_images[source_name].append(os.path.join(directory, image_file))
         
         # Sort images within each group by page number
@@ -186,6 +188,7 @@ def get_text_files_from_directory(directory="output_pdfs/text/"):
 
 def process_text_files_with_models(models, output_dir, text_directory="../output_pdfs/text/", prompt_path="run_models/prompt.txt", llm_function=None):
     """Process all text files with the given models using the provided LLM function."""
+    import random
     if llm_function is None:
         raise ValueError("llm_function must be provided")
     
@@ -196,7 +199,7 @@ def process_text_files_with_models(models, output_dir, text_directory="../output
     text_files = get_text_files_from_directory(text_directory)
     print(f"Found {len(text_files)} text files to process")
     print(f"Running extraction with {len(models)} models...")
-    
+    random.shuffle(text_files)  # Shuffle files for varied processing order
     for text_file in text_files:
         print(f"\n{'='*60}")
         print(f"Processing file: {text_file}")

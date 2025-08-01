@@ -56,7 +56,10 @@ def split_text(text):
 def main():
     import os
     os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
-    model = GLiNER.from_pretrained("numind/NuNerZero")
+    models = [
+        "numind/NuNerZero", 
+        #"Ihor/gliner-biomed-base-v1.0"
+        ]
     
     labels = [
         "date_collected",
@@ -96,50 +99,60 @@ def main():
     # Create output directory
     os.makedirs("outJSON/glinerOut", exist_ok=True)
     
-    for text_file in text_files:
-        print(f"\nProcessing file: {text_file}")
+    # Process each model
+    for model_name in models:
+        print(f"\n{'='*50}")
+        print(f"Processing with model: {model_name}")
+        print(f"{'='*50}")
         
-        # Read text content using jsonLLM function
-        text_content = read_text_file(os.path.join(text_directory, text_file))
-        if text_content is None:
-            print(f"Failed to read {text_file}, skipping...")
-            continue
+        # Load the current model
+        model = GLiNER.from_pretrained(model_name)
         
-        # Split text into manageable sections
-        texts = split_text(text_content)
-        results = {}
-        
-        for text_section in texts:
-            entities = model.predict_entities(text_section, labels, threshold=0.25)
-            entities = merge_entities(entities, text_section)
+        for text_file in text_files:
+            print(f"\nProcessing file: {text_file} with {model_name}")
             
-            for entity in entities:
-                if entity['label'] in results.keys():
-                    results[entity['label']] += " " + entity['text']
-                else:
-                    results[entity['label']] = entity['text']
-        
-        # Create output data with proper structure
-        output_data = {
-            "model": "numind/NuNerZero",
-            "status": "success",
-            "data": results,
-            "timestamp": "2025-06-19",
-            "source_file": text_file
-        }
-        
-        # Generate filename using same pattern as other models
-        # Extract clean name from text file (e.g., "fakeHospital1" from "report_fakeHospital1__060f50fd...txt")
-        clean_name = text_file.split("_")[1]  # Gets "fakeHospital1" or "fakeHospital2"
-        append = "distressed" if "distressed" in text_file else ""
-        model_name = "numind_NuNerZero"
-        filename = f"outJSON/glinerOut/{clean_name}_{model_name}__{append}__response.json"
-        
-        with open(filename, "w") as f:
-            import json
-            json.dump(output_data, f, indent=2)
-        
-        print(f"✓ GLiNER response saved to {filename}")
+            # Read text content using jsonLLM function
+            text_content = read_text_file(os.path.join(text_directory, text_file))
+            if text_content is None:
+                print(f"Failed to read {text_file}, skipping...")
+                continue
+            
+            # Split text into manageable sections
+            texts = split_text(text_content)
+            results = {}
+            
+            for text_section in texts:
+                entities = model.predict_entities(text_section, labels, threshold=0.25)
+                entities = merge_entities(entities, text_section)
+                
+                for entity in entities:
+                    if entity['label'] in results.keys():
+                        results[entity['label']] += " " + entity['text']
+                    else:
+                        results[entity['label']] = entity['text']
+            
+            # Create output data with proper structure
+            output_data = {
+                "model": model_name,
+                "status": "success",
+                "data": results,
+                "timestamp": "2025-06-19",
+                "source_file": text_file
+            }
+            
+            # Generate filename using same pattern as other models
+            # Extract clean name from text file (e.g., "fakeHospital1" from "report_fakeHospital1__060f50fd...txt")
+            clean_name = text_file.split("_")[1]  # Gets "fakeHospital1" or "fakeHospital2"
+            append = "distressed" if "distressed" in text_file else ""
+            # Convert model name to safe filename format
+            safe_model_name = model_name.replace("/", "_").replace("-", "_")
+            filename = f"outJSON/glinerOut/{clean_name}_{safe_model_name}__{append}__response.json"
+            
+            with open(filename, "w") as f:
+                import json
+                json.dump(output_data, f, indent=2)
+            
+            print(f"✓ GLiNER response saved to {filename}")
     
-    print(f"\nAll files processed. Check outJSON/glinerOut/ folder for results.")
+    print(f"\nAll files processed with all models. Check outJSON/glinerOut/ folder for results.")
 main()

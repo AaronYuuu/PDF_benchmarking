@@ -59,7 +59,7 @@ def imageGroupToLLM(prompt, image_group, model):
             messages=[
                 {
                     "role": "user", 
-                    "content": f"{prompt}\n\nUse these images:",
+                    "content": f"{prompt}\n\nUse these images in place of the input text:",
                     "images": images
                 }
             ]
@@ -94,6 +94,7 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
     
     print(f"Found {len(grouped_images)} source documents with images")
     print(f"Running extraction with {len(models)} vision models...")
+    vision_files = os.listdir("/Users/ayu/PDF_benchmarking/getJSON/outJSON/OllamaVisionOut")
     
     # Process each group of images
     for source_name, image_paths in grouped_images.items():
@@ -149,7 +150,7 @@ def main(): #if I ran this on an Ollama server would that
             llm_function=textToLLM
     )
     
-
+#stop when at 210 files
     process_text_files_with_models(
         prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/NERprompt.txt",
         models=models, 
@@ -175,13 +176,14 @@ def main(): #if I ran this on an Ollama server would that
         models=vision_models,
         output_dir="OllamaVisionOut"
     )
+    '''
 
     process_grouped_images_with_models(
         models=vision_models,
         output_dir="OllamaVisionOutNP",
         image_directory="../output_pdfs/images/",
         prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/NERprompt.txt"
-    )
+    )'''
     
 if __name__ == "__main__":
     main()

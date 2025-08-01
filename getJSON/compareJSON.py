@@ -3,6 +3,8 @@ import os
 import pprint
 import copy as c
 import pandas as pd  # Ensure pandas is imported with alias 'pd'
+from collections import defaultdict
+import re
 
 def compare(json1, json2):
     """
@@ -536,11 +538,13 @@ def determine_model_name(directory, json_data, filename=""):
     elif "qwen2.5-vl-7b" in model_name:
         model_name = "qwen2.5:7b"
     # Add vision indicator if this is a vision-enabled directory
+    elif "biomed_base_v1.0" in model_name:
+        model_name = "biomed_GliNER:"
     if "Vision" in directory:
         model_name = model_name + "*ImageInput*"
     
     # Handle GLiNER models
-    if "gliner" in directory.lower() in model_name.lower():
+    if "gliner" in directory.lower() or "gliner" in model_name.lower():
         model_name = "GLiNER"
 
     #handle LTNER/GPT-NER prompt inspired trials
@@ -548,34 +552,257 @@ def determine_model_name(directory, json_data, filename=""):
     return model_name
  
 
+def is_valid_gene_name(gene_name):
+    """
+    Check if a string represents a valid gene symbol.
+    Valid gene symbols should follow HGNC nomenclature patterns.
+    
+    Args:
+        gene_name (str): The gene name to validate
+        
+    Returns:
+        bool: True if the gene name appears valid, False otherwise
+    """
+    if not gene_name or not isinstance(gene_name, str):
+        return False
+    
+    gene_name = gene_name.strip()
+    
+    # Check for obvious invalid patterns
+    invalid_patterns = [
+        # Contains spaces (except for some rare cases)
+        r'\s',
+        # Contains lowercase letters mixed with uppercase improperly
+        r'[a-z].*[A-Z]|[A-Z].*[a-z].*[A-Z]',
+        # Contains punctuation other than hyphens
+        r'[^\w\-]',
+        # Contains words like "gene", "genes", "and", "or"
+        r'\b(gene|genes|and|or|the|with|protein|transcript)\b',
+        # Contains HGVS notation
+        r'[cp]\.',
+        # Contains RefSeq identifiers
+        r'NM_|XM_|NR_',
+        # Contains obvious OCR corruption (repeated characters, gibberish)
+        r'(.)\1{3,}|[bcdfghjklmnpqrstvwxyz]{6,}',
+        # Too long for a gene name (most are under 15 characters)
+        r'^.{20,}$',
+        # Contains obvious non-gene content
+        r'(variant|mutation|clinical|significance|pathogenic|benign)',
+    ]
+    
+    for pattern in invalid_patterns:
+        if re.search(pattern, gene_name, re.IGNORECASE):
+            return False
+    
+    # Additional checks for completely invalid content
+    if len(gene_name) < 2:  # Too short
+        return False
+    
+    if gene_name.lower() in ['', 'null', 'none', 'unknown', 'na', 'n/a']:
+        return False
+    
+    return True
+
+def is_gene_field(field_name):
+    """
+    Determine if a field name represents a gene symbol, regardless of validity.
+    This is more liberal than is_valid_gene_name and catches both valid and invalid gene attempts.
+    
+    Args:
+        field_name (str): The field name to check
+        
+    Returns:
+        bool: True if this looks like an attempt to extract a gene name
+    """
+    if not field_name or not isinstance(field_name, str):
+        return False
+    
+    field_name = field_name.strip()
+    
+    # Known non-gene fields - these should NOT be consolidated
+    non_gene_fields = {
+        'gene_symbol', 'transcript_id', 'hgvsg', 'hgvsc', 'hgvsp', 'chromosome', 'exon', 
+        'zygosity', 'interpretation', 'mafac', 'mafan', 'mafaf', 'type', 'mega_hgvs',
+        'variant_id', 'testing_laboratory', 'ordering_clinic', 'sample_type', 
+        'analysis_type', 'sequencing_scope', 'reference_genome', 'report_type',
+        'testing_context', 'date_collected', 'date_received', 'date_verified',
+        'num_variants', 'num_tested_genes', 'variants', 'tested_genes', 'report_id'
+    }
+    
+    if field_name.lower() in non_gene_fields:
+        return False
+    
+    # If it's 2-15 characters, mostly uppercase letters/numbers, it's likely a gene attempt
+    if (2 <= len(field_name) <= 15 and 
+        re.match(r'^[A-Z0-9][A-Z0-9\-]*[A-Z0-9]?$', field_name)):
+        return True
+    
+    # Catch other gene-like patterns (even if malformed)
+    gene_like_patterns = [
+        r'^[A-Z]{2,}[0-9]*$',  # Like TP53, BRCA1, etc.
+        r'^[A-Z]+[0-9]+[A-Z]*$',  # Mixed letters and numbers
+        r'^[A-Z]+\-[A-Z0-9]+$',  # Hyphenated
+    ]
+    
+    for pattern in gene_like_patterns:
+        if re.match(pattern, field_name):
+            return True
+    
+    return False
+
+def analyze_fp_fn_by_field(differences, hospital, model_name, template_data, extracted_data):
+    """
+    Analyze false positives and false negatives by individual extraction fields.
+    Creates a single DataFrame with FP/FN counts and tracks hallucinated/missing keys.
+    Consolidates ALL gene-related fields under the general gene_symbol field.
+    
+    Args:
+        differences (list): List of difference strings from comparison
+        hospital (str): Hospital name
+        model_name (str): Model name
+        template_data (dict): Original template data to identify required keys
+        extracted_data (dict): Extracted data to identify hallucinated keys
+    
+    Returns:
+        pd.DataFrame: Single DataFrame with all field-level error data
+    """
+    
+    # Initialize tracking dictionaries
+    fp_counts = defaultdict(int)
+    fn_counts = defaultdict(int)
+    all_fields = set()
+    
+    # Process differences to extract field names and categorize errors
+    for diff in differences:
+        diff_lower = diff.lower()
+        
+        if not ("false positive" in diff_lower or "false negative" in diff_lower):
+            continue
+            
+        path_match = re.search(r'at ([\w\.\_\[\]\/\-]+):', diff)
+        if path_match:
+            path = path_match.group(1)
+            field_name = path.split('.')[-1].split('[')[0]
+            
+            # Consolidate ALL gene-like fields under gene_symbol
+            if is_gene_field(field_name):
+                field_name = 'gene_symbol'
+            
+            all_fields.add(field_name)
+            
+            if "false positive" in diff_lower:
+                fp_counts[field_name] += 1
+            elif "false negative" in diff_lower:
+                fn_counts[field_name] += 1
+    
+    # Get all required keys from template
+    def extract_all_keys(obj, prefix=""):
+        keys = set()
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                current_key = f"{prefix}.{k}" if prefix else k
+                
+                # Consolidate gene-like keys under gene_symbol
+                if is_gene_field(k):
+                    keys.add('gene_symbol')
+                else:
+                    keys.add(k)
+                    
+                if isinstance(v, (dict, list)):
+                    keys.update(extract_all_keys(v, current_key))
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                if isinstance(item, (dict, list)):
+                    keys.update(extract_all_keys(item, f"{prefix}[{i}]" if prefix else str(i)))
+        return keys
+    
+    # Get all extracted keys
+    def extract_extracted_keys(obj, prefix=""):
+        keys = set()
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                current_key = f"{prefix}.{k}" if prefix else k
+                
+                # Consolidate gene-like keys under gene_symbol
+                if is_gene_field(k):
+                    keys.add('gene_symbol')
+                else:
+                    keys.add(k)
+                    
+                if isinstance(v, (dict, list)):
+                    keys.update(extract_extracted_keys(v, current_key))
+        elif isinstance(obj, list):
+            for i, item in enumerate(obj):
+                if isinstance(item, (dict, list)):
+                    keys.update(extract_extracted_keys(item, f"{prefix}[{i}]" if prefix else str(i)))
+        return keys
+    
+    required_keys = extract_all_keys(template_data)
+    extracted_keys = extract_extracted_keys(extracted_data)
+    
+    # Identify missing keys (false negatives) and hallucinated keys (false positives)
+    missing_keys = required_keys - extracted_keys
+    hallucinated_keys = extracted_keys - required_keys
+    
+    # Add missing keys to false negatives (but consolidate gene names)
+    for key in missing_keys:
+        if is_gene_field(key):
+            fn_counts['gene_symbol'] += 1
+            all_fields.add('gene_symbol')
+        else:
+            fn_counts[key] += 1
+            all_fields.add(key)
+    
+    # Create comprehensive field list
+    all_error_fields = sorted(list(all_fields))
+    
+    # Create single row of data
+    row_data = {
+        'hospital': hospital,
+        'model': model_name,
+        'total_fp': sum(fp_counts.values()),
+        'total_fn': sum(fn_counts.values()),
+        'hallucinated_keys_count': len(hallucinated_keys),
+        'hallucinated_keys': '|'.join(sorted(hallucinated_keys)) if hallucinated_keys else '',
+        'missing_keys_count': len(missing_keys),
+        'missing_keys': '|'.join(sorted(missing_keys)) if missing_keys else ''
+    }
+    
+    # Add columns for each field
+    for field in all_error_fields:
+        row_data[f'fp_{field}'] = fp_counts.get(field, 0)
+        row_data[f'fn_{field}'] = fn_counts.get(field, 0)
+    
+    return pd.DataFrame([row_data])
+
+
 def main():
-    import numpy as np  # Ensure numpy is imported with alias 'np'
+    import numpy as np
     import os
     os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
-    with open("../makeTemplatePDF/out/mock_data.json", "r") as f:
-        temp = json.load(f)
-    k = list(temp.keys())[0]
-    template = temp[k]
-    #print("Template loaded successfully.")
-    template = template_to_string(template)  
-
+    
     if os.path.exists("../graphs/Hospital.csv"):
         ovr = pd.read_csv("../graphs/Hospital.csv") 
     else:
         ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Parsed","Hospital", "Prompt", "Distressed"])
 
-    # Expand to all available folders in outJSON with their corresponding sources
+    # Initialize single DataFrame for field-level analysis
+    if os.path.exists("../graphs/field_analysis.csv"):
+        field_analysis_df = pd.read_csv("../graphs/field_analysis.csv") 
+    else:
+        field_analysis_df = pd.DataFrame()
+
     json_direcs = [
         "localout",
-        "glinerOut", 
-        "OllamaOut",
-        "OllamaOutNP",
-        "OllamaVisionOut",
-        "OllamaVisionOutNP",
-        "OpenAIOut", 
-        "OpenAIOutNP",
-        "OpenAIVisionOut",
-        "OpenAIVisionOutNP"
+    #    "glinerOut", 
+    #    "OllamaOut",
+    #    "OllamaOutNP",
+    #    "OllamaVisionOut",
+    #    "OllamaVisionOutNP",
+    #    "OpenAIOut", 
+    #    "OpenAIOutNP",
+    #    "OpenAIVisionOut",
+    #    "OpenAIVisionOutNP"
     ]
     
     hospitals = [
@@ -592,7 +819,16 @@ def main():
                 "UHN"
                  ]
     
-    # Map each directory to its corresponding source
+    lab_to_hospital = {
+        "children's hospital of eastern ontario (ottawa)": "CHEO",
+        "hamilton health sciences (hamilton)": "Hamilton",
+        "hospital for sick children (toronto)": "SickKids",
+        "kingston health sciences centre (kingston)": "Kingston",
+        "london health sciences centre (london)": "LHSC",
+        "north york general hospital (toronto)": "NYGH",
+        "sinai health system (toronto)": "MtSinai"
+    }
+    
     sources = {
         "localout": "huggingface",
         "glinerOut": "gliner",
@@ -612,142 +848,109 @@ def main():
         source = sources[d]
         direc_path = "outJSON/" + direc
         
-        # Check if directory exists and has files
         if not os.path.exists(direc_path):
-            print(f"Directory {direc_path} does not exist, skipping...")
             continue
             
         all_files = [f for f in os.listdir(direc_path) if f.endswith('.json')]
         if not all_files:
-            print(f"No JSON files found in {direc_path}, skipping...")
             continue
         
-        print(f"\n=== Processing directory: {direc} (source: {source}) ===")
-        
-        for hospital in hospitals: 
-            # For now, focus on numind models, but make it flexible for other models
-            if direc == "glinerOut":
-                # GLiNER uses different naming convention
-                json_files = [f for f in all_files if hospital in f and "numind" in f]
-            else:
-                # Standard naming convention for other sources
-                json_files = [f for f in all_files if hospital in f]
+        for json_file in all_files:
+            with open("../makeTemplatePDF/out/mock_data.json", "r") as f:
+                temp = json.load(f)
             
-            if not json_files:
-                print(f"No matching JSON files found for {hospital} in {direc_path}")
-                continue
-            # Filter template for this hospital
+            template = template_to_string(temp)
+            report_id = json_file.split("_")[0].replace(".txt","")
+            hospital = template[report_id].get("testing_laboratory", "").lower()
+            hospital = lab_to_hospital[hospital]
             copy = template_to_string(filter_template(template, hospital))
             copy = dict_to_lowercase(copy)
-            #print(f"\n--- Processing {hospital} in {direc} ---")
-            #pprint.pprint(copy)
-            for json_file in json_files:
-                file_path = os.path.join(direc_path, json_file)
-                try:
-                    with open(file_path, "r") as f:
-                        dtemp = json.load(f)
-                except (json.JSONDecodeError, FileNotFoundError) as e:
-                    #print(f"Error reading {json_file}: {e}")
-                    continue
-                    
-                #print(f"\n--- {json_file} ---")
-                temp_num = dtemp["source_file"].split("_distressed.txt")[-1]
-                temp_num = temp_num.split("_") if "_" in temp_num else [temp_num]
-                temp_num = temp_num[-1]
-                temp_num = temp_num[-1].replace(".txt","")  
-                template = template[temp_num] if isinstance(template, dict) and temp_num in template else template
-                copy = template_to_string(filter_template(template, hospital))
-                copy = dict_to_lowercase(copy)
-                # Handle different file structures based on source
-                if direc == "glinerOut":
-                    # GLiNER has different structure - use the GLiNER comparison function
-                    model_name = determine_model_name(direc, dtemp, json_file)
-                    result = compare_gliner_output(copy, dtemp, hospital, source, model_name, json_file)
-                    ovr = pd.concat([ovr, pd.DataFrame([result])], ignore_index=True)
-                else:
-                    # Use the determine_model_name function for consistent naming
-                    model_name = determine_model_name(direc, dtemp, json_file)
-                    prompt = "LTNER/GPT-NER" if 'NP' in direc else "Normal"
-                    prompt = "None" if "localout" == direc else prompt
-                    # Check for failed JSON parsing
-                    if dtemp.get("status") != "success":
-                        print(f"Model failed to parse JSON - treating as 0% accuracy")
-                        temp_row = {
-                            "LLM": model_name,
-                            "False Positives": np.nan,
-                            "False Negatives": np.nan,
-                            "Incorrect Extractions": np.nan,
-                            "Correct Matches": np.nan,
-                            "Precision": np.nan,
-                            "Recall": np.nan,
-                            "F1score": np.nan,
-                            "Accuracy": np.nan,
-                            "Parsed": False,
-                            "Hospital": hospital,
-                            "Prompt": prompt, 
-                            "Distressed": True if "distressed" in json_file.lower() else False
-                        }
-                        ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
-                        continue
-                    
-                    # Use simplified comparison for valid extractions
-                    try:
-                        #print("Opening layers")
-                        #print("=========================")
-                        data = dict_to_lowercase(dtemp["data"])
-                        # Handle nested report_id structure - flatten it if it exists
-                        if isinstance(data, dict):
-                            for k,v in data.items():
-                                data = v if isinstance(v, dict) else data
-                                break
-                    except KeyError:
-                        data = {}
-                    correct_matches, fp, fn, ic, total_values, differences = compare_values_with_template(copy, data)
-                    #pprint.pprint(copy)
-                    # Calculate metrics using standard formulas
-                    # Precision = TP / (TP + FP) where TP = correct_matches, FP = false_positives
-                    # Recall = TP / (TP + FN) where TP = correct_matches, FN = false_negatives
-                    # F1 = 2 * (Precision * Recall) / (Precision + Recall)
-                    
-                    total_extracted = correct_matches + fp + ic  # Total fields extracted
-                    total_expected = correct_matches + fn  # Total fields that should be extracted
-                    
-                    accuracy = (correct_matches / total_values * 100) if total_values > 0 else 0
-                    precision = (correct_matches / total_extracted * 100) if total_extracted > 0 else 0
-                    recall = (correct_matches / total_expected * 100) if total_expected > 0 else 0
-                    f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-                    
-                  #  print(f"Model: {model_name}")
-                  #  print(f"Correct: {correct_matches}/{total_values}")
-                  #  print(f"FP: {fp}, FN: {fn}, IC: {ic}")
-                  #  print(f"Accuracy: {accuracy:.1f}%, Precision: {precision:.1f}%, Recall: {recall:.1f}%, F1: {f1score:.1f}%")
-                    
-                    # Show some example differences for debugging
-                #    if differences:
-                #        print("Sample differences:")
-                       # for diff in differences:  # Show differences
-                           # print(f"  {diff}")
-                    
+            
+            file_path = os.path.join(direc_path, json_file)
+            try:
+                with open(file_path, "r") as f:
+                    dtemp = json.load(f)
+            except (json.JSONDecodeError, FileNotFoundError) as e:
+                continue
+                
+            temp_num = json_file.split("_")[0].replace(".txt","")
+            template = template[temp_num] if isinstance(template, dict) and temp_num in template else template
+            copy = template_to_string(filter_template(template, hospital))
+            copy = dict_to_lowercase(copy)
+            
+            if direc == "glinerOut":
+                model_name = determine_model_name(direc, dtemp, json_file)
+                result = compare_gliner_output(copy, dtemp, hospital, source, model_name, json_file)
+                ovr = pd.concat([ovr, pd.DataFrame([result])], ignore_index=True)
+            else:
+                model_name = determine_model_name(direc, dtemp, json_file)
+                prompt = "LTNER/GPT-NER" if 'NP' in direc else "Normal"
+                prompt = "None" if "localout" == direc else prompt
+                
+                if dtemp.get("status") != "success":
                     temp_row = {
-                        "LLM": model_name.split("+")[0],
-                        "False Positives": fp,
-                        "False Negatives": fn,
-                        "Incorrect Extractions": ic,
-                        "Correct Matches": correct_matches,
-                        "Precision": precision,
-                        "Recall": recall,
-                        "F1score": f1score,
-                        "Accuracy": accuracy,
-                        "Parsed": True,
-                        "Hospital": hospital, 
-                        "Prompt": prompt,
+                        "LLM": model_name,
+                        "False Positives": np.nan,
+                        "False Negatives": np.nan,
+                        "Incorrect Extractions": np.nan,
+                        "Correct Matches": np.nan,
+                        "Precision": np.nan,
+                        "Recall": np.nan,
+                        "F1score": np.nan,
+                        "Accuracy": np.nan,
+                        "Parsed": False,
+                        "Hospital": hospital,
+                        "Prompt": prompt, 
                         "Distressed": True if "distressed" in json_file.lower() else False
                     }
                     ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
+                    continue
+                
+                try:
+                    data = dict_to_lowercase(dtemp["data"])
+                    if isinstance(data, dict):
+                        for k,v in data.items():
+                            data = v if isinstance(v, dict) else data
+                            break
+                except KeyError:
+                    data = {}
+                
+                correct_matches, fp, fn, ic, total_values, differences = compare_values_with_template(copy, data)
+                
+                total_extracted = correct_matches + fp + ic
+                total_expected = correct_matches + fn
+                
+                accuracy = (correct_matches / total_values * 100) if total_values > 0 else 0
+                precision = (correct_matches / total_extracted * 100) if total_extracted > 0 else 0
+                recall = (correct_matches / total_expected * 100) if total_expected > 0 else 0
+                f1score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+                
+                if differences:
+                    field_analysis = analyze_fp_fn_by_field(differences, hospital, model_name, copy, data)
+                    field_analysis_df = pd.concat([field_analysis_df, field_analysis], ignore_index=True)
+                
+                temp_row = {
+                    "LLM": model_name.split("+")[0],
+                    "False Positives": fp,
+                    "False Negatives": fn,
+                    "Incorrect Extractions": ic,
+                    "Correct Matches": correct_matches,
+                    "Precision": precision,
+                    "Recall": recall,
+                    "F1score": f1score,
+                    "Accuracy": accuracy,
+                    "Parsed": True,
+                    "Hospital": hospital, 
+                    "Prompt": prompt,
+                    "Distressed": True if "distressed" in json_file.lower() else False
+                }
+                ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
 
     # Save results
-    #ovr.to_csv("../graphs/Hospital.csv")
-    #print("Comparison complete. Results saved to Hospital.csv")
+    ovr.to_csv("../graphs/Hospital.csv", index=False)
+    
+    if not field_analysis_df.empty:
+        field_analysis_df.to_csv("../graphs/field_analysis.csv", index=False)
 
 
 if __name__ == "__main__":
