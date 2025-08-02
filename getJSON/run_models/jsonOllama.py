@@ -94,13 +94,39 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
     
     print(f"Found {len(grouped_images)} source documents with images")
     print(f"Running extraction with {len(models)} vision models...")
-    vision_files = os.listdir("/Users/ayu/PDF_benchmarking/getJSON/outJSON/OllamaVisionOut")
+    
+    # Get list of already processed sources from both vision output directories
+    processed_sources = set()
+    vision_out_dirs = [
+        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/OllamaVisionOut",
+        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/OllamaVisionOutNP"
+    ]
+    
+    for vision_dir in vision_out_dirs:
+        if os.path.exists(vision_dir):
+            try:
+                vision_files = os.listdir(vision_dir)
+                for filename in vision_files:
+                    if filename.endswith('_response.json'):
+                        # Extract source ID (UUID) from filename
+                        source_id = filename.split('_')[0]
+                        processed_sources.add(source_id)
+            except Exception as e:
+                print(f"Warning: Could not read {vision_dir}: {e}")
+    
+    print(f"Found {len(processed_sources)} already processed sources, will skip them.")
     
     # Process each group of images
     for source_name, image_paths in grouped_images.items():
         print(f"\n{'='*60}")
         source = image_paths[0].split("_page")[0].split("/images/")[1]  # Extract source name from image paths
         print(f"Processing source: {source} ({len(image_paths)} pages)")
+        
+        # Check if this source has already been processed
+        if source in processed_sources:
+            print(f"⏭️  Skipping {source} - already processed in vision output directories")
+            continue
+        
         print(f"{'='*60}")
         
         # Try each vision model for this image group
