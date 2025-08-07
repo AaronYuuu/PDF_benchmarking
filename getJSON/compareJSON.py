@@ -2,16 +2,9 @@ import json
 import os
 import pprint
 import copy as c
-import pandas as pd  # Ensure pandas is imported with alias 'pd'
+import pandas as pd  
 from collections import defaultdict
 import re
-
-def compare(json1, json2):
-    """
-    Compare two JSON objects for equality.
-    """
-    return json1 == json2
-
 
 def filter_template(template, reportName):
     """
@@ -93,6 +86,7 @@ def dict_to_lowercase(obj):
     return obj
 
 def count_all_template_values(template):
+
     """
     Count ALL string and numeric values in the template, including empty ones and those in nested structures.
     This gives us the true total that should be used as the denominator for accuracy.
@@ -116,6 +110,48 @@ def count_all_template_values(template):
     total = count_recursive(template)
     #print(f"Total template values (including empty): {total}")
     return total
+
+def normalizeNames(x):
+    import re
+    '''
+    Normalize names by removing special characters and converting to lowercase. 
+    bAsed off of ohcrn_lei eval compare_json.py same function
+    '''
+    # normalize hgvs by removing prefixes and brackets
+    x = re.sub(r"Chr.+:g\.", "", x)
+    x = re.sub(r"^g\.|^c\.|^p\.", "", x)
+    x = re.sub(r"^\(|\)$", "", x)
+    if re.match(r"^\d+-\d+$", x):
+      x = re.sub(r"-\d+$", "", x)
+    # normalize omim, clinvar, dbsnp
+    x = re.sub(r"^OMIM\D+", "", x)
+    x = re.sub(r"^Clinvar[^V]*", "", x, flags=re.IGNORECASE)
+    x = re.sub(r"^dbSNP[^r]*", "", x, flags=re.IGNORECASE)
+    # normalize chromosomes
+    if re.match(r"^ChrX$|^ChrY$|^Chr\d$", x, flags=re.IGNORECASE):
+      x = re.sub(r"Chr", "", x, flags=re.IGNORECASE)
+    # remove location tags
+    x = re.sub(
+      r" ?\(Toronto$| ?\(Kingston$| ?\(Ottawa| ?\(London| ?\(Orillia.*| ?\(Mississauga",
+      "",
+      x,
+      flags=re.IGNORECASE,
+    )
+    # convert everything to uppercase for case insensitive matching
+    x = x.lower()
+    # remove extra spaces
+    x = re.sub(r"\s+", " ", x).strip()
+
+    if "e-" in x or "e+" in x:
+        # Handle scientific notation by converting to float and back to string
+        try:
+            num = float(x)
+            x = str(num)
+        except ValueError:
+            pass
+        
+    return x
+
 
 def compare_dict_keys_and_values(dict1, dict2, path=""):
     """
@@ -166,48 +202,6 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
         differences = compare_vals(val1, val2, current_path, differences)
     
     return differences
-
-def normalizeNames(x):
-    import re
-    '''
-    Normalize names by removing special characters and converting to lowercase. 
-    bAsed off of ohcrn_lei eval compare_json.py same function
-    '''
-    # normalize hgvs by removing prefixes and brackets
-    x = re.sub(r"Chr.+:g\.", "", x)
-    x = re.sub(r"^g\.|^c\.|^p\.", "", x)
-    x = re.sub(r"^\(|\)$", "", x)
-    if re.match(r"^\d+-\d+$", x):
-      x = re.sub(r"-\d+$", "", x)
-    # normalize omim, clinvar, dbsnp
-    x = re.sub(r"^OMIM\D+", "", x)
-    x = re.sub(r"^Clinvar[^V]*", "", x, flags=re.IGNORECASE)
-    x = re.sub(r"^dbSNP[^r]*", "", x, flags=re.IGNORECASE)
-    # normalize chromosomes
-    if re.match(r"^ChrX$|^ChrY$|^Chr\d$", x, flags=re.IGNORECASE):
-      x = re.sub(r"Chr", "", x, flags=re.IGNORECASE)
-    # remove location tags
-    x = re.sub(
-      r" ?\(Toronto$| ?\(Kingston$| ?\(Ottawa| ?\(London| ?\(Orillia.*| ?\(Mississauga",
-      "",
-      x,
-      flags=re.IGNORECASE,
-    )
-    # convert everything to uppercase for case insensitive matching
-    x = x.lower()
-    # remove extra spaces
-    x = re.sub(r"\s+", " ", x).strip()
-
-    if "e-" in x or "e+" in x:
-        # Handle scientific notation by converting to float and back to string
-        try:
-            num = float(x)
-            x = str(num)
-        except ValueError:
-            pass
-        
-    return x
-
 
 def compare_string(str1, str2, path=""):
     """
@@ -322,7 +316,7 @@ def compare_values_with_template(template, data):
     fn = 0  # False negatives: missing fields or empty values where template has content
     ic = 0  # Incorrect extractions: wrong values where both template and extraction have content
     correct_matches = 0  # ONLY exact matches of non-empty values
-    count = 0
+    count = 0.0
     for diff in differences:
         diff_lower = diff.lower()
         
@@ -344,7 +338,7 @@ def compare_values_with_template(template, data):
             temp = float(diff_lower.split(" ")[0])
             correct_matches += temp
             ic += 1 - temp
-            count += 1
+            count += temp
     # Verify counts make sense
     
     # Debug information
@@ -530,7 +524,7 @@ def determine_model_name(directory, json_data, filename=""):
     elif "llama3.2_3b" in model_name:
         model_name = "llama3.2:3b"
     elif "numind/NuNerZero" in model_name: 
-        model_name = "GliNER"
+        model_name = "GLiNER"
     elif "llava-llama-3.2-vision" in model_name:
         model_name = "llava-llama3.2:8b"
     elif "mistral_latest" in model_name:
@@ -542,12 +536,6 @@ def determine_model_name(directory, json_data, filename=""):
         model_name = "biomed_GliNER:"
     if "Vision" in directory:
         model_name = model_name + "*ImageInput*"
-    
-    # Handle GLiNER models
-    if "gliner" in directory.lower() or "gliner" in model_name.lower():
-        model_name = "GLiNER"
-
-    #handle LTNER/GPT-NER prompt inspired trials
     
     return model_name
  
@@ -676,12 +664,15 @@ def analyze_fp_fn_by_field(differences, hospital, model_name, template_data, ext
     for diff in differences:
         diff_lower = diff.lower()
         
+        # Skip non-error differences
         if not ("false positive" in diff_lower or "false negative" in diff_lower):
             continue
             
+        # Extract the path/field name from the difference string
         path_match = re.search(r'at ([\w\.\_\[\]\/\-]+):', diff)
         if path_match:
             path = path_match.group(1)
+            # Get the leaf field name (last part after dots, before brackets)
             field_name = path.split('.')[-1].split('[')[0]
             
             # Consolidate ALL gene-like fields under gene_symbol
@@ -690,85 +681,70 @@ def analyze_fp_fn_by_field(differences, hospital, model_name, template_data, ext
             
             all_fields.add(field_name)
             
+            # Count the error type
             if "false positive" in diff_lower:
                 fp_counts[field_name] += 1
             elif "false negative" in diff_lower:
                 fn_counts[field_name] += 1
     
-    # Get all required keys from template
-    def extract_all_keys(obj, prefix=""):
+    # Also process structural differences (missing/extra keys at dict level)
+    def extract_all_leaf_keys(obj, prefix=""):
+        """Extract all leaf keys from nested structure"""
         keys = set()
         if isinstance(obj, dict):
             for k, v in obj.items():
-                current_key = f"{prefix}.{k}" if prefix else k
-                
-                # Consolidate gene-like keys under gene_symbol
-                if is_gene_field(k):
-                    keys.add('gene_symbol')
-                else:
-                    keys.add(k)
+                if isinstance(v, (dict, list)) and v:  # Non-empty nested structures
+                    keys.update(extract_all_leaf_keys(v, f"{prefix}.{k}" if prefix else k))
+                else:  # Leaf nodes (including empty values)
+                    leaf_key = f"{prefix}.{k}" if prefix else k
+                    # Get just the field name
+                    field_name = leaf_key.split('.')[-1].split('[')[0]
                     
-                if isinstance(v, (dict, list)):
-                    keys.update(extract_all_keys(v, current_key))
+                    # Consolidate gene-like keys under gene_symbol
+                    if is_gene_field(field_name):
+                        keys.add('gene_symbol')
+                    else:
+                        keys.add(field_name)
         elif isinstance(obj, list):
             for i, item in enumerate(obj):
                 if isinstance(item, (dict, list)):
-                    keys.update(extract_all_keys(item, f"{prefix}[{i}]" if prefix else str(i)))
-        return keys
-    
-    # Get all extracted keys
-    def extract_extracted_keys(obj, prefix=""):
-        keys = set()
-        if isinstance(obj, dict):
-            for k, v in obj.items():
-                current_key = f"{prefix}.{k}" if prefix else k
-                
-                # Consolidate gene-like keys under gene_symbol
-                if is_gene_field(k):
-                    keys.add('gene_symbol')
+                    keys.update(extract_all_leaf_keys(item, f"{prefix}[{i}]" if prefix else str(i)))
                 else:
-                    keys.add(k)
-                    
-                if isinstance(v, (dict, list)):
-                    keys.update(extract_extracted_keys(v, current_key))
-        elif isinstance(obj, list):
-            for i, item in enumerate(obj):
-                if isinstance(item, (dict, list)):
-                    keys.update(extract_extracted_keys(item, f"{prefix}[{i}]" if prefix else str(i)))
+                    # Leaf item in list
+                    field_name = f"{prefix}[{i}]" if prefix else str(i)
+                    keys.add(field_name.split('.')[-1].split('[')[0])
         return keys
     
-    required_keys = extract_all_keys(template_data)
-    extracted_keys = extract_extracted_keys(extracted_data)
+    # Get all leaf keys from both template and extracted data
+    template_keys = extract_all_leaf_keys(template_data)
+    extracted_keys = extract_all_leaf_keys(extracted_data)
     
-    # Identify missing keys (false negatives) and hallucinated keys (false positives)
-    missing_keys = required_keys - extracted_keys
-    hallucinated_keys = extracted_keys - required_keys
-    
-    # Add missing keys to false negatives (but consolidate gene names)
-    for key in missing_keys:
+    # Add any keys that might have been missed in the differences processing
+    all_possible_keys = template_keys | extracted_keys
+    for key in all_possible_keys:
         if is_gene_field(key):
-            fn_counts['gene_symbol'] += 1
             all_fields.add('gene_symbol')
         else:
-            fn_counts[key] += 1
             all_fields.add(key)
     
     # Create comprehensive field list
     all_error_fields = sorted(list(all_fields))
     
+    # Calculate totals - these should match the main comparison totals
+    total_fp = sum(fp_counts.values())
+    total_fn = sum(fn_counts.values())
+    
     # Create single row of data
     row_data = {
         'hospital': hospital,
         'model': model_name,
-        'total_fp': sum(fp_counts.values()),
-        'total_fn': sum(fn_counts.values()),
-        'hallucinated_keys_count': len(hallucinated_keys),
-        'hallucinated_keys': '|'.join(sorted(hallucinated_keys)) if hallucinated_keys else '',
-        'missing_keys_count': len(missing_keys),
-        'missing_keys': '|'.join(sorted(missing_keys)) if missing_keys else ''
+        'total_fp': total_fp,
+        'total_fn': total_fn,
+        'template_keys_count': len(template_keys),
+        'extracted_keys_count': len(extracted_keys)
     }
     
-    # Add columns for each field
+    # Add columns for each field's FP/FN counts
     for field in all_error_fields:
         row_data[f'fp_{field}'] = fp_counts.get(field, 0)
         row_data[f'fn_{field}'] = fn_counts.get(field, 0)
@@ -781,8 +757,8 @@ def main():
     import os
     os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
     
-    if os.path.exists("../graphs/Hospital.csv"):
-        ovr = pd.read_csv("../graphs/Hospital.csv") 
+    if os.path.exists("../graphs/Hospitaltest.csv"):
+        ovr = pd.read_csv("../graphs/Hospitaltest.csv") 
     else:
         ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Parsed","Hospital", "Prompt", "Distressed"])
 
@@ -794,30 +770,16 @@ def main():
 
     json_direcs = [
         "localout",
-    #    "glinerOut", 
-    #    "OllamaOut",
-    #    "OllamaOutNP",
-    #    "OllamaVisionOut",
+        "glinerOut", 
+       "OllamaOut",
+      #  "OllamaOutNP",
+    #   "OllamaVisionOut",
     #    "OllamaVisionOutNP",
-    #    "OpenAIOut", 
-    #    "OpenAIOutNP",
-    #    "OpenAIVisionOut",
-    #    "OpenAIVisionOutNP"
+        "OpenAIOut", 
+        "OpenAIOutNP",
+        "OpenAIVisionOut",
+        "OpenAIVisionOutNP"
     ]
-    
-    hospitals = [
-                "fakeHospital1", 
-                "fakeHospital2",
-                "CHEO",
-                "Hamilton",
-                "Kingston",
-                "LHSC",
-                "MtSinai",
-                "NYGH",
-                "SickKids",
-                "Trillium",
-                "UHN"
-                 ]
     
     lab_to_hospital = {
         "children's hospital of eastern ontario (ottawa)": "CHEO",
@@ -947,7 +909,7 @@ def main():
                 ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
 
     # Save results
-    ovr.to_csv("../graphs/Hospital.csv", index=False)
+    ovr.to_csv("../graphs/Hospitaltest.csv", index=False)
     
     if not field_analysis_df.empty:
         field_analysis_df.to_csv("../graphs/field_analysis.csv", index=False)

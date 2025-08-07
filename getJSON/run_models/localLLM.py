@@ -3,8 +3,6 @@ from jsonLLM import save_model_response
 import torch
 import json
 import os
-from collections import defaultdict
-from PIL import Image
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoModelForVision2Seq, AutoProcessor
 
 # Global cache for loaded models
