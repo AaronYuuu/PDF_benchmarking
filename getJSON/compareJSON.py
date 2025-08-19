@@ -123,6 +123,14 @@ def normalizeNames(x):
     x = re.sub(r"^\(|\)$", "", x)
     if re.match(r"^\d+-\d+$", x):
       x = re.sub(r"-\d+$", "", x)
+    if re.match(r"^g+[0-9]", x):
+        x = re.sub(r"^g","", x)
+
+    if re.match(r"^c+[0-9]", x):
+        x = re.sub(r"^c","", x)
+
+    if re.match(r"^p+[0-9]", x):
+        x = re.sub(r"^c","", x)
     # normalize omim, clinvar, dbsnp
     x = re.sub(r"^OMIM\D+", "", x)
     x = re.sub(r"^Clinvar[^V]*", "", x, flags=re.IGNORECASE)
@@ -241,8 +249,8 @@ def compare_string(str1, str2, path=""):
     elif norm_str1 and not norm_str2:
         # Template has value but extraction empty/null
         differences.append(f"FALSE NEGATIVE at {path}: expected '{str1}' but got empty/null")
-    elif norm_str1 in norm_str2:
-        differences.append(f"{len(norm_str1)/len(norm_str2):.2f} PARTIAL MATCH at {path}: '{norm_str2}' found in '{norm_str1}'")
+    elif norm_str2 in norm_str1:
+        differences.append(f"{len(norm_str2)/len(norm_str1):.2f} PARTIAL MATCH at {path}: '{norm_str2}' found in '{norm_str1}'")
     else:
         differences.append(f"VALUE MISMATCH at {path}: expected '{str1}' but got '{str2}'")
     
@@ -317,6 +325,8 @@ def compare_values_with_template(template, data):
     ic = 0  # Incorrect extractions: wrong values where both template and extraction have content
     correct_matches = 0  # ONLY exact matches of non-empty values
     count = 0.0
+
+    
     for diff in differences:
         diff_lower = diff.lower()
         
@@ -335,7 +345,13 @@ def compare_values_with_template(template, data):
         elif "partial match" in diff_lower:
             #print(diff_lower)
             #print(diff.lower().split(" "))
-            temp = float(diff_lower.split(" ")[0])
+            location = diff_lower.split(" at ")[1]
+            temp = 0.0
+            valid = ["date", 'report_type', "testing context", 
+             'ordering_clinic', 'testing_laboratory', "sequencing_scope", 
+             "sample_type", "analysis_type", "reference_genome"]
+            if location in valid:
+                temp = float(diff_lower.split(" ")[0])
             correct_matches += temp
             ic += 1 - temp
             count += temp
@@ -757,24 +773,24 @@ def main():
     import os
     os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
     
-    if os.path.exists("../graphs/Hospitaltest.csv"):
+    '''if os.path.exists("../graphs/Hospitaltest.csv"):
         ovr = pd.read_csv("../graphs/Hospitaltest.csv") 
-    else:
-        ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Parsed","Hospital", "Prompt", "Distressed"])
+    else:'''
+    ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Parsed","Hospital", "Prompt", "Distressed"])
 
     # Initialize single DataFrame for field-level analysis
-    if os.path.exists("../graphs/field_analysis.csv"):
+    '''if os.path.exists("../graphs/field_analysis.csv"):
         field_analysis_df = pd.read_csv("../graphs/field_analysis.csv") 
-    else:
-        field_analysis_df = pd.DataFrame()
+    else:'''
+    field_analysis_df = pd.DataFrame()
 
     json_direcs = [
-        "localout",
+        #"localout",
         "glinerOut", 
        "OllamaOut",
-      #  "OllamaOutNP",
-    #   "OllamaVisionOut",
-    #    "OllamaVisionOutNP",
+        "OllamaOutNP",
+       "OllamaVisionOut",
+        "OllamaVisionOutNP",
         "OpenAIOut", 
         "OpenAIOutNP",
         "OpenAIVisionOut",
@@ -909,10 +925,10 @@ def main():
                 ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
 
     # Save results
-    ovr.to_csv("../graphs/Hospitaltest.csv", index=False)
+    ovr.to_csv("../graphs/Hospital3.csv", index=False)
     
     if not field_analysis_df.empty:
-        field_analysis_df.to_csv("../graphs/field_analysis.csv", index=False)
+        field_analysis_df.to_csv("../graphs/field_analysis3.csv", index=False)
 
 
 if __name__ == "__main__":
