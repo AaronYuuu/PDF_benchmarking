@@ -316,10 +316,9 @@ def compare_values_with_template(template, data):
     """
     differences = compare_dict_keys_and_values(template, data)
     
-    # Calculate actual template values
+    # Calculate all template values
     total_template_values = count_all_template_values(template)
     
-    # Properly categorize differences - ONLY exact matches count as correct
     fp = 0  # False positives: extra fields, placeholder values, or wrong values where template is empty
     fn = 0  # False negatives: missing fields or empty values where template has content
     ic = 0  # Incorrect extractions: wrong values where both template and extraction have content
@@ -355,7 +354,6 @@ def compare_values_with_template(template, data):
             correct_matches += temp
             ic += 1 - temp
             count += temp
-    # Verify counts make sense
     
     # Debug information
     #print(f"  Categorization: Correct={correct_matches}, FP={fp}, FN={fn}, IC={ic}")
