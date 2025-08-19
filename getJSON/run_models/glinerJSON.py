@@ -58,7 +58,7 @@ def main():
     os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
     models = [
         "numind/NuNerZero", 
-        #"Ihor/gliner-biomed-base-v1.0"
+        "Ihor/gliner-biomed-base-v1.0"
         ]
     
     labels = [
@@ -87,7 +87,8 @@ def main():
         "mafan",
         "mafaf",
         "num_variants",
-        "reference_genome"
+        "reference_genome",
+        "type"
     ]
     
     # Use jsonLLM functions to read text files from output_pdfs/text directory
