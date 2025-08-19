@@ -139,12 +139,12 @@ def main():
     print(f"Available models: {OPENAI_MODELS}")
     
     # Use the shared processing function
-    '''process_text_files_with_models(
+    process_text_files_with_models(
         models=OPENAI_MODELS,
         output_dir="OpenAIOut/", 
         text_directory="../output_pdfs/text/", 
         llm_function=textToLLM
-    )'''
+    )
     
     '''process_grouped_images_with_models(
         models=OPENAI_MODELS,
@@ -158,41 +158,18 @@ def main():
         output_dir="OpenAIVisionOut/",
         image_directory="../output_pdfs/images/",
     )'''
-    process_text_files_with_models(
+    '''process_text_files_with_models(
         models=OPENAI_MODELS,
         output_dir="OpenAIOutNP/", 
         text_directory="../output_pdfs/text/", 
         llm_function=textToLLM,
         prompt_path="run_models/NERprompt.txt"
-    )
+    )'''
     print("Processing completed.")
 
-
-def main2():
-    # List of OpenAI models to try
-    OPENAI_MODELS = [
-        "gpt-4.1-mini",
-        #"gpt-4.1-nano", 
-        #"gpt-4.1"
-        #"gpt-4o" #more expensuive may not be applicable or accessible for use in remote areas
-        # Add more OpenAI models as needed
-    ]
-    
-    print("Starting OpenAI model processing...")
-    print(f"Available models: {OPENAI_MODELS}")
-    
-    # Use the shared processing function
-    process_text_files_with_models(
-        models=OPENAI_MODELS,
-        output_dir="OpenAIOutNP/", 
-        text_directory="../output_pdfs/text/", 
-        llm_function=textToLLM,
-        prompt_path="run_models/NERprompt.txt"
-    )
-
 def main3():
-    main()
-
+    #main()
+    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")  # Ensure we are in the correct directory
     # List of OpenAI models to try
     OPENAI_MODELS = [
         "gpt-4.1-mini",

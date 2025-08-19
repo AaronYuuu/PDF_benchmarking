@@ -199,12 +199,7 @@ def process_text_files_with_models(models, output_dir, text_directory="../output
     # Get list of already processed sources from all text output directories
     processed_sources = set()
     text_out_dirs = [
-        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/OllamaOut",
-        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/OllamaOutNP",
-        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/OpenAIOut",
-        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/OpenAIOutNP",
-        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/glinerOut",
-        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/localout"
+        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/" + output_dir
     ]
     
     for text_dir in text_out_dirs:

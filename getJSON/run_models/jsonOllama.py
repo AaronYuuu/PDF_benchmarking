@@ -98,8 +98,7 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
     # Get list of already processed sources from both vision output directories
     processed_sources = set()
     vision_out_dirs = [
-        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/OllamaVisionOut",
-        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/OllamaVisionOutNP"
+        "/Users/ayu/PDF_benchmarking/getJSON/outJSON/" + output_dir
     ]
     
     for vision_dir in vision_out_dirs:
@@ -107,9 +106,11 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
             try:
                 vision_files = os.listdir(vision_dir)
                 for filename in vision_files:
-                    if filename.endswith('_response.json'):
+                    if filename.endswith('.json'):
                         # Extract source ID (UUID) from filename
                         source_id = filename.split('_')[0]
+                        if "distressed" in filename.lower():
+                            source_id += "_distressed"
                         processed_sources.add(source_id)
             except Exception as e:
                 print(f"Warning: Could not read {vision_dir}: {e}")
@@ -121,9 +122,9 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
         print(f"\n{'='*60}")
         source = image_paths[0].split("_page")[0].split("/images/")[1]  # Extract source name from image paths
         print(f"Processing source: {source} ({len(image_paths)} pages)")
-        
+        s = source.replace("report_", "")  # Clean up source name if needed
         # Check if this source has already been processed
-        if source in processed_sources:
+        if s in processed_sources:
             print(f"⏭️  Skipping {source} - already processed in vision output directories")
             continue
         
@@ -202,14 +203,63 @@ def main(): #if I ran this on an Ollama server would that
         models=vision_models,
         output_dir="OllamaVisionOut"
     )
-    '''
+    
 
     process_grouped_images_with_models(
         models=vision_models,
         output_dir="OllamaVisionOutNP",
         image_directory="../output_pdfs/images/",
         prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/NERprompt.txt"
-    )'''
+    )
+
+def main_vision():
+    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
+    vision_models = [
+       "mistral-small3.1:latest", #24b
+       "gemma3:27b", #27b
+    ]
+    print(f"Found {len(vision_models)} vision models to process.")
+    process_grouped_images_with_models(
+        models=vision_models,
+        output_dir="OllamaVisionOut"
+    )
+
+def main_ner():
+    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
+    vision_models = [
+       # "mistral:7b",     # Fast and capable
+        #"phi3:mini",      # Very efficient
+        #"gemma3:1b",
+        #"gemma3:1b-it-qat",  #quantized 1b
+     #   "gemma3n:e4b", #optimiazed for laptops
+     #   "qwen2.5vl:7b", #vision model
+        #"qwen3:4B", #good for laptops
+        #"gemma3:12b",    # can also do images unblock when done this trial
+        #"llama3.2:1b", 
+        #"llama3.2:3b",
+       #"llama3.2-vision",
+     #  "llava-llama3:8b",
+     #   "granite3.2-vision:2b",#specialized for document tasks (vision model only)
+
+        #==============HPC models========================
+        "mistral-small3.1:latest", #24b
+        #"llama3.1:70b", #70b
+        "gemma3:27b", #27b
+
+
+
+    ]
+    for model in vision_models:
+        ensure_model_exists(model)   
+    
+    
+#stop when at 210 files
+    process_grouped_images_with_models(
+        models=vision_models,
+        output_dir="OllamaVisionOutNP",
+        image_directory="../output_pdfs/images/",
+        prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/NERprompt.txt"
+    )
     
 if __name__ == "__main__":
     main()
