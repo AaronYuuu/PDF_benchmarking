@@ -416,7 +416,7 @@ tryCatch({
     )
 
     # Add custom rotated x-axis labels
-    x_coords <- colMeans(xs)
+    x_coords <- colMeans(xs) + 0.5
     # Adjust y position to be below the plot area
     y_pos <- par("usr")[3] - 2 
     text(x = x_coords, y = y_pos, labels = rownames(f1_mat), srt = 0, adj = 1, xpd = TRUE)
