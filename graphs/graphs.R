@@ -401,9 +401,9 @@ mycolors <- c("firebrick2", "firebrick4", "steelblue2", "steelblue4")
 
 # Use tryCatch to ensure dev.off() is called even if errors occur
 tryCatch({
-    png("F1_scores_plot.png", width = 16, height = 8, units = "in", res = 1200)
+    png("F1_scores_plot.png", width = 10, height = 5, units = "in", res = 600)
     # Set margins and axis label orientations
-    op <- par(mar = c(8, 4, 4, 2), cex = 1.2)
+    op <- par(mar = c(2, 4, 4, 2), cex = 1.2)
 
     # Draw plot
     xs <- barplot(
