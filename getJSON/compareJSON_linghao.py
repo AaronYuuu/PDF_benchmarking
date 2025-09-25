@@ -207,7 +207,7 @@ def compare_dict_keys_and_values(dict1, dict2, path=""):
         
         # Both values are strings (or converted from null) - exact comparison
         differences = compare_vals(val1, val2, current_path, differences)
-    
+
     return differences
 
 def compare_string(str1, str2, path=""):
@@ -803,15 +803,13 @@ def extract_hospital_from_template(expected_report):
 
     return expected_report, hospital
 
-def linghao_code():
-
-    data_dir = "/u/lsong/labspace/lei_notebook/data/"
+def linghao_code(data_dir, mock_data_test_output):
 
     import pickle
     import pandas as pd
 
     #load mock data dictionary
-    with open(f"{data_dir}mock_data_test_output_10ct.pkl", "rb") as f:
+    with open(data_dir+mock_data_test_output, "rb") as f:
         mock_report_outputs = pickle.load(f)
 
     ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Parsed","Hospital", "Prompt", "Distressed"])
@@ -826,12 +824,12 @@ def linghao_code():
         # Prepare template for this hospital
         expected_report = template_to_string(expected_report)
 
-        model_name = "Gemma3-27B"
+        model_name = "Gemma3-2B"
         prompt = "Normal"
         from run_models.jsonLLM import extract_json_from_response
 
         parsed_output_json = extract_json_from_response(mock_report_outputs[keys]["response"])
-
+        
         correct_matches, fp, fn, ic, total_values, differences = compare_values_with_template(expected_report, parsed_output_json)
 
         total_extracted = correct_matches + fp + ic
@@ -864,7 +862,9 @@ def linghao_code():
         ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
 
     # Save results
-    ovr.to_csv(f"{data_dir}Hospitalfinal.csv", index=False)
+    ovr.to_csv(f"{data_dir}{mock_data_test_output}_Hospitalfinal.csv", index=False)
 
 if __name__ == "__main__":
-    linghao_code()
+    data_dir = "/u/lsong/labspace/lei_notebook/data/"
+    mock_data_test_output = "output_gemma-3-27b-it_200ct.pkl"
+    linghao_code(data_dir, mock_data_test_output)

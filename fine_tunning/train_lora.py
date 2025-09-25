@@ -8,12 +8,15 @@ pkl_dir = "/u/lsong/labspace/lei_notebook/data/"
 model_id = "/.mounts/labs/courtotlab/scratch/gemma-3-27b-it/" # or `google/gemma-3-12b-pt`, `google/gemma-3-27-pt`, google/gemma-3-4b-pt, gemma-3n-E2B-it-finetuned/ 
 print(model_id)
 
-wanted_count = 20
+wanted_count = 1000
 
 import pickle
+import numpy as np
 
 with open(f"{pkl_dir}mock_data_train_input_{wanted_count}ct.pkl", "rb") as f:
     dataset = pickle.load(f)
+
+train_dataset, test_dataset = np.split(dataset, [int(len(dataset)*0.9)])
 
 import torch
 # Check if GPU benefits from bfloat16
@@ -65,10 +68,10 @@ peft_config = LoraConfig(
 from trl import SFTConfig
 
 args = SFTConfig(
-    output_dir=model_id,                     # directory to save and repository id
-    max_length=512,                         # max sequence length for model and packing of the dataset
+    output_dir=model_id,                    # directory to save and repository id
+    max_length=1024,                        # max sequence length for model and packing of the dataset
     packing=False,                          # Groups multiple samples in the dataset into a single sequence
-    num_train_epochs=3,                     # number of training epochs
+    num_train_epochs=1,                     # number of training epochs
     per_device_train_batch_size=1,          # batch size per device during training
     gradient_accumulation_steps=4,          # number of steps before performing a backward/update pass
     gradient_checkpointing=True,            # use gradient checkpointing to save memory
@@ -81,8 +84,12 @@ args = SFTConfig(
     max_grad_norm=0.3,                      # max gradient norm based on QLoRA paper
     warmup_ratio=0.03,                      # warmup ratio based on QLoRA paper
     lr_scheduler_type="constant",           # use constant learning rate scheduler
-    push_to_hub=False,                       # push model to hub
+    push_to_hub=False,                      # push model to hub
+    do_eval=True,                           # enable evaluation
+    evaluation_strategy="steps",            # after x steps do evaluation
+    eval_steps=75,                          # evaluation steps
     report_to="tensorboard",                # report metrics to tensorboard
+    evaluate_during_training=True,          # allow evaluate while training
     dataset_kwargs={
         "add_special_tokens": False,        # We template with special tokens
         "append_concat_token": True,        # Add EOS token as separator token between examples
@@ -155,7 +162,8 @@ from trl import SFTTrainer
 trainer = SFTTrainer(
     model=model,
     args=args,
-    train_dataset=dataset,
+    train_dataset=train_dataset,
+    eval_dataset=test_dataset,
     peft_config=peft_config,
     processing_class=processor,
     data_collator=collate_fn,
@@ -169,7 +177,13 @@ start = time.time()
 trainer.train()
 
 # Save the final model
-trainer.save_model(f"{args.output_dir}{wanted_count}ct")
+trainer.save_model(f"{args.output_dir}{wanted_count}ct1")
+
+log_history = trainer.state.log_history
+
+with open(f"{args.output_dir}training.log", 'w') as f:
+    for line in log_history:
+        f.write(line+"\n")
 
 end = time.time()
 length = end - start
