@@ -27,15 +27,7 @@ C. Variant Details
 - Interpretation — “Variant of [clinical significance...]”
 - MAF — mafac, mafan, mafaf (decimal)
 - Type - frameshift, nonsense, synonymous, missense
-- mega_hgvs - paste0(
-    transcript_id, "(", gene_symbol, "):[",
-    hgvsc, "(", hgvsp, ")]:[",
-    switch(zygosity,
-      homozygous = paste0(hgvsc, "(", hgvsp, ")"),
-      heterozygous = "="
-    ),
-    "]"
-  )
+- mega_hgvs - A composite string combining Transcript ID, Gene Symbol, HGVSc, and HGVSp. The format changes based on Zygosity. If Homozygous: Transcript_ID(Gene_Symbol):[HGVSc(HGVSp)]:[HGVSc(HGVSp)]. If Heterozygous: Transcript_ID(Gene_Symbol):[HGVSc(HGVSp)]:[=]
 
 Output must match this JSON structure exactly. All fields must be included, even if empty (use ""). Do NOT add summaries or comments. Validate your output for format errors.
 Format:
