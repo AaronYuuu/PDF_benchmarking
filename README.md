@@ -1,59 +1,4 @@
-# PDF Benchmarking for LLM Genetic Report Extraction
-
-A benchmarking framework that evaluates Large Language Model (LLM) performance on extracting structured data from genetic laboratory reports. The system generates synthetic genetic reports as PDFs and tests various LLMs' ability to extract accurate structured information.
-
-## Purpose
-
-This project evaluates how well different LLMs can process complex genetic laboratory reports and extract structured clinical data. It provides:
-- Realistic test data using synthetic genetic reports
-- Multi-provider evaluation via HuggingFace, OpenAI, and local Ollama instances
-- Standardized benchmarking across different models and providers
-- Comprehensive performance metrics and accuracy analysis
-- End-to-end automation from report generation to performance analysis
-
-## Architecture
-### 3-Stage Pipeline
-1. **Report Generation** (makeTemplatePDF/)
-   - Creates mock genetic reports using R and LaTeX
-   - Generates ground truth data for validation
-   - Supports multiple hospital report formats
-2. **Data Extraction** (getJSON/)
-   - Converts PDFs to text
-   - Processes reports through multiple LLMs
-   - Extracts structured JSON data
-3. **Validation** (getJSON/)
-   - Compares extracted data against ground truth
-   - Provides accuracy metrics per model
-   - Generates performance reports
-
-## Quick Start
-### Prerequisites
-
-Required software:
-- R 4.0+ (with biomaRt, yaml, httr, RJSONIO packages)
-- Python 3.8+
-- LaTeX distribution (MacTeX on macOS, TeXLive on Linux)
-- Git
-- Ollama (for local LLM testing)
-
-### Setup and Installation
-
-1. Clone the repository and install dependencies:
-```bash
-git clone https://github.com/AaronYuuu/PDF_benchmarking
-cd PDF_benchmarking
-pip install -r requirements.txt
-```
-
-2. Install R packages:
-```r
-install.packages(c("biomaRt", "yaml", "httr", "RJSONIO"))
-```
-
-3. Configure API keys in api_keys.txt:
-```
-OPENAI_API_KEY=your-openai-key-here
-```
+# PDF Benchmarking for LLM Genetic Report Extraction`
 
 ### Review Results
 - Raw outputs: `getJSON/outJSON/`
@@ -65,7 +10,6 @@ OPENAI_API_KEY=your-openai-key-here
 - Generated reports and OCR outputs: `output_pdfs/`
 
 ## Results
-
 The system generates:
 - Intent-to-treat (iTT) document-level F1 (unparseable outputs scored as 0)
 - Parsed-only secondary F1/accuracy summaries
