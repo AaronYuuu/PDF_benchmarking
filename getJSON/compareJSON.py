@@ -5,6 +5,7 @@ import copy as c
 import pandas as pd  
 from collections import defaultdict
 import re
+from collections import Counter
 
 def filter_template(template, reportName):
     """
@@ -160,6 +161,30 @@ def normalizeNames(x):
         
     return x
 
+def tokenize_normalized_text(x):
+    """
+    Tokenize normalized text into alphanumeric tokens for overlap scoring.
+    """
+    if not x:
+        return []
+    return re.findall(r"[a-z0-9]+", x.lower())
+
+def hallucination_fp_penalty(expected_text, extracted_text):
+    """
+    Fractional FP penalty for extra tokens in extracted_text that are not in expected_text.
+    Returns value in [0, 1]. 0 means no hallucinated tokens.
+    """
+    expected_tokens = tokenize_normalized_text(expected_text)
+    extracted_tokens = tokenize_normalized_text(extracted_text)
+    if not extracted_tokens:
+        return 0.0
+
+    expected_counts = Counter(expected_tokens)
+    extracted_counts = Counter(extracted_tokens)
+    overlap = sum(min(expected_counts[t], extracted_counts[t]) for t in extracted_counts)
+    extra = max(0, len(extracted_tokens) - overlap)
+    return extra / len(extracted_tokens)
+
 
 def compare_dict_keys_and_values(dict1, dict2, path=""):
     """
@@ -249,9 +274,21 @@ def compare_string(str1, str2, path=""):
     elif norm_str1 and not norm_str2:
         # Template has value but extraction empty/null
         differences.append(f"FALSE NEGATIVE at {path}: expected '{str1}' but got empty/null")
-    elif norm_str2 in norm_str1:
-        differences.append(f"{len(norm_str2)/len(norm_str1):.2f} PARTIAL MATCH at {path}: '{norm_str2}' found in '{norm_str1}'")
     else:
+        # Fractional partial match based on token overlap with expected string.
+        expected_tokens = tokenize_normalized_text(norm_str1)
+        extracted_tokens = tokenize_normalized_text(norm_str2)
+        if expected_tokens and extracted_tokens:
+            expected_counts = Counter(expected_tokens)
+            extracted_counts = Counter(extracted_tokens)
+            overlap = sum(min(expected_counts[t], extracted_counts[t]) for t in expected_counts)
+            alpha = overlap / len(expected_tokens)
+            if alpha > 0:
+                differences.append(
+                    f"PARTIAL MATCH at {path}: alpha={alpha:.4f}; expected='{norm_str1}'; extracted='{norm_str2}'"
+                )
+                return differences
+
         differences.append(f"VALUE MISMATCH at {path}: expected '{str1}' but got '{str2}'")
     
     return differences
@@ -342,19 +379,31 @@ def compare_values_with_template(template, data):
             ic += 1
             count += 1
         elif "partial match" in diff_lower:
-            #print(diff_lower)
-            #print(diff.lower().split(" "))
-            location = diff_lower.split(" at ")[1]
-            temp = 0.0
-            valid = ["date", 'report_type', "testing context", 
-             'ordering_clinic', 'testing_laboratory', "sequencing_scope", 
-             "sample_type", "analysis_type", "reference_genome"]
-            if location in valid:
-                temp = float(diff_lower.split(" ")[0])
-                print(f"Partial match at {location} counted as {temp}")
-            correct_matches += temp
-            ic += 1 - temp
-            count += temp
+            # Parse normalized partial-match info from compare_string().
+            alpha = 0.0
+            expected_text = ""
+            extracted_text = ""
+
+            alpha_match = re.search(r"alpha=([0-9]*\.?[0-9]+)", diff, flags=re.IGNORECASE)
+            expected_match = re.search(r"expected='([^']*)'", diff, flags=re.IGNORECASE)
+            extracted_match = re.search(r"extracted='([^']*)'", diff, flags=re.IGNORECASE)
+
+            if alpha_match:
+                alpha = max(0.0, min(1.0, float(alpha_match.group(1))))
+            if expected_match:
+                expected_text = expected_match.group(1)
+            if extracted_match:
+                extracted_text = extracted_match.group(1)
+
+            # Fractional accounting:
+            # TP += alpha
+            # FN += (1 - alpha)
+            # FP += hallucination penalty for extra unmatched extracted tokens
+            correct_matches += alpha
+            fn += (1.0 - alpha)
+            fp += hallucination_fp_penalty(expected_text, extracted_text)
+            ic += (1.0 - alpha)
+            count += 1
     
     # Debug information
     #print(f"  Categorization: Correct={correct_matches}, FP={fp}, FN={fn}, IC={ic}")
@@ -449,12 +498,14 @@ def compare_gliner_output(template, data, hospital, source, model_name, json_fil
         "Precision": precision,
         "Recall": recall,
         "F1score": f1score,
+        "F1score_ParsedOnly": f1score,
         "Accuracy": accuracy,
-        "Parsed": None,
+        "Parsed": True,
         "Hospital": hospital,
         # GLiNER does not use prompts in the same way, so we set it to
         "Prompt": "None",
-        "Distressed": True if "distressed" in json_file.lower() else False
+        "Distressed": True if "distressed" in json_file.lower() else False,
+        "RunStatus": "success"
 
     }
 
@@ -540,13 +591,10 @@ def determine_model_name(directory, json_data, filename=""):
         model_name = "llama3.2:3b"
     elif "numind/NuNerZero" in model_name: 
         model_name = "GLiNER"
-    elif "llava-llama-3.2-vision" in model_name:
-        model_name = "llava-llama3.2:8b"
     elif "mistral_latest" in model_name:
         model_name = "mistral:7b"
     elif "qwen2.5-vl-7b" in model_name:
         model_name = "qwen2.5:7b"
-    # Add vision indicator if this is a vision-enabled directory
     elif "biomed_base_v1.0" in model_name:
         model_name = "biomed_GliNER:"
     if "Vision" in directory:
@@ -775,7 +823,11 @@ def main():
     '''if os.path.exists("../graphs/Hospitaltest.csv"):
         ovr = pd.read_csv("../graphs/Hospitaltest.csv") 
     else:'''
-    ovr = pd.DataFrame(columns = ["LLM","False Positives","False Negatives","Incorrect Extractions","Correct Matches","Precision","Recall","F1score","Accuracy","Parsed","Hospital", "Prompt", "Distressed"])
+    ovr = pd.DataFrame(columns = [
+        "DocID", "LLM", "False Positives", "False Negatives", "Incorrect Extractions",
+        "Correct Matches", "Precision", "Recall", "F1score", "F1score_ParsedOnly",
+        "Accuracy", "Parsed", "Hospital", "Prompt", "Distressed", "RunStatus"
+    ])
 
     # Initialize single DataFrame for field-level analysis
     '''if os.path.exists("../graphs/field_analysisfinal.csv"):
@@ -858,6 +910,7 @@ def main():
             if direc == "glinerOut":
                 model_name = determine_model_name(direc, dtemp, json_file)
                 result = compare_gliner_output(copy, dtemp, hospital, source, model_name, json_file)
+                result["DocID"] = temp_num
                 ovr = pd.concat([ovr, pd.DataFrame([result])], ignore_index=True)
             else:
                 model_name = determine_model_name(direc, dtemp, json_file)
@@ -866,19 +919,24 @@ def main():
                 
                 if dtemp.get("status") != "success":
                     temp_row = {
+                        "DocID": temp_num,
                         "LLM": model_name,
-                        "False Positives": np.nan,
-                        "False Negatives": np.nan,
-                        "Incorrect Extractions": np.nan,
-                        "Correct Matches": np.nan,
-                        "Precision": np.nan,
-                        "Recall": np.nan,
-                        "F1score": np.nan,
-                        "Accuracy": np.nan,
+                        "False Positives": 0.0,
+                        "False Negatives": 0.0,
+                        "Incorrect Extractions": 0.0,
+                        "Correct Matches": 0.0,
+                        "Precision": 0.0,
+                        "Recall": 0.0,
+                        # iTT document-level F1: parse failures count as 0
+                        "F1score": 0.0,
+                        # Parsed-only F1 excludes parse failures via NaN
+                        "F1score_ParsedOnly": np.nan,
+                        "Accuracy": 0.0,
                         "Parsed": False,
                         "Hospital": hospital,
                         "Prompt": prompt, 
-                        "Distressed": True if "distressed" in json_file.lower() else False
+                        "Distressed": True if "distressed" in json_file.lower() else False,
+                        "RunStatus": dtemp.get("status", "failed")
                     }
                     ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
                     continue
@@ -907,6 +965,7 @@ def main():
                     field_analysis_df = pd.concat([field_analysis_df, field_analysis], ignore_index=True)
                 
                 temp_row = {
+                    "DocID": temp_num,
                     "LLM": model_name.split("+")[0],
                     "False Positives": fp,
                     "False Negatives": fn,
@@ -915,16 +974,33 @@ def main():
                     "Precision": precision,
                     "Recall": recall,
                     "F1score": f1score,
+                    "F1score_ParsedOnly": f1score,
                     "Accuracy": accuracy,
                     "Parsed": True,
                     "Hospital": hospital, 
                     "Prompt": prompt,
-                    "Distressed": True if "distressed" in json_file.lower() else False
+                    "Distressed": True if "distressed" in json_file.lower() else False,
+                    "RunStatus": "success"
                 }
                 ovr = pd.concat([ovr, pd.DataFrame([temp_row])], ignore_index=True)
 
     # Save results
     ovr.to_csv("../graphs/Hospitalfinal.csv", index=False)
+
+    # Save model-level summary with parse rate and iTT/parsed-only F1.
+    group_cols = ["LLM", "Prompt", "Hospital", "Distressed"]
+    summary = (
+        ovr.groupby(group_cols, dropna=False)
+           .agg(
+               n_runs=("DocID", "count"),
+               parse_rate=("Parsed", "mean"),
+               mean_f1_itt=("F1score", "mean"),
+               mean_f1_parsed_only=("F1score_ParsedOnly", "mean")
+           )
+           .reset_index()
+    )
+    summary["parse_rate"] = summary["parse_rate"] * 100
+    summary.to_csv("../graphs/Hospitalfinal_summary.csv", index=False)
     
     if not field_analysis_df.empty:
         field_analysis_df.to_csv("../graphs/field_analysisfinal.csv", index=False)

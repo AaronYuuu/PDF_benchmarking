@@ -140,7 +140,7 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
     print(f"All image groups and models completed. Check {full_output_dir} folder for results.")
     print(f"{'='*60}")
 
-def main(): #if I ran this on an Ollama server would that 
+def main(): 
     os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
     models = [
         #==============HPC models========================
@@ -152,14 +152,13 @@ def main(): #if I ran this on an Ollama server would that
         ensure_model_exists(model) 
 
     print(f"Found {len(models)} models to process.")
-    '''process_text_files_with_models(
+    process_text_files_with_models(
             prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/OSprompt.txt",
             models=models, 
             output_dir="OllamaOut",
             llm_function=textToLLM
-    )'''
+    )
     
-#stop when at 210 files
     process_text_files_with_models(
         prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/OSprompt.txt",
         models=models, 

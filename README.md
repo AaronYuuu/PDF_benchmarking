@@ -62,42 +62,36 @@ install.packages(c("biomaRt", "yaml", "httr", "RJSONIO"))
 ```
 OPENAI_API_KEY=your-openai-key-here
 ```
+### Run Benchmarking (Current Pipeline)
 
-4. Install Ollama (optional):
-```bash
-# macOS
-brew install ollama
-# Linux
-curl -fsSL https://ollama.ai/install.sh | sh
-ollama serve
-```
-
-### Generate Reports
+Run from repository root:
 
 ```bash
-./generate_reports.sh
-```
+# 1) OCR from generated PDFs -> output_pdfs/text and output_pdfs/images
+python3 getJSON/pdfToText.py
 
-### Run Benchmarking
+# 2) Model extraction runs (OpenRouter is deprecated and not used)
+python3 getJSON/run_models/openAItoJSON.py
+python3 getJSON/run_models/jsonOllama.py
+python3 getJSON/run_models/localLLM.py
+python3 getJSON/run_models/glinerJSON.py
 
-Complete pipeline:
-```bash
-./run_all_llms.sh
-```
+# 3) Evaluation and aggregation
+python3 getJSON/compareJSON.py
 
-Individual components:
-```bash
-cd getJSON
-python3 jsonOllama.py      # Local models
-python3 openAItoJSON.py    # OpenAI models
-python3 compareJSON.py     # Performance analysis
+# 4) Figures + statistics exports
+Rscript graphs/graphs.R
 ```
 
 ### Review Results
 
-- Raw outputs: getJSON/outJSON/
-- Performance metrics: getJSON/Hospital.csv
-- Generated reports: output_pdfs/
+- Raw outputs: `getJSON/outJSON/`
+- Document-level metrics: `graphs/Hospitalfinal.csv`
+- Summary metrics (parse-rate + iTT + parsed-only means): `graphs/Hospitalfinal_summary.csv`
+- Primary mixed-effects stats (BH-adjusted): `graphs/stats_primary_table.csv`
+- MWU sensitivity stats (BH-adjusted): `graphs/stats_mwu_sensitivity_table.csv`
+- Supplementary parsed-only accuracy figure: `graphs/Supplementary_ParsedOnly_Accuracy.png`
+- Generated reports and OCR outputs: `output_pdfs/`
 
 ## Project Structure
 
@@ -108,10 +102,16 @@ PDF_benchmarking/
 │   ├── scripts/                  # R generation scripts
 │   └── templates/                # LaTeX report templates
 ├── getJSON/                      # LLM processing and evaluation
-│   ├── openAItoJSON.py          # OpenAI interface
-│   ├── jsonOllama.py            # Ollama interface
-│   ├── compareJSON.py           # Performance evaluation
-│   └── outJSON/                 # LLM results
+│   ├── run_models/
+│   │   ├── openAItoJSON.py       # OpenAI interface
+│   │   ├── jsonOllama.py         # Ollama interface
+│   │   ├── localLLM.py           # Local HuggingFace-style models
+│   │   └── glinerJSON.py         # GLiNER baseline extraction
+│   ├── pdfToText.py              # OCR + image extraction from PDFs
+│   ├── compareJSON.py            # Performance evaluation (iTT + parse-rate)
+│   └── outJSON/                  # LLM results
+├── graphs/                       # Plotting and statistical analysis
+│   └── graphs.R                  # Figures + mixed-effects + sensitivity stats
 ├── output_pdfs/                  # Generated reports
 ├── api_keys.txt                  # API credentials
 ├── requirements.txt              # Python dependencies
@@ -120,21 +120,24 @@ PDF_benchmarking/
 
 ## Results
 
-The system generates accuracy metrics in getJSON/Hospital.csv with:
-- Total Keys: Number of extractable fields
-- Extracted Keys: Successfully identified fields
-- Accuracy Percentage: Correct extractions / Total fields
-- Missing Fields: Fields not extracted
-- Incorrect Values: Fields with wrong values
+The system generates:
+- Intent-to-treat (iTT) document-level F1 (unparseable outputs scored as 0)
+- Parsed-only secondary F1/accuracy summaries
+- Parse success rates by model/prompt/input condition
+- Mixed-effects primary inference tables with BH correction
+- Separate MWU sensitivity analysis table
 
 ## Configuration
 
 ### Adding Models
 
 Edit the respective Python files:
-- openRouterLLMs.py for OpenRouter models
-- jsonOllama.py for Ollama models
-- openAItoJSON.py for OpenAI models
+- `getJSON/run_models/jsonOllama.py` for Ollama models
+- `getJSON/run_models/openAItoJSON.py` for OpenAI models
+- `getJSON/run_models/localLLM.py` for local transformer models
+- `getJSON/run_models/glinerJSON.py` for GLiNER variants
+
+Note: OpenRouter models are no longer part of the active benchmark pipeline.
 
 ### Customizing Templates
 
@@ -151,27 +154,35 @@ Common issues:
 - API limits: Built-in retry logic handles this
 - Permission errors: Make scripts executable with chmod +x
 
-## Manual Steps
+## Reviewer Feedback Change Log
 
-If automation fails:
+The table below maps major reviewer feedback items to implemented code changes.
 
-1. Generate reports:
+| Reviewer item | Requested revision | Implemented change | File(s) |
+|---|---|---|---|
+| #6 / Reviewer N #2 | Score unparseable outputs as failures in headline metric | Intent-to-treat scoring added (`F1score=0` when parse fails), with explicit `Parsed` flag and `RunStatus` | `getJSON/compareJSON.py` |
+| #6 / Reviewer N #2 | Report parse reliability separately | Added parse-rate summaries (`Hospitalfinal_summary.csv`) including iTT and parsed-only means | `getJSON/compareJSON.py` |
+| #7 | Clarify partial-match TP/FN/FP math, including hallucinated tokens | Added explicit partial scoring (`TP += alpha`, `FN += 1-alpha`) and hallucination FP penalty based on unmatched token fraction | `getJSON/compareJSON.py` |
+| Reviewer M #3 | Improve statistics beyond MWU-only | Added mixed-effects primary analysis (`lme4`) + `emmeans` contrasts + BH correction | `graphs/graphs.R` |
+| Reviewer M #3 | Keep MWU as sensitivity analysis only | Added separate MWU sensitivity export with BH correction; removed legacy hard-coded MWU plotting tests | `graphs/graphs.R` |
+| Supplement request | Add non-iTT parsed-only figure | Added parsed-only accuracy summary + supplementary figure export | `graphs/graphs.R` |
+| Pipeline update | OpenRouter removed from active run path | Updated docs and run script to exclude OpenRouter from active benchmark reruns | `README.md`, `run_all_llms.sh` |
+
+## Run Entire Pipeline (`everything.sh`)
+
+Use `everything.sh` for a full clean rerun (report generation + extraction + scoring + stats/figures):
+
 ```bash
-cd makeTemplatePDF/scripts
-Rscript generate_mock_data.R
-Rscript hospital1.r
-Rscript hospital2.r
+cd PDF_benchmarking
+chmod +x everything.sh generate_reports.sh run_all_llms.sh
+./everything.sh
 ```
 
-2. Convert PDFs:
-```bash
-cd getJSON
-python3 pdfToText.py
-```
+What `everything.sh` does:
 
-3. Test models:
-```bash
-cd getJSON
-python3 jsonOllama.py
-python3 compareJSON.py
-```
+1. Cleans prior outputs under `getJSON/outJSON/`, `makeTemplatePDF/out/`, and `output_pdfs/`
+2. Runs `./generate_reports.sh` to regenerate mock data and PDFs
+3. Runs `./run_all_llms.sh` to execute OCR, model extraction, scoring, and graph/stat generation
+
+Important notes:
+- Start in the repository root (`PDF_benchmarking`) or the script will exit.

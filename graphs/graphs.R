@@ -15,6 +15,8 @@ library(yogitools)
 #dev.off()
 library(dplyr)
 library(tidyr)
+library(lme4)
+library(emmeans)
 
 # Read the CSV file with full path
 df <- read.csv("/Users/ayu/PDF_benchmarking/graphs/Hospitalfinal.csv")
@@ -35,14 +37,90 @@ if (length(unnamed_cols) > 0) {
 # Count values in Input column
 table(df$Input)
 
+# -------------------------------
+# Supplementary figure:
+# Parsed-only accuracy (non-iTT)
+# -------------------------------
+df_parsed <- df %>%
+    filter(Parsed == TRUE) %>%
+    mutate(
+        PromptClean = case_when(
+            Prompt == "Normal" ~ "zero-shot",
+            Prompt == "LTNER/GPT-NER" ~ "one-shot",
+            Prompt == "None" ~ "zero-shot",
+            TRUE ~ tolower(Prompt)
+        ),
+        InputClean = tolower(Input),
+        LLMClean = gsub("\\*ImageInput\\*|\\s\\(One-shot\\)|\\s\\(Zero-shot\\)", "", LLM)
+    )
+
+acc_parsed_stats <- df_parsed %>%
+    group_by(LLMClean, PromptClean, InputClean) %>%
+    summarise(
+        n_runs = n(),
+        mean_accuracy_parsed = mean(Accuracy, na.rm = TRUE),
+        sd_accuracy_parsed = sd(Accuracy, na.rm = TRUE),
+        .groups = "drop"
+    )
+
+write.csv(
+    acc_parsed_stats,
+    "/Users/ayu/PDF_benchmarking/graphs/accuracy_parsed_only_summary.csv",
+    row.names = FALSE
+)
+
+acc_plot <- ggplot(
+    acc_parsed_stats,
+    aes(x = LLMClean, y = mean_accuracy_parsed, fill = interaction(PromptClean, InputClean))
+) +
+    geom_col(position = position_dodge(width = 0.9)) +
+    geom_errorbar(
+        aes(ymin = pmax(0, mean_accuracy_parsed - sd_accuracy_parsed),
+            ymax = pmin(100, mean_accuracy_parsed + sd_accuracy_parsed)),
+        width = 0.2,
+        position = position_dodge(width = 0.9)
+    ) +
+    labs(
+        title = "Parsed-only Accuracy by Model and Condition",
+        x = "Model",
+        y = "Accuracy (%)",
+        fill = "Prompt;Input"
+    ) +
+    coord_cartesian(ylim = c(0, 100)) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 30, hjust = 1))
+
+ggsave(
+    filename = "/Users/ayu/PDF_benchmarking/graphs/Supplementary_ParsedOnly_Accuracy.png",
+    plot = acc_plot,
+    width = 12,
+    height = 6,
+    dpi = 300
+)
+
 # Group by LLM, Prompt, and Input, then calculate mean and std of F1score
 df_stats <- df %>%
     group_by(LLM, Prompt, Input) %>%
     summarise(
+        n_runs = n(),
+        parse_rate = mean(Parsed, na.rm = TRUE) * 100,
         mean = mean(F1score, na.rm = TRUE),
         std = sd(F1score, na.rm = TRUE),
         .groups = 'drop'
     )
+
+# Optional parsed-only summary (legacy metric, not primary)
+df_stats_parsed_only <- df %>%
+    filter(Parsed == TRUE) %>%
+    group_by(LLM, Prompt, Input) %>%
+    summarise(
+        mean_parsed_only = mean(F1score_ParsedOnly, na.rm = TRUE),
+        std_parsed_only = sd(F1score_ParsedOnly, na.rm = TRUE),
+        .groups = 'drop'
+    )
+
+# Save a compact summary table for manuscript reporting
+write.csv(df_stats, "/Users/ayu/PDF_benchmarking/graphs/F1_parse_summary.csv", row.names = FALSE)
 
 # Clean up LLM names
 df_stats$LLM <- gsub("\\*ImageInput\\*", "", df_stats$LLM)
@@ -188,213 +266,148 @@ raw_data_for_stats <- df %>%
         llm_clean = name_mapping(gsub("\\*ImageInput\\*|\\s\\(One-shot\\)|\\s\\(Zero-shot\\)", "", LLM))
     )
 
-# P-value 1: Compare GPT-4.1 zero-shot text vs Gemma on zero-shot image
-group1_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "GPT-4.1" & 
-    raw_data_for_stats$prompt_clean == "zero-shot" & 
-    raw_data_for_stats$input_clean == "text"
-]
-group2_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "Gemma" & 
-    raw_data_for_stats$prompt_clean == "zero-shot" & 
-    raw_data_for_stats$input_clean == "image"
-]
+# -------------------------------
+# Primary inference:
+# mixed-effects + emmeans contrasts
+# -------------------------------
+raw_data_for_stats <- raw_data_for_stats %>%
+    mutate(
+        # Robust boolean parsing for Parsed column
+        Parsed = case_when(
+            Parsed %in% c(TRUE, "TRUE", "True", 1, "1") ~ 1L,
+            TRUE ~ 0L
+        ),
+        DocID = as.factor(DocID),
+        llm_clean = as.factor(llm_clean),
+        prompt_clean = as.factor(prompt_clean),
+        input_clean = as.factor(input_clean),
+        Distressed = as.factor(Distressed)
+    )
 
-# Remove NA values
-group1_comparison <- group1_comparison[!is.na(group1_comparison)]
-group2_comparison <- group2_comparison[!is.na(group2_comparison)]
+# Mixed model for iTT F1 score (continuous primary quality endpoint)
+f1_lmm <- lmer(
+    F1score ~ llm_clean * prompt_clean * input_clean + Distressed + (1 | DocID),
+    data = raw_data_for_stats
+)
 
-# Calculate p-value if both groups have data
-pval1 <- if (length(group1_comparison) > 0 && length(group2_comparison) > 0) {
-    wilcox.test(group1_comparison, group2_comparison, exact = FALSE)$p.value
-} else {
-    NA
+f1_emm <- emmeans(f1_lmm, ~ llm_clean | prompt_clean + input_clean)
+f1_contrasts <- as.data.frame(pairs(f1_emm, adjust = "none"))
+f1_contrasts$endpoint <- "F1score_iTT"
+f1_contrasts$estimate_type <- "mean_difference"
+f1_contrasts$p_value <- f1_contrasts$p.value
+f1_contrasts$p_bh <- p.adjust(f1_contrasts$p_value, method = "BH")
+
+# Mixed logistic model for parse success (reliability endpoint)
+parse_glmm <- glmer(
+    Parsed ~ llm_clean * prompt_clean * input_clean + Distressed + (1 | DocID),
+    data = raw_data_for_stats,
+    family = binomial(link = "logit")
+)
+
+parse_emm <- emmeans(parse_glmm, ~ llm_clean | prompt_clean + input_clean, type = "link")
+parse_contrasts <- as.data.frame(pairs(parse_emm, adjust = "none"))
+parse_contrasts$endpoint <- "ParseSuccess"
+parse_contrasts$estimate_type <- "log_odds_difference"
+parse_contrasts$odds_ratio <- exp(parse_contrasts$estimate)
+parse_contrasts$p_value <- parse_contrasts$p.value
+parse_contrasts$p_bh <- p.adjust(parse_contrasts$p_value, method = "BH")
+
+# Harmonize and export primary stats table
+f1_primary <- f1_contrasts %>%
+    transmute(
+        endpoint,
+        prompt_clean,
+        input_clean,
+        contrast,
+        estimate,
+        SE,
+        df,
+        statistic = t.ratio,
+        odds_ratio = NA_real_,
+        estimate_type,
+        p_value,
+        p_bh
+    )
+
+parse_primary <- parse_contrasts %>%
+    transmute(
+        endpoint,
+        prompt_clean,
+        input_clean,
+        contrast,
+        estimate,
+        SE,
+        df = NA_real_,
+        statistic = z.ratio,
+        odds_ratio,
+        estimate_type,
+        p_value,
+        p_bh
+    )
+
+stats_primary_table <- bind_rows(f1_primary, parse_primary)
+write.csv(
+    stats_primary_table,
+    "/Users/ayu/PDF_benchmarking/graphs/stats_primary_table.csv",
+    row.names = FALSE
+)
+
+# -------------------------------
+# Sensitivity analysis:
+# pairwise MWU (within prompt/input)
+# -------------------------------
+split_conditions <- split(
+    raw_data_for_stats,
+    list(raw_data_for_stats$prompt_clean, raw_data_for_stats$input_clean),
+    drop = TRUE
+)
+
+mwu_rows <- list()
+
+for (cond_name in names(split_conditions)) {
+    cond_df <- split_conditions[[cond_name]]
+    models_here <- sort(unique(as.character(cond_df$llm_clean)))
+    if (length(models_here) < 2) next
+
+    cond_parts <- strsplit(cond_name, "\\.")[[1]]
+    prompt_val <- cond_parts[1]
+    input_val <- cond_parts[2]
+
+    combs <- combn(models_here, 2, simplify = FALSE)
+    for (pair in combs) {
+        m1 <- pair[1]
+        m2 <- pair[2]
+        x <- cond_df$F1score[cond_df$llm_clean == m1]
+        y <- cond_df$F1score[cond_df$llm_clean == m2]
+        x <- x[!is.na(x)]
+        y <- y[!is.na(y)]
+        if (length(x) < 2 || length(y) < 2) next
+
+        wt <- wilcox.test(x, y, exact = FALSE)
+        mwu_rows[[length(mwu_rows) + 1]] <- data.frame(
+            endpoint = "F1score_iTT",
+            prompt_clean = prompt_val,
+            input_clean = input_val,
+            contrast = paste0(m1, " - ", m2),
+            n_model_1 = length(x),
+            n_model_2 = length(y),
+            median_model_1 = median(x),
+            median_model_2 = median(y),
+            median_diff = median(x) - median(y),
+            p_value = wt$p.value
+        )
+    }
 }
 
-# P-value 2: Compare GPT-4.1 vs Gemma on one-shot text
-group3_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "GPT-4.1" & 
-    raw_data_for_stats$prompt_clean == "one-shot" & 
-    raw_data_for_stats$input_clean == "text"
-]
-group4_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "Gemma" & 
-    raw_data_for_stats$prompt_clean == "one-shot" & 
-    raw_data_for_stats$input_clean == "image"
-]
-
-group3_comparison <- group3_comparison[!is.na(group3_comparison)]
-group4_comparison <- group4_comparison[!is.na(group4_comparison)]
-
-pval2 <- if (length(group3_comparison) > 0 && length(group4_comparison) > 0) {
-    wilcox.test(group3_comparison, group4_comparison, exact = FALSE)$p.value
-} else {
-    NA
+if (length(mwu_rows) > 0) {
+    mwu_sensitivity <- bind_rows(mwu_rows)
+    mwu_sensitivity$p_bh <- p.adjust(mwu_sensitivity$p_value, method = "BH")
+    write.csv(
+        mwu_sensitivity,
+        "/Users/ayu/PDF_benchmarking/graphs/stats_mwu_sensitivity_table.csv",
+        row.names = FALSE
+    )
 }
-
-# P-value 3: Compare GPT-4.1 vs Gemma on zero-shot image
-group5_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "GPT-4.1" & 
-    raw_data_for_stats$prompt_clean == "one-shot" & 
-    raw_data_for_stats$input_clean == "text"
-]
-group6_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "Gemma" & 
-    raw_data_for_stats$prompt_clean == "zero-shot" & 
-    raw_data_for_stats$input_clean == "image"
-]
-
-group5_comparison <- group5_comparison[!is.na(group5_comparison)]
-group6_comparison <- group6_comparison[!is.na(group6_comparison)]
-
-pval3 <- if (length(group5_comparison) > 0 && length(group6_comparison) > 0) {
-    wilcox.test(group5_comparison, group6_comparison, exact = FALSE)$p.value
-} else {
-    NA
-}
-
-# P-value 4: Compare GPT-4.1 on zero-shot text vs Gemma on one-shot image
-group7_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "GPT-4.1" & 
-    raw_data_for_stats$prompt_clean == "zero-shot" & 
-    raw_data_for_stats$input_clean == "text"
-]
-group8_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "Gemma" & 
-    raw_data_for_stats$prompt_clean == "one-shot" & 
-    raw_data_for_stats$input_clean == "image"
-]
-
-group7_comparison <- group7_comparison[!is.na(group7_comparison)]
-group8_comparison <- group8_comparison[!is.na(group8_comparison)]
-
-pval4 <- if (length(group7_comparison) > 0 && length(group8_comparison) > 0) {
-    wilcox.test(group7_comparison, group8_comparison, exact = FALSE)$p.value
-} else {
-    NA
-}
-
-# P-value 5: Compare Llama vs Mistral both zero-shot text
-group9_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "Llama3.1" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-
-group10_comparison <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "Mistral" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-
-pval5 <- if (length(group9_comparison) > 0 && length(group10_comparison) > 0) {
-    wilcox.test(group9_comparison, group10_comparison, exact = FALSE)$p.value
-} else {
-    NA
-}
-
-
-# P-value 6: Compare GliNER vs BioGliNER on zero-shot text
-gliner_zst <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "GliNER" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-biogliner_zst <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "BioGliNER" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-
-gliner_zst <- gliner_zst[!is.na(gliner_zst)]
-biogliner_zst <- biogliner_zst[!is.na(biogliner_zst)]
-
-pval6 <- if (length(gliner_zst) > 0 && length(biogliner_zst) > 0) {
-    wilcox.test(gliner_zst, biogliner_zst, exact = FALSE)$p.value
-} else {
-    NA
-}
-
-# P-value 7: Compare NuExtract vs GPT-4.1 on zero-shot text
-nuextract_zst <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "NuExtract" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-gpt_zst <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "GPT-4.1" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-
-nuextract_zst <- nuextract_zst[!is.na(nuextract_zst)]
-gpt_zst <- gpt_zst[!is.na(gpt_zst)]
-
-pval7 <- if (length(nuextract_zst) > 0 && length(gpt_zst) > 0) {
-    wilcox.test(nuextract_zst, gpt_zst, exact = FALSE)$p.value
-} else {
-    NA
-}
-
-# P-value 8: Compare GPT-4.1 vs Llama3.1 on zero-shot text
-gpt_zst_llama <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "GPT-4.1" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-llama_zst_gpt <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "Llama3.1" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-
-gpt_zst_llama <- gpt_zst_llama[!is.na(gpt_zst_llama)]
-llama_zst_gpt <- llama_zst_gpt[!is.na(llama_zst_gpt)]
-
-pval8 <- if (length(gpt_zst_llama) > 0 && length(llama_zst_gpt) > 0) {
-    wilcox.test(gpt_zst_llama, llama_zst_gpt, exact = FALSE)$p.value
-} else {
-    NA
-}
-
-# P-value 9: Compare NuExtract vs Llama3.1 on zero-shot text
-nuextract_zst_llama <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "NuExtract" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-llama_zst_nuext <- raw_data_for_stats$F1score[
-    raw_data_for_stats$llm_clean == "Llama3.1" &
-    raw_data_for_stats$prompt_clean == "zero-shot" &
-    raw_data_for_stats$input_clean == "text"
-]
-
-nuextract_zst_llama <- nuextract_zst_llama[!is.na(nuextract_zst_llama)]
-llama_zst_nuext <- llama_zst_nuext[!is.na(llama_zst_nuext)]
-
-pval9 <- if (length(nuextract_zst_llama) > 0 && length(llama_zst_nuext) > 0) {
-    wilcox.test(nuextract_zst_llama, llama_zst_nuext, exact = FALSE)$p.value
-} else {
-    NA
-}
-
-# Create vector of real p-values
-pvals <- c(pval1, pval2, pval3, pval4, pval5, pval6, pval7, pval8, pval9)
-
-# Remove NA p-values
-pvals <- pvals[!is.na(pvals)]
-
-# Print the calculated p-values for verification
-cat("\nCalculated p-values:\n")
-cat("P-value 1 - GPT-4.1 zero-shot text vs Gemma zero-shot image: ", pval1, "\n")
-cat("P-value 2 - GPT-4.1 one-shot text vs Gemma one-shot image: ", pval2, "\n")
-cat("P-value 3 - GPT-4.1 one-shot text vs Gemma zero-shot image: ", pval3, "\n")
-cat("P-value 4 - GPT-4.1 zero-shot text vs Gemma one-shot image: ", pval4, "\n")
-cat("P-value 5 - Llama vs Mistral Kruskal-Wallis: ", pval5, "\n")
-cat("P-value 6 - GliNER vs BioGliNER zero-shot text: ", pval6, "\n")
-cat("P-value 7 - NuExtract vs GPT-4.1 zero-shot text: ", pval7, "\n")
-cat("P-value 8 - GPT-4.1 vs Llama3.1 zero-shot text: ", pval8, "\n")
-cat("P-value 9 - NuExtract vs Llama3.1 zero-shot text: ", pval9, "\n")
 
 # Define colors
 mycolors <- c("firebrick2", "firebrick4", "steelblue2", "steelblue4")
@@ -433,158 +446,8 @@ tryCatch({
         rect(xna - 0.5, 0, xna + 0.5, 100, col = "gray", density = 20, border = NA)
     }
 
-    # Add significance brackets comparing GPT-4.1 vs Gemma across conditions
-    # Find GPT-4.1 and Gemma positions in the matrix
-    gpt_row <- which(mnames == "GPT-4.1")
-    gemma_row <- which(mnames == "Gemma")
-
-    print("Model positions:")
-    print(paste("GPT-4.1 at row:", gpt_row))
-    print(paste("Gemma at row:", gemma_row))
-
-    # Column positions: zero-shot;text=1, one-shot;text=2, zero-shot;image=3, one-shot;image=4 # nolint: line_length_linter.
-    if (length(pvals) >= 1 && !is.na(pvals[1]) && length(gpt_row) > 0 && length(gemma_row) > 0) { # nolint: line_length_linter.
-        # Compare GPT vs Gemma on zero-shot text
-        x1_gpt <- xs[1, gpt_row]
-        x1_gemma <- xs[3, gemma_row]
-        stars <- ifelse(pvals[1] < 0.001, "***", ifelse(pvals[1] < 0.01, "**", ifelse(pvals[1] < 0.05, "*", "ns")))
-        
-        if (stars != "ns") {
-            y_pos <- 85
-            segments(x1_gpt, y_pos, x1_gemma, y_pos)
-            text((x1_gpt + x1_gemma) / 2, y_pos + 2, stars, cex = 1.5)
-        }
-    }
-
-    if (length(pvals) >= 2 && !is.na(pvals[2]) && length(gpt_row) > 0 && length(gemma_row) > 0) { # nolint: line_length_linter.
-        # Compare GPT vs Gemma on one-shot text
-        x2_gpt <- xs[2, gpt_row]
-        x2_gemma <- xs[4, gemma_row]
-        stars <- ifelse(pvals[2] < 0.001, "***", ifelse(pvals[2] < 0.01, "**", ifelse(pvals[2] < 0.05, "*", "ns")))
-        
-        if (stars != "ns") {
-            y_pos <- 80
-            segments(x2_gpt, y_pos, x2_gemma, y_pos)
-            text((x2_gpt + x2_gemma) / 2, y_pos + 2, stars, cex = 1.5)
-        }
-    }
-
-    if (length(pvals) >= 3 && !is.na(pvals[3]) && length(gpt_row) > 0 && length(gemma_row) > 0) { # nolint: line_length_linter.
-        # Compare GPT vs Gemma on zero-shot image
-        x3_gpt <- xs[2, gpt_row]
-        x3_gemma <- xs[3, gemma_row]
-        stars <- ifelse(pvals[3] < 0.001, "***", ifelse(pvals[3] < 0.01, "**", ifelse(pvals[3] < 0.05, "*", "ns")))
-        
-        if (stars != "ns") {
-            y_pos <- 75
-            segments(x3_gpt, y_pos, x3_gemma, y_pos)
-            text((x3_gpt + x3_gemma) / 2, y_pos + 2, stars, cex = 1.5)
-        }
-    }
-
-    if (length(pvals) >= 4 && !is.na(pvals[4]) && length(gpt_row) > 0 && length(gemma_row) > 0) { # nolint: line_length_linter.
-        # Compare GPT vs Gemma on one-shot image
-        x4_gpt <- xs[1, gpt_row]
-        x4_gemma <- xs[4, gemma_row]
-        stars <- ifelse(pvals[4] < 0.001, "***", ifelse(pvals[4] < 0.01, "**", ifelse(pvals[4] < 0.05, "*", "ns")))
-        
-        if (stars != "ns") {
-            y_pos <- 70
-            segments(x4_gpt, y_pos, x4_gemma, y_pos)
-            text((x4_gpt + x4_gemma) / 2, y_pos + 2, stars, cex = 1.5)
-        }
-    }
-
-    #Pval 5 llama and mistral zero-shot text
-
-    if (length(pvals) >= 5 && !is.na(pvals[5])) {
-        llama_row <- which(mnames == "Llama3.1")
-        mistral_row <- which(mnames == "Mistral")
-        if (length(llama_row) > 0 && length(mistral_row) > 0) {
-            x_llama_zst <- xs[1, llama_row]
-            x_mistral_zst <- xs[1, mistral_row]
-            
-            stars <- ifelse(pvals[5] < 0.001, "***", ifelse(pvals[5] < 0.01, "**", ifelse(pvals[5] < 0.05, "*", "ns")))
-            
-            if (stars != "n") {
-                y_pos <- 50
-                segments(x_llama_zst, y_pos, x_mistral_zst, y_pos)
-                text((x_llama_zst + x_mistral_zst) / 2, y_pos + 2, stars, cex = 1.5)
-            }
-        }
-    }
-
-    # P-value 6: GliNER vs BioGliNER on zero-shot text
-    if (length(pvals) >= 6 && !is.na(pvals[6])) {
-        gliner_row <- which(mnames == "GliNER")
-        biogliner_row <- which(mnames == "BioGliNER")
-        if (length(gliner_row) > 0 && length(biogliner_row) > 0) {
-            x_gliner_zst <- xs[1, gliner_row]
-            x_biogliner_zst <- xs[1, biogliner_row]
-            
-            stars <- ifelse(pvals[6] < 0.001, "***", ifelse(pvals[6] < 0.01, "**", ifelse(pvals[6] < 0.05, "*", "ns")))
-            
-            if (stars != "ns") {
-                y_pos <- 65
-                segments(x_gliner_zst, y_pos-5, x_biogliner_zst, y_pos-5)
-                text((x_gliner_zst + x_biogliner_zst) / 2, y_pos - 3, stars, cex = 1.5)
-            }
-        }
-    }
-
-    # P-value 7: NuExtract vs GPT-4.1 on zero-shot text
-    if (length(pvals) >= 7 && !is.na(pvals[7])) {
-        nuextract_row <- which(mnames == "NuExtract")
-        gpt_row <- which(mnames == "GPT-4.1")
-        if (length(nuextract_row) > 0 && length(gpt_row) > 0) {
-            x_nuextract_zst <- xs[1, nuextract_row]
-            x_gpt_zst <- xs[1, gpt_row]
-            
-            stars <- ifelse(pvals[7] < 0.001, "***", ifelse(pvals[7] < 0.01, "**", ifelse(pvals[7] < 0.05, "*", "ns")))
-            
-            if (stars != "ns") {
-                y_pos <- 55
-                segments(x_nuextract_zst, y_pos, x_gpt_zst, y_pos)
-                text((x_nuextract_zst + x_gpt_zst) / 2, y_pos + 2, stars, cex = 1.5)
-            }
-        }
-    }
-
-    # P-value 8: GPT-4.1 vs Llama3.1 on zero-shot text
-    if (length(pvals) >= 8 && !is.na(pvals[8])) {
-        gpt_row <- which(mnames == "GPT-4.1")
-        llama_row <- which(mnames == "Llama3.1")
-        if (length(gpt_row) > 0 && length(llama_row) > 0) {
-            x_gpt_zst <- xs[1, gpt_row]
-            x_llama_zst <- xs[1, llama_row]
-            
-            stars <- ifelse(pvals[8] < 0.001, "***", ifelse(pvals[8] < 0.01, "**", ifelse(pvals[8] < 0.05, "*", "ns")))
-            
-            if (stars != "ns") {
-                y_pos <- 65
-                segments(x_gpt_zst, y_pos, x_llama_zst, y_pos)
-                text((x_gpt_zst + x_llama_zst) / 2, y_pos + 2, stars, cex = 1.5)
-            }
-        }
-    }
-
-    # P-value 9: NuExtract vs Llama3.1 on zero-shot text
-    if (length(pvals) >= 9 && !is.na(pvals[9])) {
-        nuextract_row <- which(mnames == "NuExtract")
-        llama_row <- which(mnames == "Llama3.1")
-        if (length(nuextract_row) > 0 && length(llama_row) > 0) {
-            x_nuextract_zst <- xs[1, nuextract_row]
-            x_llama_zst <- xs[1, llama_row]
-            
-            stars <- ifelse(pvals[9] < 0.001, "***", ifelse(pvals[9] < 0.01, "**", ifelse(pvals[9] < 0.05, "*", "ns")))
-            
-            if (stars != "ns") {
-                y_pos <- 90
-                segments(x_nuextract_zst, y_pos, x_llama_zst, y_pos)
-                text((x_nuextract_zst + x_llama_zst) / 2, y_pos + 2, stars, cex = 1.5)
-            }
-        }
-    }
+    # No significance annotations here; inferential results are exported
+    # from the mixed-effects primary table and MWU sensitivity table.
 
     # Add grid lines
     grid(NA, NULL)

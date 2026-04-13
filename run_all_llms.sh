@@ -1,53 +1,54 @@
 #!/bin/bash
+set -euo pipefail
 
-# Script to run all LLM processing scripts
-# This will run jsonOllama, openAItoJSON, openRouterLLMs, and localLLM scripts
+# Run from anywhere; script resolves repo root automatically.
 
-echo "Starting LLM processing pipeline..."
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
+
+echo "Starting full benchmarking pipeline..."
 echo "======================================="
 
-# Change to the getJSON directory
-cd getJSON/run_models|| { echo "Directory getJSON not found! Exiting. Must start in PDF_benchmarking"; exit 1; }
-
-# Run jsonOllama.py
-echo "1. Running Ollama models..."
-echo "----------------------------"
-python3 jsonOllama.py
+echo "1) OCR: PDF to text/images"
+echo "--------------------------"
+python3 getJSON/pdfToText.py
 echo ""
 
-# Run openAItoJSON.py
-echo "2. Running OpenAI models..."
-echo "---------------------------"
-python3 openAItoJSON.py
+echo "2) OpenAI extraction"
+echo "--------------------"
+python3 getJSON/run_models/openAItoJSON.py
 echo ""
 
+echo "3) Ollama extraction"
+echo "--------------------"
+python3 getJSON/run_models/jsonOllama.py
+echo ""
 
-echo "5. Running gliner"
+echo "4) Local transformer extraction"
 echo "-------------------------------"
-/Users/ayu/.pyenv/versions/PDF_benchmarking_py312/bin/python /Users/ayu/PDF_benchmarking/getJSON/run_models/glinerJSON.py
-echo "Gliner processing completed"
+python3 getJSON/run_models/localLLM.py
 echo ""
 
-echo "4. Running local HuggingFace models..."
-echo "______________________________________"
-python3 localLLM.py
-echo "Local models completed"
+echo "5) GLiNER extraction"
+echo "--------------------"
+python3 getJSON/run_models/glinerJSON.py
 echo ""
 
+echo "6) Aggregate + score (iTT + parse rate)"
+echo "---------------------------------------"
+python3 getJSON/compareJSON.py
+echo ""
+
+echo "7) Figures + statistics tables"
+echo "------------------------------"
+Rscript graphs/graphs.R
+echo ""
 
 echo "======================================="
-echo "All LLM processing scripts completed!"
-echo "Check the respective output directories:"
-echo "- outJSON/OllamaOut/ for Ollama results"
-echo "- outJSON/OpenAIOut/ for OpenAI results" 
-echo "- outJSON/OpenRouter/ for OpenRouter results"
-echo "- outJSON/localout/ for local HuggingFace results"
-echo "- outJSON/gliner/ for Gliner results"
-echo ""
-
-echo "5. Checking accuracy..."
-echo "---------------------"
-cd .. 
-# Run accuracy check script
-python3 compareJSON.py
-echo "Accuracy check completed! Check the Hospital.csv file for results."
+echo "Pipeline completed."
+echo "Key outputs:"
+echo "- graphs/Hospitalfinal.csv"
+echo "- graphs/Hospitalfinal_summary.csv"
+echo "- graphs/stats_primary_table.csv"
+echo "- graphs/stats_mwu_sensitivity_table.csv"
+echo "- graphs/Supplementary_ParsedOnly_Accuracy.png"

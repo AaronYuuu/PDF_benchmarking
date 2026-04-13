@@ -18,13 +18,14 @@ if [ -d "getJSON/outJSON" ]; then
     echo "Removing getJSON/outJSON/*"
     rm -rf getJSON/outJSON/OllamaOut/*
     rm -rf getJSON/outJSON/OllamaVisionOut/*
+    rm -rf getJSON/outJSON/OllamaVisionOutOS/*
     rm -rf getJSON/outJSON/OpenAIOut/*
     rm -rf getJSON/outJSON/OpenAIVisionOut/*
-    rm -rf getJSON/outJSON/OpenRouter/*
-    rm -rf getJSON/outJSON/OpenRouterVisionOut/*
     rm -rf getJSON/outJSON/localout/*
     rm -rf getJSON/outJSON/glinerOut/*
-    rm -rf getJSON/outJSON/OllamaOutNP/*
+    rm -rf getJSON/outJSON/OllamaOutOS/*
+    rm -rf getJSON/outJSON/OpenAIVisionOutOS/*
+    rm -rf getJSON/outJSON/OpenAIOutOS/*
     rm -rf getJSON/outJSON/*
 fi
 
