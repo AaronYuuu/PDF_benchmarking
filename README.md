@@ -5,7 +5,6 @@ A benchmarking framework that evaluates Large Language Model (LLM) performance o
 ## Purpose
 
 This project evaluates how well different LLMs can process complex genetic laboratory reports and extract structured clinical data. It provides:
-
 - Realistic test data using synthetic genetic reports
 - Multi-provider evaluation via HuggingFace, OpenAI, and local Ollama instances
 - Standardized benchmarking across different models and providers
@@ -13,26 +12,21 @@ This project evaluates how well different LLMs can process complex genetic labor
 - End-to-end automation from report generation to performance analysis
 
 ## Architecture
-
 ### 3-Stage Pipeline
-
 1. **Report Generation** (makeTemplatePDF/)
    - Creates mock genetic reports using R and LaTeX
    - Generates ground truth data for validation
    - Supports multiple hospital report formats
-
 2. **Data Extraction** (getJSON/)
    - Converts PDFs to text
    - Processes reports through multiple LLMs
    - Extracts structured JSON data
-
 3. **Validation** (getJSON/)
    - Compares extracted data against ground truth
    - Provides accuracy metrics per model
    - Generates performance reports
 
 ## Quick Start
-
 ### Prerequisites
 
 Required software:
@@ -40,15 +34,13 @@ Required software:
 - Python 3.8+
 - LaTeX distribution (MacTeX on macOS, TeXLive on Linux)
 - Git
-
-Optional:
 - Ollama (for local LLM testing)
 
 ### Setup and Installation
 
 1. Clone the repository and install dependencies:
 ```bash
-git clone <repository-url>
+git clone https://github.com/AaronYuuu/PDF_benchmarking
 cd PDF_benchmarking
 pip install -r requirements.txt
 ```
@@ -62,29 +54,8 @@ install.packages(c("biomaRt", "yaml", "httr", "RJSONIO"))
 ```
 OPENAI_API_KEY=your-openai-key-here
 ```
-### Run Benchmarking (Current Pipeline)
-
-Run from repository root:
-
-```bash
-# 1) OCR from generated PDFs -> output_pdfs/text and output_pdfs/images
-python3 getJSON/pdfToText.py
-
-# 2) Model extraction runs (OpenRouter is deprecated and not used)
-python3 getJSON/run_models/openAItoJSON.py
-python3 getJSON/run_models/jsonOllama.py
-python3 getJSON/run_models/localLLM.py
-python3 getJSON/run_models/glinerJSON.py
-
-# 3) Evaluation and aggregation
-python3 getJSON/compareJSON.py
-
-# 4) Figures + statistics exports
-Rscript graphs/graphs.R
-```
 
 ### Review Results
-
 - Raw outputs: `getJSON/outJSON/`
 - Document-level metrics: `graphs/Hospitalfinal.csv`
 - Summary metrics (parse-rate + iTT + parsed-only means): `graphs/Hospitalfinal_summary.csv`
@@ -92,31 +63,6 @@ Rscript graphs/graphs.R
 - MWU sensitivity stats (BH-adjusted): `graphs/stats_mwu_sensitivity_table.csv`
 - Supplementary parsed-only accuracy figure: `graphs/Supplementary_ParsedOnly_Accuracy.png`
 - Generated reports and OCR outputs: `output_pdfs/`
-
-## Project Structure
-
-```
-PDF_benchmarking/
-├── makeTemplatePDF/              # Report generation system
-│   ├── data/                     # Configuration and gene data
-│   ├── scripts/                  # R generation scripts
-│   └── templates/                # LaTeX report templates
-├── getJSON/                      # LLM processing and evaluation
-│   ├── run_models/
-│   │   ├── openAItoJSON.py       # OpenAI interface
-│   │   ├── jsonOllama.py         # Ollama interface
-│   │   ├── localLLM.py           # Local HuggingFace-style models
-│   │   └── glinerJSON.py         # GLiNER baseline extraction
-│   ├── pdfToText.py              # OCR + image extraction from PDFs
-│   ├── compareJSON.py            # Performance evaluation (iTT + parse-rate)
-│   └── outJSON/                  # LLM results
-├── graphs/                       # Plotting and statistical analysis
-│   └── graphs.R                  # Figures + mixed-effects + sensitivity stats
-├── output_pdfs/                  # Generated reports
-├── api_keys.txt                  # API credentials
-├── requirements.txt              # Python dependencies
-└── README.md                     # Documentation
-```
 
 ## Results
 
@@ -127,37 +73,8 @@ The system generates:
 - Mixed-effects primary inference tables with BH correction
 - Separate MWU sensitivity analysis table
 
-## Configuration
-
-### Adding Models
-
-Edit the respective Python files:
-- `getJSON/run_models/jsonOllama.py` for Ollama models
-- `getJSON/run_models/openAItoJSON.py` for OpenAI models
-- `getJSON/run_models/localLLM.py` for local transformer models
-- `getJSON/run_models/glinerJSON.py` for GLiNER variants
-
-Note: OpenRouter models are no longer part of the active benchmark pipeline.
-
-### Customizing Templates
-
-Modify files in makeTemplatePDF/data/:
-- field_values.yml for gene panels
-- text_pieces.yml for template components
-
-## Troubleshooting
-
-Common issues:
-- LaTeX errors: Install complete distribution
-- R package issues: Update R version
-- Ollama not found: Ensure service is running
-- API limits: Built-in retry logic handles this
-- Permission errors: Make scripts executable with chmod +x
-
 ## Reviewer Feedback Change Log
-
 The table below maps major reviewer feedback items to implemented code changes.
-
 | Reviewer item | Requested revision | Implemented change | File(s) |
 |---|---|---|---|
 | #6 / Reviewer N #2 | Score unparseable outputs as failures in headline metric | Intent-to-treat scoring added (`F1score=0` when parse fails), with explicit `Parsed` flag and `RunStatus` | `getJSON/compareJSON.py` |
@@ -169,7 +86,6 @@ The table below maps major reviewer feedback items to implemented code changes.
 | Pipeline update | OpenRouter removed from active run path | Updated docs and run script to exclude OpenRouter from active benchmark reruns | `README.md`, `run_all_llms.sh` |
 
 ## Run Entire Pipeline (`everything.sh`)
-
 Use `everything.sh` for a full clean rerun (report generation + extraction + scoring + stats/figures):
 
 ```bash
