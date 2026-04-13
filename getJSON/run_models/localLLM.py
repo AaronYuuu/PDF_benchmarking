@@ -60,11 +60,9 @@ def load_model(model_name):
             trust_remote_code=True
         ).to(device).eval()
 
-        # <-- FIX: Load the necessary processor for multimodal inputs
         processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
         
         # The 'processor' handles both tokenization and image processing.
-        # We return it instead of a separate tokenizer.
         result = (model, processor)
     else:
         model = AutoModelForCausalLM.from_pretrained(
@@ -76,7 +74,7 @@ def load_model(model_name):
         tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
         result = (model, tokenizer)  # <-- FIX: Ensure result is assigned correctly
     model_cache[model_name] = result
-    print(f"✓ Successfully loaded {model_name}")
+    print(f"Successfully loaded {model_name}")
     return result
 
 def process_with_nuextract_2_0_text(text, model_name):

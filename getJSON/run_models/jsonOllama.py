@@ -3,11 +3,9 @@ import base64
 import os
 
 from jsonLLM import(
-    extract_json_from_response, 
     save_model_response, 
     process_text_files_with_models,
     group_images_by_source,
-    encode_image_group_to_base64,
     read_prompt_file
 )
 
@@ -28,7 +26,7 @@ def textToLLM(prompt, text, model):
         
     except Exception as e:
         error_str = str(e)
-        print(f"✗ Error with model {model}: {error_str}")
+        print(f"Error with model {model}: {error_str}")
         return None
 
 def ensure_model_exists(model):
@@ -145,33 +143,17 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
 def main(): #if I ran this on an Ollama server would that 
     os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
     models = [
-       # "mistral:7b",     # Fast and capable
-        #"phi3:mini",      # Very efficient
-        #"gemma3:1b",
-        #"gemma3:1b-it-qat",  #quantized 1b
-     #   "gemma3n:e4b", #optimiazed for laptops
-     #   "qwen2.5vl:7b", #vision model
-        #"qwen3:4B", #good for laptops
-        #"gemma3:12b",    # can also do images unblock when done this trial
-        #"llama3.2:1b", 
-        #"llama3.2:3b",
-       #"llama3.2-vision",
-     #  "llava-llama3:8b",
-     #   "granite3.2-vision:2b",#specialized for document tasks (vision model only)
-
         #==============HPC models========================
         "mistral-small3.1:latest", #24b
         "llama3.1:70b", #70b
         "gemma3:27b", #27b
-
-
-
     ]
     for model in models:
-        ensure_model_exists(model)   
+        ensure_model_exists(model) 
+
     print(f"Found {len(models)} models to process.")
     '''process_text_files_with_models(
-            prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/NERprompt.txt",
+            prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/OSprompt.txt",
             models=models, 
             output_dir="OllamaOut",
             llm_function=textToLLM
@@ -179,21 +161,13 @@ def main(): #if I ran this on an Ollama server would that
     
 #stop when at 210 files
     process_text_files_with_models(
-        prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/NERprompt.txt",
+        prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/OSprompt.txt",
         models=models, 
-        output_dir="OllamaOutNP",
+        output_dir="OllamaOutOS",
         llm_function=textToLLM
     )
     
-    
     vision_models = [
-     #   "gemma3:12b",       # Can handle images
-     #   "granite3.2-vision:2b",
-     #   "qwen2.5vl:7b", #vision model
-     #   "llava-llama3:8b", #vision model
-        #"llama3.2-vision", #specialized for document tasks (vision model only)
-       #"gemma3:4b", 
-
        #HPC
        "mistral-small3.1:latest", #24b
        "gemma3:27b", #27b
@@ -204,62 +178,12 @@ def main(): #if I ran this on an Ollama server would that
         output_dir="OllamaVisionOut"
     )
     
-
     process_grouped_images_with_models(
         models=vision_models,
-        output_dir="OllamaVisionOutNP",
+        output_dir="OllamaVisionOutOS",
         image_directory="../output_pdfs/images/",
-        prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/NERprompt.txt"
+        prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/OSprompt.txt"
     )
 
-def main_vision():
-    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
-    vision_models = [
-       "mistral-small3.1:latest", #24b
-       "gemma3:27b", #27b
-    ]
-    print(f"Found {len(vision_models)} vision models to process.")
-    process_grouped_images_with_models(
-        models=vision_models,
-        output_dir="OllamaVisionOut"
-    )
-
-def main_ner():
-    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")
-    vision_models = [
-       # "mistral:7b",     # Fast and capable
-        #"phi3:mini",      # Very efficient
-        #"gemma3:1b",
-        #"gemma3:1b-it-qat",  #quantized 1b
-     #   "gemma3n:e4b", #optimiazed for laptops
-     #   "qwen2.5vl:7b", #vision model
-        #"qwen3:4B", #good for laptops
-        #"gemma3:12b",    # can also do images unblock when done this trial
-        #"llama3.2:1b", 
-        #"llama3.2:3b",
-       #"llama3.2-vision",
-     #  "llava-llama3:8b",
-     #   "granite3.2-vision:2b",#specialized for document tasks (vision model only)
-
-        #==============HPC models========================
-        "mistral-small3.1:latest", #24b
-        #"llama3.1:70b", #70b
-        "gemma3:27b", #27b
-
-
-
-    ]
-    for model in vision_models:
-        ensure_model_exists(model)   
-    
-    
-#stop when at 210 files
-    process_grouped_images_with_models(
-        models=vision_models,
-        output_dir="OllamaVisionOutNP",
-        image_directory="../output_pdfs/images/",
-        prompt_path="/Users/ayu/PDF_benchmarking/getJSON/run_models/NERprompt.txt"
-    )
-    
 if __name__ == "__main__":
     main()

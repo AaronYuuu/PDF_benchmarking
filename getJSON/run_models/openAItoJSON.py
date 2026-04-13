@@ -135,7 +135,7 @@ def process_grouped_images_with_models(models, output_dir, image_directory="../o
             continue
         # Try each vision model for this image group
         for model in models:
-            print(f"\nProcessing {source_name} with model: {model}")
+            print(f"\OSrocessing {source_name} with model: {model}")
             
             response = imageGroupToLLM(prompt, image_paths, model)
             # Use source name as the "file" identifier for consistent naming
@@ -150,60 +150,36 @@ def main():
     # List of OpenAI models to try
     OPENAI_MODELS = [
         "gpt-4.1-mini",
-        #"gpt-4.1-nano", 
-        #"gpt-4.1"
-        # Add more OpenAI models as needed
     ]
     
     print("Starting OpenAI model processing...")
-    print(f"Available models: {OPENAI_MODELS}")
     
     # Use the shared processing function
-    '''process_text_files_with_models(
+    process_text_files_with_models(
         models=OPENAI_MODELS,
         output_dir="OpenAIOut/", 
         text_directory="../output_pdfs/text/", 
         llm_function=textToLLM
     )
     
-    '''
-    '''process_grouped_images_with_models(
+    process_grouped_images_with_models(
         models=OPENAI_MODELS,
-        output_dir="OpenAIVisionOutNP/",
+        output_dir="OpenAIVisionOutOS/",
         image_directory="../output_pdfs/images/",
-        prompt_path="run_models/NERprompt.txt"
-    )'''
-    
-    '''process_grouped_images_with_models(
+        prompt_path="run_models/OSprompt.txt"
+    )
+    process_grouped_images_with_models(
         models=OPENAI_MODELS,
         output_dir="OpenAIVisionOut/",
         image_directory="../output_pdfs/images/",
-    )'''
+    )
     process_text_files_with_models(
         models=OPENAI_MODELS,
-        output_dir="OpenAIOutNP/", 
+        output_dir="OpenAIOutOS/", 
         text_directory="../output_pdfs/text/", 
         llm_function=textToLLM,
-        prompt_path="run_models/NERprompt.txt"
+        prompt_path="run_models/OSprompt.txt"
     )
     print("Processing completed.")
 
-def main3():
-    #main()
-    os.chdir("/Users/ayu/PDF_benchmarking/getJSON")  # Ensure we are in the correct directory
-    # List of OpenAI models to try
-    OPENAI_MODELS = [
-        "gpt-4.1-mini",
-        #"gpt-4.1-nano", 
-        #"gpt-4.1"
-        # Add more OpenAI models as needed
-    ]
-    process_text_files_with_models(
-        models=OPENAI_MODELS,
-        output_dir="OpenAIOutNP/", 
-        text_directory="../output_pdfs/text/", 
-        llm_function=textToLLM,
-        prompt_path="run_models/NERprompt.txt"
-    )
-    print("Processing completed.")
 main()
