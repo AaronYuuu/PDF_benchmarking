@@ -7,7 +7,7 @@ A benchmarking framework that evaluates Large Language Model (LLM) performance o
 This project evaluates how well different LLMs can process complex genetic laboratory reports and extract structured clinical data. It provides:
 
 - Realistic test data using synthetic genetic reports
-- Multi-provider evaluation via OpenRouter, OpenAI, and local Ollama instances
+- Multi-provider evaluation via HuggingFace, OpenAI, and local Ollama instances
 - Standardized benchmarking across different models and providers
 - Comprehensive performance metrics and accuracy analysis
 - End-to-end automation from report generation to performance analysis
@@ -60,7 +60,6 @@ install.packages(c("biomaRt", "yaml", "httr", "RJSONIO"))
 
 3. Configure API keys in api_keys.txt:
 ```
-OPENROUTER_API_KEY=your-openrouter-key-here
 OPENAI_API_KEY=your-openai-key-here
 ```
 
@@ -91,7 +90,6 @@ Individual components:
 cd getJSON
 python3 jsonOllama.py      # Local models
 python3 openAItoJSON.py    # OpenAI models
-python3 openRouterLLMs.py  # OpenRouter models
 python3 compareJSON.py     # Performance analysis
 ```
 
@@ -110,7 +108,6 @@ PDF_benchmarking/
 │   ├── scripts/                  # R generation scripts
 │   └── templates/                # LaTeX report templates
 ├── getJSON/                      # LLM processing and evaluation
-│   ├── openRouterLLMs.py        # OpenRouter interface
 │   ├── openAItoJSON.py          # OpenAI interface
 │   ├── jsonOllama.py            # Ollama interface
 │   ├── compareJSON.py           # Performance evaluation
@@ -121,33 +118,7 @@ PDF_benchmarking/
 └── README.md                     # Documentation
 ```
 
-## Supported Models
-
-### OpenRouter Models (Free Tier)
-- Google Gemini 2.0 Flash Experimental (`google/gemini-2.0-flash-exp:free`)
-- Qwen 2.5-VL 72B Instruct (`qwen/qwen2.5-vl-72b-instruct:free`)
-- Meta Llama 4 Scout (`meta-llama/llama-4-scout:free`)
-- Mistral Small 3.1 24B Instruct (`mistralai/mistral-small-3.1-24b-instruct:free`)
-
-### OpenAI Models
-- GPT-4o Mini (`gpt-4o-mini`)
-- GPT-4.1 Nano (`gpt-4.1-nano`)
-- GPT-4o (`gpt-4o`)
-
-### Local Ollama Models
-- Gemma 3 1B IT QAT (`gemma3:1b-it-qat`)
-- Gemma 3 4B (`gemma3:4b`) - Vision capable
-- Llama 3.2 1B (`llama3.2:1b`)
-- Llama 3.2 3B (`llama3.2:3b`)
-- Qwen 3 1.7B (`qwen3:1.7b`)
-- Qwen 2.5-VL 3B (`qwen2.5vl:3b`) - Vision language model
-- Granite 3.2 Vision Latest (`granite3.2-vision:latest`) - Vision model
-
-### Local HuggingFace NuExtract Models
-- NuExtract 2.0 2B (`numind/NuExtract-2.0-2B`) - Text and Vision
-- NuExtract 1.5 Tiny (`numind/NuExtract-1.5-tiny`) - Text only
-
-## Understanding Results
+## Results
 
 The system generates accuracy metrics in getJSON/Hospital.csv with:
 - Total Keys: Number of extractable fields
