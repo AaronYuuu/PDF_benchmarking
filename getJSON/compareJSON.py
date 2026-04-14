@@ -839,13 +839,13 @@ def main():
         "localout",
         "glinerOut", 
        "OllamaOut",
-        "OllamaOutNP",
+        "OllamaOutOS",
        "OllamaVisionOut",
-        "OllamaVisionOutNP",
+        "OllamaVisionOutOS",
         "OpenAIOut", 
-        "OpenAIOutNP",
+        "OpenAIOutOS",
         "OpenAIVisionOut",
-        "OpenAIVisionOutNP"
+        "OpenAIVisionOutOS"
     ]
     
     lab_to_hospital = {
@@ -862,7 +862,7 @@ def main():
         "localout": "huggingface",
         "glinerOut": "gliner",
         "OllamaOut": "ollama",
-        "OllamaOutNP": "ollama",
+        "OllamaOutOS": "ollama",
         "OllamaVisionOut": "ollama_vision", 
         "OpenAIOut": "openai",
         "OpenAIVisionOut": "openai_vision",
@@ -872,8 +872,8 @@ def main():
     
     for direc in json_direcs:
         d = direc
-        if "NP" in direc:
-            d = d.replace("NP","")
+        if "OS" in direc:
+            d = d.replace("OS","")
         source = sources[d]
         direc_path = "outJSON/" + direc
         
@@ -914,7 +914,7 @@ def main():
                 ovr = pd.concat([ovr, pd.DataFrame([result])], ignore_index=True)
             else:
                 model_name = determine_model_name(direc, dtemp, json_file)
-                prompt = "LTNER/GPT-NER" if 'NP' in direc else "Normal"
+                prompt = "LTNER/GPT-NER" if 'OS' in direc else "Normal"
                 prompt = "None" if "localout" == direc else prompt
                 
                 if dtemp.get("status") != "success":
